@@ -1,3 +1,3 @@
-# pars-{component}
+# pars-core
 
 This component provides ...
