@@ -13,7 +13,25 @@
         "forum": "https://discourse.parsphp.org/"
     },
     "require": {
-        "php": "^7.4"
+        "php": "^7.4",
+        "ext-intl": "*",
+        "ext-json": "*",
+        "laminas/laminas-db": "^2.11",
+        "laminas/laminas-diactoros": "^2.4",
+        "laminas/laminas-i18n": "^2.11",
+        "laminas/laminas-log": "^2.12",
+        "mezzio/mezzio": "^3.2.1",
+        "mezzio/mezzio-authentication": "^1.2",
+        "mezzio/mezzio-authentication-session": "^1.0",
+        "mezzio/mezzio-csrf": "^1.0",
+        "mezzio/mezzio-flash": "^1.0",
+        "mezzio/mezzio-helpers": "^5.3",
+        "mezzio/mezzio-session": "^1.4",
+        "mezzio/mezzio-session-cache": "^1.5",
+        "pars/pars-helpers": "dev-master",
+        "pars/pars-models": "dev-master",
+        "php-ds/php-ds": "^1.3",
+        "robertkleinschuster/nice-beans": "dev-next"
     },
     "require-dev": {
         "phpunit/phpunit": "^7.5 || ^8.1",
