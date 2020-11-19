@@ -128,7 +128,7 @@ class DatabaseBeanSaver extends AbstractBeanSaver implements AdapterAwareInterfa
             $keyField_List = $this->getKeyField_List($table);
             if (count($keyField_List) == 1) {
                 foreach ($keyField_List as $field) {
-                    $bean->setData($field, $result->getGeneratedValue());
+                    $bean->set($field, $result->getGeneratedValue());
                 }
             }
             return $result->getAffectedRows() > 0;
@@ -158,8 +158,8 @@ class DatabaseBeanSaver extends AbstractBeanSaver implements AdapterAwareInterfa
             $update = $sql->update($table);
             $keyFieldList = $this->getKeyField_List($table);
             foreach ($keyFieldList as $field) {
-                if ($bean->hasData($field)) {
-                    $update->where([$this->getColumn($field) => $bean->getData($field)]);
+                if ($bean->exists($field)) {
+                    $update->where([$this->getColumn($field) => $bean->get($field)]);
                 }
             }
             $update->set($data);
@@ -200,15 +200,15 @@ class DatabaseBeanSaver extends AbstractBeanSaver implements AdapterAwareInterfa
         $data = [];
         $fieldList = $this->getField_List($table);
         foreach ($fieldList as $field) {
-            if ($bean->hasData($field)) {
-                $data[$this->getColumn($field)] = $converter->convert($bean)->getData($field);
+            if ($bean->exists($field)) {
+                $data[$this->getColumn($field)] = $converter->convert($bean)->get($field);
             }
         }
         if ($includeKeys) {
             $keyFieldList = $this->getKeyField_List($table);
             foreach ($keyFieldList as $field) {
-                if ($bean->hasData($field)) {
-                    $data[$this->getColumn($field)] = $converter->convert($bean)->getData($field);
+                if ($bean->exists($field)) {
+                    $data[$this->getColumn($field)] = $converter->convert($bean)->get($field);
                 }
             }
         }
@@ -226,8 +226,8 @@ class DatabaseBeanSaver extends AbstractBeanSaver implements AdapterAwareInterfa
         $data = [];
         $fieldList = $this->getKeyField_List($table);
         foreach ($fieldList as $field) {
-            if ($bean->hasData($field)) {
-                $data[$this->getColumn($field)] = $formatter->convert($bean)->getData($field);
+            if ($bean->exists($field)) {
+                $data[$this->getColumn($field)] = $formatter->convert($bean)->get($field);
             }
         }
         return $data;
