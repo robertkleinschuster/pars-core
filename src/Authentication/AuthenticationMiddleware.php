@@ -25,17 +25,17 @@ class AuthenticationMiddleware implements MiddlewareInterface
     /**
      * @var ContainerInterface
      */
-    private $container;
+    private ContainerInterface $container;
 
     /**
      * @var AuthenticationInterface
      */
-    private $auth;
+    private AuthenticationInterface $auth;
 
     /**
      * @var PathHelper
      */
-    private $pathHelper;
+    private PathHelper $pathHelper;
 
     /**
      * AuthenticationMiddleware constructor.

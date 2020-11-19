@@ -2,15 +2,14 @@
 
 namespace Pars\Core\Translation;
 
-use Pars\Core\Localization\LocalizationMiddleware;
+use Pars\Core\Localization\LocaleInterface;
 use Pars\Core\Logging\LoggingMiddleware;
-use Pars\Model\Translation\TranslationLoader\TranslationBeanFinder;
-use Laminas\Db\Adapter\AdapterInterface;
 use Laminas\I18n\Translator\Translator;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
+use Psr\Log\LoggerInterface;
 
 /**
  * Class TranslatorMiddleware
@@ -28,6 +27,7 @@ class TranslatorMiddleware implements MiddlewareInterface
     /**
      * TranslationMiddleware constructor.
      * @param Translator $translator
+     * @param array $config
      */
     public function __construct(Translator $translator)
     {
@@ -37,31 +37,28 @@ class TranslatorMiddleware implements MiddlewareInterface
 
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
-        $locale = $request->getAttribute(LocalizationMiddleware::LOCALIZATION_ATTRIBUTE);
+        $locale = $request->getAttribute(LocaleInterface::class);
         $logger = $request->getAttribute(LoggingMiddleware::LOGGER_ATTRIBUTE);
-        $this->translator->setLocale($locale);
-
-        $this->translator->enableEventManager();
-
-        if ($this->translator->isEventManagerEnabled()) {
-            $this->translator->getEventManager()->attach(
-                \Laminas\I18n\Translator\Translator::EVENT_MISSING_TRANSLATION,
-                static function (\Laminas\EventManager\EventInterface $event) use ($logger) {
-                    $logger->warning('Missing translation', $event->getParams());
-                }
-            );
-            $this->translator->getEventManager()->attach(
-                \Laminas\I18n\Translator\Translator::EVENT_NO_MESSAGES_LOADED,
-                static function (\Laminas\EventManager\EventInterface $event) use ($logger) {
-                    $logger->error('No messages loaded', $event->getParams());
-                }
-            );
+        if ($locale instanceof LocaleInterface) {
+            $this->translator->setLocale($locale->getLocale_Code());
         }
-
-        $this->translator->getPluginManager()->setFactory(TranslationBeanFinder::class, function ($container) {
-            return new TranslationBeanFinder($container->get(AdapterInterface::class));
-        });
-
+        if ($logger instanceof LoggerInterface) {
+            $this->translator->enableEventManager();
+            if ($this->translator->isEventManagerEnabled()) {
+                $this->translator->getEventManager()->attach(
+                    \Laminas\I18n\Translator\Translator::EVENT_MISSING_TRANSLATION,
+                    static function (\Laminas\EventManager\EventInterface $event) use ($logger) {
+                        $logger->warning('Missing translation', $event->getParams());
+                    }
+                );
+                $this->translator->getEventManager()->attach(
+                    \Laminas\I18n\Translator\Translator::EVENT_NO_MESSAGES_LOADED,
+                    static function (\Laminas\EventManager\EventInterface $event) use ($logger) {
+                        $logger->error('No messages loaded', $event->getParams());
+                    }
+                );
+            }
+        }
         return $handler->handle($request->withAttribute(self::TRANSLATOR_ATTRIBUTE, $this->translator));
     }
 }

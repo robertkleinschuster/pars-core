@@ -26,29 +26,46 @@ class LocalizationMiddleware implements MiddlewareInterface
      */
     private UrlHelper $urlHelper;
     private array $config;
+    private LocaleFinderInterface $localization;
 
-    public const LOCALIZATION_ATTRIBUTE = 'locale';
 
     /**
      * LocalizationMiddleware constructor.
      * @param UrlHelper $urlHelper
      */
-    public function __construct(UrlHelper $urlHelper, array $config)
+    public function __construct(UrlHelper $urlHelper, array $config, LocaleFinderInterface $localization)
     {
         $this->urlHelper = $urlHelper;
         $this->config = $config;
+        $this->localization = $localization;
     }
 
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
-        $locale = $request->getAttribute('locale', false);
-        $locale = Locale::acceptFromHttp($locale);
-        $redirect = $this->config['redirect'];
-        $basePath = $this->config['default'];
-        $user = $request->getAttribute(UserInterface::class);
-        if ($user instanceof UserBean && $locale === false) {
-            $locale = $user->hasData('Locale_Code') ? $user->getData('Locale_Code') : $locale;
+        $routeLocaleCode = Locale::acceptFromHttp($request->getAttribute('locale', null));
+        $routeLanguageCode = Locale::getPrimaryLanguage($routeLocaleCode);
+        if ($routeLocaleCode === null) {
+            $headerLocaleCode = Locale::acceptFromHttp($request->getServerParams()['HTTP_ACCEPT_LANGUAGE']);
+            $headerLanguageCode = Locale::getPrimaryLanguage($headerLocaleCode);
+            $user = $request->getAttribute(UserInterface::class);
+            if ($user instanceof LocaleAwareInterface && $user->hasLocale()) {
+                $locale = $user->getLocale();
+            } else {
+                $locale = $this->localization->findLocale(
+                    $headerLocaleCode,
+                    $headerLanguageCode,
+                    $this->config['fallback']
+                );
+            }
+            if ($this->config['redirect'] === true) {
+                $this->urlHelper->setBasePath($locale->getUrl_Code());
+                return new RedirectResponse($this->urlHelper->generate());
+            }
+        } else {
+            $locale = $this->localization->findLocale($routeLocaleCode, $routeLanguageCode, $this->config['fallback']);
         }
+        return $handler->handle($request->withAttribute(LocaleInterface::class, $locale));
+/*
         try {
             if ($locale === false || $locale === null) {
                 $adapter = $request->getAttribute(DatabaseMiddleware::ADAPTER_ATTRIBUTE);
@@ -92,7 +109,6 @@ class LocalizationMiddleware implements MiddlewareInterface
         if ($redirect) {
             $this->urlHelper->setBasePath($basePath);
             return new RedirectResponse($this->urlHelper->generate());
-        }
-        return $handler->handle($request->withAttribute(self::LOCALIZATION_ATTRIBUTE, $locale));
+        }*/
     }
 }
