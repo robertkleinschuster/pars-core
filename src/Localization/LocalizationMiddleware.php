@@ -65,50 +65,5 @@ class LocalizationMiddleware implements MiddlewareInterface
             $locale = $this->localization->findLocale($routeLocaleCode, $routeLanguageCode, $this->config['fallback']);
         }
         return $handler->handle($request->withAttribute(LocaleInterface::class, $locale));
-/*
-        try {
-            if ($locale === false || $locale === null) {
-                $adapter = $request->getAttribute(DatabaseMiddleware::ADAPTER_ATTRIBUTE);
-                $locale = Locale::acceptFromHttp($request->getServerParams()['HTTP_ACCEPT_LANGUAGE']);
-                if ($locale !== false) {
-                    $finder = new LocaleBeanFinder($adapter);
-                    $finder->setLocale_Code($locale);
-                    $finder->setLocale_Active(true);
-                    $finder->limit(1, 0);
-                    if ($finder->count() == 1) {
-                        $basePath = $finder->getBean()->getData('Locale_UrlCode');
-                    } else {
-                        $locale = false;
-                    }
-                }
-                if ($locale === false) {
-                    $finder = new LocaleBeanFinder($adapter);
-                    $finder->setLanguage(Locale::getPrimaryLanguage(Locale::acceptFromHttp($request->getServerParams()['HTTP_ACCEPT_LANGUAGE'])));
-                    $finder->setLocale_Active(true);
-                    $finder->limit(1, 0);
-                    if ($finder->count() == 1) {
-                        $basePath = $finder->getBean()->getData('Locale_UrlCode');
-                    } else {
-                        $locale = false;
-                    }
-                }
-                if ($locale === false) {
-                    $finder = new LocaleBeanFinder($adapter);
-                    $finder->setLocale_Active(true);
-                    $finder->limit(1, 0);
-                    $basePath = $finder->getBean()->getData('Locale_UrlCode');
-                }
-            }
-        } catch (\Exception $exception) {
-            $basePath = $this->config['default'];
-            $logger = $request->getAttribute(LoggingMiddleware::LOGGER_ATTRIBUTE);
-            if ($logger instanceof LoggerInterface) {
-                $logger->error('Error finding locale for request!', ['exception' => $exception]);
-            }
-        }
-        if ($redirect) {
-            $this->urlHelper->setBasePath($basePath);
-            return new RedirectResponse($this->urlHelper->generate());
-        }*/
     }
 }
