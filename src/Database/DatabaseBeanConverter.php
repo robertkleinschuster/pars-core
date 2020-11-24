@@ -13,7 +13,7 @@ class DatabaseBeanConverter extends AbstractBeanConverter
         if ($value === null) {
             return null;
         }
-        switch ($bean->getType($name)) {
+        switch ($bean->type($name)) {
             case AbstractBaseBean::DATA_TYPE_FLOAT:
             case AbstractBaseBean::DATA_TYPE_INT:
             case AbstractBaseBean::DATA_TYPE_STRING:
@@ -26,7 +26,7 @@ class DatabaseBeanConverter extends AbstractBeanConverter
                 }
             case AbstractBaseBean::DATA_TYPE_ARRAY:
                 return json_encode($value);
-            case AbstractBaseBean::DATA_TYPE_DATETIME:
+            case \DateTime::class:
                 if ($value instanceof \DateTime) {
                     return $value->format('Y-m-d H:i:s');
                 }
@@ -39,7 +39,7 @@ class DatabaseBeanConverter extends AbstractBeanConverter
         if ($value === null || $value === '') {
             return null;
         }
-        switch ($bean->getType($name)) {
+        switch ($bean->type($name)) {
             case AbstractBaseBean::DATA_TYPE_STRING:
                 return strval($value);
             case AbstractBaseBean::DATA_TYPE_BOOL:
@@ -55,7 +55,7 @@ class DatabaseBeanConverter extends AbstractBeanConverter
                 return boolval($value);
             case AbstractBaseBean::DATA_TYPE_ARRAY:
                 return json_decode($value);
-            case AbstractBaseBean::DATA_TYPE_DATETIME:
+            case \DateTime::class:
                 return \DateTime::createFromFormat('Y-m-d H:i:s', $value);
         }
         throw new \Exception("Unable to convert $name from db.");

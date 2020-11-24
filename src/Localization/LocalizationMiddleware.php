@@ -44,7 +44,9 @@ class LocalizationMiddleware implements MiddlewareInterface
     {
         $routeLocaleCode = Locale::acceptFromHttp($request->getAttribute('locale', null));
         $routeLanguageCode = Locale::getPrimaryLanguage($routeLocaleCode);
-        if ($routeLocaleCode === null) {
+        if ($routeLocaleCode) {
+            $locale = $this->localization->findLocale($routeLocaleCode, $routeLanguageCode, $this->config['fallback']);
+        } else {
             $headerLocaleCode = Locale::acceptFromHttp($request->getServerParams()['HTTP_ACCEPT_LANGUAGE']);
             $headerLanguageCode = Locale::getPrimaryLanguage($headerLocaleCode);
             $user = $request->getAttribute(UserInterface::class);
@@ -61,8 +63,6 @@ class LocalizationMiddleware implements MiddlewareInterface
                 $this->urlHelper->setBasePath($locale->getUrl_Code());
                 return new RedirectResponse($this->urlHelper->generate());
             }
-        } else {
-            $locale = $this->localization->findLocale($routeLocaleCode, $routeLanguageCode, $this->config['fallback']);
         }
         return $handler->handle($request->withAttribute(LocaleInterface::class, $locale));
     }

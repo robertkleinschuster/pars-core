@@ -341,7 +341,7 @@ class DatabaseBeanLoader extends AbstractBeanLoader implements AdapterAwareInter
         $beanData = [];
         foreach ($this->getField_List() as $field) {
             $beanData[$field] = $data["{$this->getTable($field)}.{$this->getColumn($field)}"];
-        }
+        };
         return $converter->convert($bean, $beanData)->toBean();
     }
 
