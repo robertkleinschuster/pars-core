@@ -75,22 +75,21 @@ class AuthenticationMiddleware implements MiddlewareInterface
         $current = $this->normalizePath($currentPath);
         $session = $request->getAttribute(SessionMiddleware::SESSION_ATTRIBUTE);
 
-        $user = null;
+        $user = $this->auth->authenticate($request);
+
         // Validation CSRF Token
-        if ($request->getMethod() === 'POST') {
-            if ($guard->validateToken($request->getParsedBody()['login_token'] ?? '', 'login_token')) {
+        if ($request->getMethod() === 'POST' && $user === null) {
+            if (isset($request->getParsedBody()['login_token']) && $guard->validateToken($request->getParsedBody()['login_token'] ?? '', 'login_token')) {
                 $user = $this->auth->authenticate($request);
                 if ($user === null) {
-                    $flash->flash('login_error', 'Ungültiger Benutzername oder Passwort.');
+                    $flash->flash('login_error', 'credentials');
                     return new RedirectResponse($currentPath);
                 }
                 $session->unset('locale');
             } else {
-                $flash->flash('login_error', 'Ungültiger Token.');
+                $flash->flash('login_error', 'token');
                 return new RedirectResponse($currentPath);
             }
-        } else {
-            $user = $this->auth->authenticate($request);
         }
 
         if ($user !== null) {

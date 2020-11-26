@@ -2,6 +2,7 @@
 
 namespace Pars\Core\Translation;
 
+use Laminas\I18n\Translator\Loader\RemoteLoaderInterface;
 use Pars\Core\Localization\LocaleInterface;
 use Pars\Core\Logging\LoggingMiddleware;
 use Laminas\I18n\Translator\Translator;
@@ -59,6 +60,9 @@ class TranslatorMiddleware implements MiddlewareInterface
                 );
             }
         }
+        $this->translator->getPluginManager()->setFactory(RemoteLoaderInterface::class, function ($container) {
+            return $container->get(RemoteLoaderInterface::class);
+        });
         return $handler->handle($request->withAttribute(self::TRANSLATOR_ATTRIBUTE, $this->translator));
     }
 }

@@ -8,6 +8,8 @@ use Niceshops\Bean\Type\Base\BeanInterface;
 
 class DatabaseBeanConverter extends AbstractBeanConverter
 {
+    public const DATE_FORMAT = 'Y-m-d H:i:s';
+
     public function convertValueFromBean(BeanInterface $bean, string $name, $value)
     {
         if ($value === null) {
@@ -17,7 +19,7 @@ class DatabaseBeanConverter extends AbstractBeanConverter
             case AbstractBaseBean::DATA_TYPE_FLOAT:
             case AbstractBaseBean::DATA_TYPE_INT:
             case AbstractBaseBean::DATA_TYPE_STRING:
-                return strval($value);
+                return (string) $value;
             case AbstractBaseBean::DATA_TYPE_BOOL:
                 if ($value) {
                     return 1;
@@ -28,7 +30,7 @@ class DatabaseBeanConverter extends AbstractBeanConverter
                 return json_encode($value);
             case \DateTime::class:
                 if ($value instanceof \DateTime) {
-                    return $value->format('Y-m-d H:i:s');
+                    return $value->format(self::DATE_FORMAT);
                 }
         }
         throw new \Exception("Unable to convert $name to db.");
@@ -41,7 +43,7 @@ class DatabaseBeanConverter extends AbstractBeanConverter
         }
         switch ($bean->type($name)) {
             case AbstractBaseBean::DATA_TYPE_STRING:
-                return strval($value);
+                return (string) $value;
             case AbstractBaseBean::DATA_TYPE_BOOL:
                 if ($value == 1) {
                     return true;
@@ -50,13 +52,13 @@ class DatabaseBeanConverter extends AbstractBeanConverter
                 }
                 break;
             case AbstractBaseBean::DATA_TYPE_INT:
-                return intval($value);
+                return (int) $value;
             case AbstractBaseBean::DATA_TYPE_FLOAT:
-                return boolval($value);
+                return (bool) $value;
             case AbstractBaseBean::DATA_TYPE_ARRAY:
                 return json_decode($value);
             case \DateTime::class:
-                return \DateTime::createFromFormat('Y-m-d H:i:s', $value);
+                return \DateTime::createFromFormat(self::DATE_FORMAT, $value);
         }
         throw new \Exception("Unable to convert $name from db.");
     }
