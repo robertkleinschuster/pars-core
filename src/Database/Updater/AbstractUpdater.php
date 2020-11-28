@@ -18,7 +18,7 @@ use Laminas\Db\Sql\Sql;
 use Pars\Helper\Validation\ValidationHelperAwareInterface;
 use Pars\Helper\Validation\ValidationHelperAwareTrait;
 
-class AbstractUpdater implements ValidationHelperAwareInterface, AdapterAwareInterface
+abstract class AbstractUpdater implements ValidationHelperAwareInterface, AdapterAwareInterface
 {
     use ValidationHelperAwareTrait;
     use AdapterAwareTrait;
@@ -40,6 +40,9 @@ class AbstractUpdater implements ValidationHelperAwareInterface, AdapterAwareInt
      */
     protected $existingTableList;
 
+
+
+    abstract public function getCode(): string;
 
     /**
      * SchemaUpdater constructor.

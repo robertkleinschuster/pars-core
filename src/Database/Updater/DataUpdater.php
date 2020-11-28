@@ -6,6 +6,12 @@ namespace Pars\Core\Database\Updater;
 class DataUpdater extends AbstractUpdater
 {
 
+    public function getCode(): string
+    {
+        return 'data';
+    }
+
+
     public function updateDataUserState()
     {
         $data_Map = [];
@@ -362,6 +368,20 @@ class DataUpdater extends AbstractUpdater
     {
         $data_Map = [];
 
+        $data_Map[] = [
+            'UserPermission_Code' => 'content',
+            'UserPermission_Active' => true,
+        ];
+
+        $data_Map[] = [
+            'UserPermission_Code' => 'media',
+            'UserPermission_Active' => true,
+        ];
+
+        $data_Map[] = [
+            'UserPermission_Code' => 'system',
+            'UserPermission_Active' => true,
+        ];
 
         $data_Map[] = [
             'UserPermission_Code' => 'article',

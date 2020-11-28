@@ -17,5 +17,5 @@ interface LocaleAwareInterface
     /**
      * @return LocaleInterface
      */
-    public function hasLocale(): LocaleInterface;
+    public function hasLocale(): bool;
 }

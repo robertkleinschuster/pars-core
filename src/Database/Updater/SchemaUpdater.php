@@ -14,6 +14,13 @@ use Laminas\Db\Sql\Ddl\Index\Index;
 class SchemaUpdater extends AbstractUpdater
 {
 
+
+    public function getCode(): string
+    {
+        return 'schema';
+    }
+
+
     public function updateTablePerson()
     {
         $table = $this->getTableStatement('Person');
@@ -118,6 +125,7 @@ class SchemaUpdater extends AbstractUpdater
         $this->addColumnToTable($table, new Integer('UserRole_ID'))
             ->setOption('AUTO_INCREMENT', true);
         $this->addColumnToTable($table, new Varchar('UserRole_Code', 255));
+        $this->addColumnToTable($table, new Varchar('UserRole_Name', 255));
         $this->addColumnToTable($table, new Boolean('UserRole_Active'))
             ->setDefault(true);
         $this->addConstraintToTable($table, new PrimaryKey('UserRole_ID'));

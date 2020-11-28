@@ -83,12 +83,12 @@ class AuthenticationMiddleware implements MiddlewareInterface
                 $user = $this->auth->authenticate($request);
                 if ($user === null) {
                     $flash->flash('login_error', 'credentials');
-                    return new RedirectResponse($currentPath);
+                    $redirect = $currentPath;
                 }
                 $session->unset('locale');
             } else {
                 $flash->flash('login_error', 'token');
-                return new RedirectResponse($currentPath);
+                $redirect = $currentPath;
             }
         }
 
