@@ -13,7 +13,7 @@
         "forum": "https://discourse.parsphp.org/"
     },
     "require": {
-        "php": "^7.4",
+        "php": "^7.4"
     },
     "require-dev": {
         "phpunit/phpunit": "^7.5 || ^8.1",
