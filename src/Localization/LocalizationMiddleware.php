@@ -46,6 +46,11 @@ class LocalizationMiddleware implements MiddlewareInterface
         $routeLanguageCode = Locale::getPrimaryLanguage($routeLocaleCode);
         if ($routeLocaleCode) {
             $locale = $this->localization->findLocale($routeLocaleCode, $routeLanguageCode, $this->config['fallback']);
+            if ($routeLocaleCode != $locale->getLocale_Code()) {
+                if ($this->config['redirect'] === true) {
+                    return new RedirectResponse($this->urlHelper->generate('cms', ['locale' => $locale->getUrl_Code()]));
+                }
+            }
         } else {
             $headerLocaleCode = Locale::acceptFromHttp($request->getServerParams()['HTTP_ACCEPT_LANGUAGE']);
             $headerLanguageCode = Locale::getPrimaryLanguage($headerLocaleCode);
