@@ -201,14 +201,14 @@ class DatabaseBeanSaver extends AbstractBeanSaver implements AdapterAwareInterfa
         $data = [];
         $fieldList = $this->getField_List($table);
         foreach ($fieldList as $field) {
-            if ($bean->exists($field)) {
+            if ($bean->initialized($field)) {
                 $data[$this->getColumn($field)] = $converter->convert($bean)->get($field);
             }
         }
         if ($includeKeys) {
             $keyFieldList = $this->getKeyField_List($table);
             foreach ($keyFieldList as $field) {
-                if ($bean->exists($field)) {
+                if ($bean->initialized($field)) {
                     $data[$this->getColumn($field)] = $converter->convert($bean)->get($field);
                 }
             }
