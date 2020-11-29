@@ -13,28 +13,52 @@ if (!file_exists($root . '/../config/autoload/database.local.php')) {
         if ($result === false) {
             $error = 'Error connecting to DB: ' . mysqli_connect_error();
         } else {
-            http_redirect('/');
+            header("Location: /");
+            exit;
         }
     }
-    echo('
-            <form method="post">
-            <label for="DB_NAME">DB_NAME</label>
-            <input name="DB_NAME" value="pars">
-            <br>
-            <label for="DB_USER">DB_USER</label>
-            <input name="DB_USER" value="pars">            
-                        <br>
-            <label for="DB_PASSWORD">DB_PASSWORD</label>
-            <input name="DB_PASSWORD" value="pars">
-                        <br>
+    echo("
+<!DOCTYPE html>
+<html>
+<head>
+<title>Configure DB</title>
+<link rel=\"stylesheet\" href=\"https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css\" integrity=\"sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO\" crossorigin=\"anonymous\">
+</head>
+<body>
 
-            <label for="DB_HOSTNAME">DB_HOSTNAME</label>
-            <input name="DB_HOSTNAME" value="localhost">
-                        <br>
+<form class='container' method=\"post\">
+        <div class='alert alert-danger'>$error</div>
 
-            <input type="submit">
+<div class='form-group'>
+ <label for=\"DB_NAME\">DB_NAME</label>
+            <input class=\"form-control\"  name=\"DB_NAME\" value=\"pars\">
+</div>
+           
+<div class='form-group'>
+   <label for=\"DB_USER\">DB_USER</label>
+            <input class=\"form-control\"  name=\"DB_USER\" value=\"pars\">     
+</div>
+                
+<div class='form-group'>
+            <label for=\"DB_PASSWORD\">DB_PASSWORD</label>
+            <input class=\"form-control\" name=\"DB_PASSWORD\" value=\"pars\">
+                        </div>
+
+<div class='form-group'>
+
+            <label for=\"DB_HOSTNAME\">DB_HOSTNAME</label>
+            <input class=\"form-control\"  name=\"DB_HOSTNAME\" value=\"localhost\">
+</div>
+<div class='form-group'>
+
+            <input class='btn btn-primary' type=\"submit\">
+            </div>
+
             </form>
             <br>
-            ' . $error);
+</body>
+</html>
+            
+            ");
     exit;
 }
