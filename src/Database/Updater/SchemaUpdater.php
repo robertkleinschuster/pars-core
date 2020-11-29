@@ -34,6 +34,18 @@ class SchemaUpdater extends AbstractUpdater
         return $this->query($table);
     }
 
+    public function updateTableConfig()
+    {
+        $table = $this->getTableStatement('Config');
+        $this->addColumnToTable($table, new Varchar('Config_Code', 255));
+        $this->addColumnToTable($table, new Varchar('Config_Value', 255, true));
+        $this->addColumnToTable($table, new Text('Config_Data', 65535, true));
+        $this->addConstraintToTable($table, new PrimaryKey('Config_Code'));
+        $this->addDefaultColumnsToTable($table);
+        return $this->query($table);
+    }
+
+
     public function updateTableFileType()
     {
         $table = $this->getTableStatement('FileType');

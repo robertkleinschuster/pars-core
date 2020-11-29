@@ -12,6 +12,17 @@ class DataUpdater extends AbstractUpdater
     }
 
 
+    public function updateDataConfig()
+    {
+        $data_Map = [];
+        $data_Map[] = [
+            'Config_Code' => 'asset.domain',
+            'Config_Value' => '',
+        ];
+        return $this->saveDataMap('Config', 'Config_Code', $data_Map);
+    }
+
+
     public function updateDataUserState()
     {
         $data_Map = [];
@@ -400,6 +411,23 @@ class DataUpdater extends AbstractUpdater
             'UserPermission_Active' => true,
         ];
 
+        $data_Map[] = [
+            'UserPermission_Code' => 'config',
+            'UserPermission_Active' => true,
+        ];
+        $data_Map[] = [
+            'UserPermission_Code' => 'config.delete',
+            'UserPermission_Active' => true,
+        ];
+        $data_Map[] = [
+            'UserPermission_Code' => 'config.create',
+            'UserPermission_Active' => true,
+        ];
+        $data_Map[] = [
+            'UserPermission_Code' => 'config.edit',
+            'UserPermission_Active' => true,
+        ];
+
 
         $data_Map[] = [
             'UserPermission_Code' => 'cmsmenu',
@@ -606,6 +634,11 @@ class DataUpdater extends AbstractUpdater
         ];
         $data_Map[] = [
             'UserPermission_Code' => 'update.data',
+            'UserPermission_Active' => true,
+        ];
+
+        $data_Map[] = [
+            'UserPermission_Code' => 'update.special',
             'UserPermission_Active' => true,
         ];
 
