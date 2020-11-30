@@ -17,7 +17,6 @@ class DataUpdater extends AbstractUpdater
         $data_Map = [];
         $data_Map[] = [
             'Config_Code' => 'asset.domain',
-            'Config_Value' => '',
         ];
         $data_Map[] = [
             'Config_Code' => 'timezone',
