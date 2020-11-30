@@ -19,6 +19,10 @@ class DataUpdater extends AbstractUpdater
             'Config_Code' => 'asset.domain',
             'Config_Value' => '',
         ];
+        $data_Map[] = [
+            'Config_Code' => 'timezone',
+            'Config_Value' => 'UTC',
+        ];
         return $this->saveDataMap('Config', 'Config_Code', $data_Map);
     }
 

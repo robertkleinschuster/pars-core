@@ -16,11 +16,6 @@ class DatabaseBeanSaver extends AbstractBeanSaver implements AdapterAwareInterfa
     use DatabaseInfoTrait;
 
     /**
-     * @var int
-     */
-    private ?int $personId = null;
-
-    /**
      * DatabaseBeanSaver constructor.
      * @param Adapter $adapter
      */
@@ -28,34 +23,6 @@ class DatabaseBeanSaver extends AbstractBeanSaver implements AdapterAwareInterfa
     {
         $this->setDbAdapter($adapter);
     }
-
-    /**
-     * @return int
-     */
-    public function getPersonId(): int
-    {
-        return $this->personId;
-    }
-
-    /**
-     * @param int $personId
-     *
-     * @return $this
-     */
-    public function setPersonId(int $personId): self
-    {
-        $this->personId = $personId;
-        return $this;
-    }
-
-    /**
-     * @return bool
-     */
-    public function hasPersonId(): bool
-    {
-        return $this->personId !== null;
-    }
-
 
     /**
      * @param BeanInterface $bean
@@ -111,14 +78,6 @@ class DatabaseBeanSaver extends AbstractBeanSaver implements AdapterAwareInterfa
     {
         $insertdata = $this->getDataFromBean($bean, $table);
         if (count($insertdata)) {
-            $dateTime = new \DateTime();
-            $insertdata['Timestamp_Create'] = $dateTime->format('Y-m-d H:i:s');
-            $insertdata['Timestamp_Edit'] = $dateTime->format('Y-m-d H:i:s');
-            if ($this->hasPersonId()) {
-                $insertdata['Person_ID_Create'] = $this->getPersonId();
-                $insertdata['Person_ID_Edit'] = $this->getPersonId();
-            }
-
             $sql = new Sql($this->adapter);
             $insert = $sql->insert($table);
             $insert->columns(array_keys($insertdata));
@@ -150,11 +109,6 @@ class DatabaseBeanSaver extends AbstractBeanSaver implements AdapterAwareInterfa
         $data = $this->getDataFromBean($bean, $table);
         // Ensure only a single row is changed
         if (count($data) && $this->beanExistsUnique($bean, $table)) {
-            $dateTime = new \DateTime();
-            $data['Timestamp_Edit'] = $dateTime->format('Y-m-d H:i:s');
-            if ($this->hasPersonId()) {
-                $data['Person_ID_Edit'] = $this->getPersonId();
-            }
             $sql = new Sql($this->adapter);
             $update = $sql->update($table);
             $keyFieldList = $this->getKeyField_List($table);
