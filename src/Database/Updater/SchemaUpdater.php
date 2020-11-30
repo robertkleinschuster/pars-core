@@ -195,7 +195,7 @@ class SchemaUpdater extends AbstractUpdater
         $this->addColumnToTable($table, new Varchar('Translation_Code', 255));
         $this->addColumnToTable($table, new Varchar('Locale_Code', 255));
         $this->addColumnToTable($table, new Varchar('Translation_Namespace', 255));
-        $this->addColumnToTable($table, new Text('Translation_Text', 65535));
+        $this->addColumnToTable($table, new Text('Translation_Text', 65535, true));
         $this->addConstraintToTable($table, new PrimaryKey('Translation_ID'));
         $this->addConstraintToTable($table, new UniqueKey(['Translation_Code', 'Locale_Code', 'Translation_Namespace']));
         $this->addConstraintToTable($table, new ForeignKey(null, 'Locale_Code', 'Locale', 'Locale_Code'));

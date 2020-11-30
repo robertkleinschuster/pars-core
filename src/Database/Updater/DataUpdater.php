@@ -245,32 +245,32 @@ class DataUpdater extends AbstractUpdater
         $data_Map[] = [
             'CmsPageType_Code' => 'home',
             'CmsPageType_Template' => 'cmspage::home',
-            'CmsPageType_Active' => true,
+            'CmsPageType_Active' => 1,
         ];
         $data_Map[] = [
             'CmsPageType_Code' => 'about',
             'CmsPageType_Template' => 'cmspage::about',
-            'CmsPageType_Active' => false,
+            'CmsPageType_Active' => 0,
         ];
         $data_Map[] = [
             'CmsPageType_Code' => 'contact',
             'CmsPageType_Template' => 'cmspage::contact',
-            'CmsPageType_Active' => false,
+            'CmsPageType_Active' => 0,
         ];
         $data_Map[] = [
             'CmsPageType_Code' => 'blog',
             'CmsPageType_Template' => 'cmspage::blog',
-            'CmsPageType_Active' => false,
+            'CmsPageType_Active' => 0,
         ];
         $data_Map[] = [
             'CmsPageType_Code' => 'post',
             'CmsPageType_Template' => 'cmspage::post',
-            'CmsPageType_Active' => false,
+            'CmsPageType_Active' => 0,
         ];
         $data_Map[] = [
             'CmsPageType_Code' => 'faq',
             'CmsPageType_Template' => 'cmspage::faq',
-            'CmsPageType_Active' => false,
+            'CmsPageType_Active' => 0,
         ];
         return $this->saveDataMap('CmsPageType', 'CmsPageType_Code', $data_Map);
     }
