@@ -4,6 +4,7 @@
 namespace Pars\Core\Database\Updater;
 
 
+use Laminas\Db\Sql\Ddl\DropTable;
 use Pars\Model\Authorization\Permission\PermissionBeanFinder;
 use Pars\Model\Authorization\Role\RoleBeanFinder;
 use Pars\Model\Authorization\Role\RoleBeanProcessor;

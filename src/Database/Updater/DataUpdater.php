@@ -3,6 +3,8 @@
 namespace Pars\Core\Database\Updater;
 
 
+use Pars\Core\Database\DatabaseBeanConverter;
+
 class DataUpdater extends AbstractUpdater
 {
 
@@ -14,15 +16,21 @@ class DataUpdater extends AbstractUpdater
 
     public function updateDataConfig()
     {
+        $i = 1;
         $data_Map = [];
         $data_Map[] = [
             'Config_Code' => 'asset.domain',
+            'Config_Value' => ''
         ];
         $data_Map[] = [
             'Config_Code' => 'timezone',
-            'Config_Value' => 'UTC',
+            'Config_Value' => 'UTC'
         ];
-        return $this->saveDataMap('Config', 'Config_Code', $data_Map);
+        $data_Map[] = [
+            'Config_Code' => 'locale.default',
+            'Config_Value' => 'de_AT'
+        ];
+        return $this->saveDataMap('Config', 'Config_Code', $data_Map, true);
     }
 
 
@@ -59,157 +67,135 @@ class DataUpdater extends AbstractUpdater
             'Locale_Code' => 'de_DE',
             'Locale_UrlCode' => 'de-DE',
             'Locale_Name' => 'Deutsch (Deutschland)',
-            'Locale_Active' => 0,
             'Locale_Order' => $i++,
         ];
         $data_Map[] = [
             'Locale_Code' => 'de_BE',
             'Locale_UrlCode' => 'de-BE',
             'Locale_Name' => 'Deutsch (Belgien)',
-            'Locale_Active' => 0,
             'Locale_Order' => $i++,
         ];
         $data_Map[] = [
             'Locale_Code' => 'de_LI',
             'Locale_UrlCode' => 'de-LI',
             'Locale_Name' => 'Deutsch (Liechtenstein)',
-            'Locale_Active' => 0,
             'Locale_Order' => $i++,
         ];
         $data_Map[] = [
             'Locale_Code' => 'de_LU',
             'Locale_UrlCode' => 'de-LU',
             'Locale_Name' => 'Deutsch (Luxembourg)',
-            'Locale_Active' => 0,
             'Locale_Order' => $i++,
         ];
         $data_Map[] = [
             'Locale_Code' => 'de_CH',
             'Locale_UrlCode' => 'de-CH',
             'Locale_Name' => 'Deutsch (Schweiz)',
-            'Locale_Active' => 0,
             'Locale_Order' => $i++,
         ];
         $data_Map[] = [
             'Locale_Code' => 'en_AU',
             'Locale_UrlCode' => 'en-AU',
             'Locale_Name' => 'English (Australia)',
-            'Locale_Active' => 0,
             'Locale_Order' => $i++,
         ];
         $data_Map[] = [
             'Locale_Code' => 'en_BE',
             'Locale_UrlCode' => 'en-BE',
             'Locale_Name' => 'English (Belgium)',
-            'Locale_Active' => 0,
             'Locale_Order' => $i++,
         ];
         $data_Map[] = [
             'Locale_Code' => 'en_US',
             'Locale_UrlCode' => 'en-US',
             'Locale_Name' => 'English (United States)',
-            'Locale_Active' => 0,
             'Locale_Order' => $i++,
         ];
         $data_Map[] = [
             'Locale_Code' => 'en_GB',
             'Locale_UrlCode' => 'en-GB',
             'Locale_Name' => 'English (United Kingdom)',
-            'Locale_Active' => 0,
             'Locale_Order' => $i++,
         ];
         $data_Map[] = [
             'Locale_Code' => 'nl_NL',
             'Locale_UrlCode' => 'nl-NL',
             'Locale_Name' => 'Dutch (Netherlands)',
-            'Locale_Active' => 0,
             'Locale_Order' => $i++,
         ];
         $data_Map[] = [
             'Locale_Code' => 'sl_SI',
             'Locale_UrlCode' => 'sl-SI',
             'Locale_Name' => 'Slovenian (Slovenia)',
-            'Locale_Active' => 0,
             'Locale_Order' => $i++,
         ];
         $data_Map[] = [
             'Locale_Code' => 'hu_HU',
             'Locale_UrlCode' => 'hu-HU',
             'Locale_Name' => 'Hungarian (Hungary)',
-            'Locale_Active' => 0,
             'Locale_Order' => $i++,
         ];
         $data_Map[] = [
             'Locale_Code' => 'it_IT',
             'Locale_UrlCode' => 'it-IT',
             'Locale_Name' => 'Italian (Italy)',
-            'Locale_Active' => 0,
             'Locale_Order' => $i++,
         ];
         $data_Map[] = [
             'Locale_Code' => 'it_SM',
             'Locale_UrlCode' => 'it-SM',
             'Locale_Name' => 'Italian (San Marino)',
-            'Locale_Active' => 0,
             'Locale_Order' => $i++,
         ];
         $data_Map[] = [
             'Locale_Code' => 'it_CH',
             'Locale_UrlCode' => 'it-CH',
             'Locale_Name' => 'Italian (Switzerland)',
-            'Locale_Active' => 0,
             'Locale_Order' => $i++,
         ];
         $data_Map[] = [
             'Locale_Code' => 'es_ES',
             'Locale_UrlCode' => 'es-ES',
             'Locale_Name' => 'Spanish (Spain)',
-            'Locale_Active' => 0,
             'Locale_Order' => $i++,
         ];
         $data_Map[] = [
             'Locale_Code' => 'es_US',
             'Locale_UrlCode' => 'es-US',
             'Locale_Name' => 'Spanish (United States)',
-            'Locale_Active' => 0,
             'Locale_Order' => $i++,
         ];
         $data_Map[] = [
             'Locale_Code' => 'fr_FR',
             'Locale_UrlCode' => 'fr-FR',
             'Locale_Name' => 'French (France)',
-            'Locale_Active' => 0,
             'Locale_Order' => $i++,
         ];
         $data_Map[] = [
             'Locale_Code' => 'fr_BE',
             'Locale_UrlCode' => 'fr-BE',
             'Locale_Name' => 'French (Belgium)',
-            'Locale_Active' => 0,
             'Locale_Order' => $i++,
         ];
         $data_Map[] = [
             'Locale_Code' => 'fr_LU',
             'Locale_UrlCode' => 'fr-LU',
             'Locale_Name' => 'French (Luxembourg)',
-            'Locale_Active' => 0,
             'Locale_Order' => $i++,
         ];
         $data_Map[] = [
             'Locale_Code' => 'fr_MC',
             'Locale_UrlCode' => 'fr-MC',
             'Locale_Name' => 'French (Monaco)',
-            'Locale_Active' => 0,
             'Locale_Order' => $i++,
         ];
         $data_Map[] = [
             'Locale_Code' => 'fr_CH',
             'Locale_UrlCode' => 'fr-CH',
             'Locale_Name' => 'French (Switzerland)',
-            'Locale_Active' => 0,
             'Locale_Order' => $i++,
         ];
-        return $this->saveDataMap('Locale', 'Locale_Code', $data_Map);
+        return $this->saveDataMap('Locale', 'Locale_Code', $data_Map, true);
     }
 
     public function updateDataCmsPostState()

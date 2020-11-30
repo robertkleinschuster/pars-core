@@ -205,18 +205,20 @@ abstract class AbstractUpdater implements ValidationHelperAwareInterface, Adapte
      * @param array $data_Map
      * @return array
      */
-    protected function saveDataMap(string $table, string $keyColumn, array $data_Map)
+    protected function saveDataMap(string $table, string $keyColumn, array $data_Map, bool $onlyInsert = false)
     {
         $existingKey_List = $this->getKeyList($table, $keyColumn);
         $result = [];
         foreach ($data_Map as $item) {
             $sql = new Sql($this->adapter);
             if (in_array($item[$keyColumn], $existingKey_List)) {
-                $update = $sql->update($table);
-                $update->where([$keyColumn => $item[$keyColumn]]);
-                unset($item[$keyColumn]);
-                $update->set($item);
-                $result[] = $this->query($update);
+                if (!$onlyInsert) {
+                    $update = $sql->update($table);
+                    $update->where([$keyColumn => $item[$keyColumn]]);
+                    unset($item[$keyColumn]);
+                    $update->set($item);
+                    $result[] = $this->query($update);
+                }
             } else {
                 $insert = $sql->insert($table);
                 $insert->columns(array_keys($item));

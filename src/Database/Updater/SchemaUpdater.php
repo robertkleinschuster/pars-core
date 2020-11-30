@@ -94,7 +94,7 @@ class SchemaUpdater extends AbstractUpdater
         $this->addColumnToTable($table, new Varchar('Locale_Code', 255));
         $this->addColumnToTable($table, new Varchar('Locale_UrlCode', 255));
         $this->addColumnToTable($table, new Varchar('Locale_Name', 255));
-        $this->addColumnToTable($table, new Boolean('Locale_Active'));
+        $this->addColumnToTable($table, new Boolean('Locale_Active', false, 0));
         $this->addColumnToTable($table, new Integer('Locale_Order', false, 0));
         $this->addConstraintToTable($table, new PrimaryKey('Locale_Code'));
         $this->addConstraintToTable($table, new UniqueKey('Locale_UrlCode'));
@@ -192,7 +192,6 @@ class SchemaUpdater extends AbstractUpdater
         $table = $this->getTableStatement('Translation');
         $this->addColumnToTable($table, new Integer('Translation_ID'))
             ->setOption('AUTO_INCREMENT', true);
-        ;
         $this->addColumnToTable($table, new Varchar('Translation_Code', 255));
         $this->addColumnToTable($table, new Varchar('Locale_Code', 255));
         $this->addColumnToTable($table, new Varchar('Translation_Namespace', 255));
