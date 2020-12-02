@@ -67,7 +67,10 @@ class DatabaseBeanConverter extends AbstractBeanConverter
             case BeanInterface::class:
                 if (is_string($value)) {
                     try {
-                        return AbstractBaseBean::createFromArray(json_decode($value, true));
+                        $decoded = json_decode($value, true);
+                        if ($decoded) {
+                            return AbstractBaseBean::createFromArray($decoded);
+                        }
                     } catch (BeanException $exception) {
                         throw new \Exception("Unable to convert $name from db.", 0, $exception);
                     }
