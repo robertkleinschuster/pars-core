@@ -65,10 +65,12 @@ class DatabaseBeanConverter extends AbstractBeanConverter
             case \DateTime::class:
                 return \DateTime::createFromFormat(self::DATE_FORMAT, $value);
             case BeanInterface::class:
-                try {
-                    return AbstractBaseBean::createFromArray(json_decode($value, true));
-                } catch (BeanException $exception) {
-                    throw new \Exception("Unable to convert $name from db.", 0, $exception);
+                if (is_string($value)) {
+                    try {
+                        return AbstractBaseBean::createFromArray(json_decode($value, true));
+                    } catch (BeanException $exception) {
+                        throw new \Exception("Unable to convert $name from db.", 0, $exception);
+                    }
                 }
         }
         throw new \Exception("Unable to convert $name from db.");
