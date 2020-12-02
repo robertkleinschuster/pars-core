@@ -248,6 +248,11 @@ class DataUpdater extends AbstractUpdater
             'CmsPageType_Active' => 1,
         ];
         $data_Map[] = [
+            'CmsPageType_Code' => 'poll',
+            'CmsPageType_Template' => 'cmspage::poll',
+            'CmsPageType_Active' => 1,
+        ];
+        $data_Map[] = [
             'CmsPageType_Code' => 'about',
             'CmsPageType_Template' => 'cmspage::about',
             'CmsPageType_Active' => 0,
@@ -346,17 +351,17 @@ class DataUpdater extends AbstractUpdater
         $data_Map[] = [
             'CmsMenuType_Code' => 'footer',
             'CmsMenuType_Template' => 'cmsmenu::footer',
-            'CmsMenuType_Active' => true,
+            'CmsMenuType_Active' => false,
         ];
         $data_Map[] = [
             'CmsMenuType_Code' => 'aside_left',
             'CmsMenuType_Template' => 'cmsmenu::aside_left',
-            'CmsMenuType_Active' => true,
+            'CmsMenuType_Active' => false,
         ];
         $data_Map[] = [
             'CmsMenuType_Code' => 'aside_right',
             'CmsMenuType_Template' => 'cmsmenu::aside_right',
-            'CmsMenuType_Active' => true,
+            'CmsMenuType_Active' => false,
         ];
         return $this->saveDataMap('CmsMenuType', 'CmsMenuType_Code', $data_Map);
     }

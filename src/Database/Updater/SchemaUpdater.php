@@ -209,6 +209,7 @@ class SchemaUpdater extends AbstractUpdater
         $this->addColumnToTable($table, new Integer('Article_ID'))
             ->setOption('AUTO_INCREMENT', true);
         $this->addColumnToTable($table, new Varchar('Article_Code', 255, true));
+        $this->addColumnToTable($table, new Text('Article_Data', 65535, true));
         $this->addConstraintToTable($table, new PrimaryKey('Article_ID'));
         $this->addConstraintToTable($table, new UniqueKey('Article_Code'));
         $this->addDefaultColumnsToTable($table);
