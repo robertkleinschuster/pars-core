@@ -34,8 +34,8 @@ class DatabaseBeanConverter extends AbstractBeanConverter
                     return $value->format(self::DATE_FORMAT);
                 }
                 break;
-            case ArticleDataBean::class:
-                return json_encode($value->toArray(true));
+            case BeanInterface::class:
+                return json_encode($value);
         }
         throw new \Exception("Unable to convert $name to db.");
     }
@@ -63,8 +63,8 @@ class DatabaseBeanConverter extends AbstractBeanConverter
                 return json_decode($value);
             case \DateTime::class:
                 return \DateTime::createFromFormat(self::DATE_FORMAT, $value);
-            case ArticleDataBean::class:
-                return ArticleDataBean::createFromArray((array) json_decode($value));
+            case BeanInterface::class:
+                return AbstractBaseBean::createFromArray(json_decode($value, true));
         }
         throw new \Exception("Unable to convert $name from db.");
     }
