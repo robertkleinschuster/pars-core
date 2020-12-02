@@ -43,7 +43,7 @@
         "cache/filesystem-adapter": "^1.0",
         "pfaciana/tiny-html-minifier": "^3.0",
         "cocur/slugify": "^4.0",
-        "robertkleinschuster/nice-beans": "^2.3",
+        "robertkleinschuster/nice-beans": "^2.3.2",
         "pars/pars-helpers": "dev-master",
         "pars/pars-models": "dev-master"
     },
