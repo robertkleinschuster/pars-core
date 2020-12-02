@@ -70,10 +70,14 @@ class DatabaseBeanConverter extends AbstractBeanConverter
                         $decoded = json_decode($value, true);
                         if ($decoded) {
                             return AbstractBaseBean::createFromArray($decoded);
+                        } else {
+                            return null;
                         }
                     } catch (BeanException $exception) {
                         throw new \Exception("Unable to convert $name from db.", 0, $exception);
                     }
+                } else {
+                    return null;
                 }
         }
         throw new \Exception("Unable to convert $name from db.");
