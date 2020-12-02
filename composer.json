@@ -44,8 +44,8 @@
         "pfaciana/tiny-html-minifier": "^3.0",
         "cocur/slugify": "^4.0",
         "robertkleinschuster/nice-beans": "^2",
-        "pars/pars-helpers": "^1.0",
-        "pars/pars-models": "^1.0"
+        "pars/pars-helpers": "^1.0.x-dev",
+        "pars/pars-models": "^1.0.x-dev"
     },
     "require-dev": {
         "phpunit/phpunit": "^9.3.7",
