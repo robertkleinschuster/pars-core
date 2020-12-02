@@ -4,6 +4,7 @@ namespace Pars\Core\Database;
 
 use Niceshops\Bean\Converter\AbstractBeanConverter;
 use Niceshops\Bean\Type\Base\AbstractBaseBean;
+use Niceshops\Bean\Type\Base\BeanException;
 use Niceshops\Bean\Type\Base\BeanInterface;
 use Pars\Model\Article\ArticleDataBean;
 
@@ -64,7 +65,11 @@ class DatabaseBeanConverter extends AbstractBeanConverter
             case \DateTime::class:
                 return \DateTime::createFromFormat(self::DATE_FORMAT, $value);
             case BeanInterface::class:
-                return AbstractBaseBean::createFromArray(json_decode($value, true));
+                try {
+                    return AbstractBaseBean::createFromArray(json_decode($value, true));
+                } catch (BeanException $exception) {
+                    throw new \Exception("Unable to convert $name from db.", 0, $exception);
+                }
         }
         throw new \Exception("Unable to convert $name from db.");
     }
