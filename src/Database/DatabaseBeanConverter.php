@@ -74,7 +74,7 @@ class DatabaseBeanConverter extends AbstractBeanConverter
                             return null;
                         }
                     } catch (BeanException $exception) {
-                        throw new \Exception("Unable to convert $name from db.", 0, $exception);
+                        return null;
                     }
                 } else {
                     return null;
