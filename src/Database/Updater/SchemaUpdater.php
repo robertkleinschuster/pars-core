@@ -331,10 +331,12 @@ class SchemaUpdater extends AbstractUpdater
         $this->addColumnToTable($table, new Integer('Article_ID'));
         $this->addColumnToTable($table, new Varchar('CmsPageState_Code', 255));
         $this->addColumnToTable($table, new Varchar('CmsPageType_Code', 255));
+        $this->addColumnToTable($table, new Integer('CmsPage_ID_Redirect', true));
         $this->addConstraintToTable($table, new ForeignKey(null, 'CmsPageState_Code', 'CmsPageState', 'CmsPageState_Code'));
         $this->addConstraintToTable($table, new ForeignKey(null, 'CmsPageType_Code', 'CmsPageType', 'CmsPageType_Code'));
         $this->addConstraintToTable($table, new PrimaryKey('CmsPage_ID'));
         $this->addConstraintToTable($table, new ForeignKey(null, 'Article_ID', 'Article', 'Article_ID'));
+        $this->addConstraintToTable($table, new ForeignKey(null, 'CmsPage_ID_Redirect', 'CmsPage', 'CmsPage_ID'));
         $this->addDefaultColumnsToTable($table);
         return $this->query($table);
     }
