@@ -446,9 +446,10 @@ class DatabaseBeanLoader extends AbstractBeanLoader implements AdapterAwareInter
         foreach ($field_List as $field => $mode) {
             if ($mode == BeanFinderInterface::ORDER_MODE_ASC) {
                 $this->addOrder($field);
-            }
-            if ($mode == BeanFinderInterface::ORDER_MODE_DESC) {
+            } elseif ($mode == BeanFinderInterface::ORDER_MODE_DESC) {
                 $this->addOrder($field, true);
+            } else {
+                $this->addOrder($mode);
             }
         }
     }

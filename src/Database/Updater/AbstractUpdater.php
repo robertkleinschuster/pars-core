@@ -205,14 +205,14 @@ abstract class AbstractUpdater implements ValidationHelperAwareInterface, Adapte
      * @param array $data_Map
      * @return array
      */
-    protected function saveDataMap(string $table, string $keyColumn, array $data_Map, bool $onlyInsert = false)
+    protected function saveDataMap(string $table, string $keyColumn, array $data_Map, bool $noUpdate = false)
     {
         $existingKey_List = $this->getKeyList($table, $keyColumn);
         $result = [];
         foreach ($data_Map as $item) {
             $sql = new Sql($this->adapter);
             if (in_array($item[$keyColumn], $existingKey_List)) {
-                if (!$onlyInsert) {
+                if (!$noUpdate) {
                     $update = $sql->update($table);
                     $update->where([$keyColumn => $item[$keyColumn]]);
                     unset($item[$keyColumn]);
@@ -224,6 +224,14 @@ abstract class AbstractUpdater implements ValidationHelperAwareInterface, Adapte
                 $insert->columns(array_keys($item));
                 $insert->values(array_values($item));
                 $result[] = $this->query($insert);
+            }
+        }
+        $newKey_List = array_column($data_Map, $keyColumn);
+        foreach ($existingKey_List as $id) {
+            if (!in_array($id, $newKey_List)) {
+                $delete = $sql->delete($table);
+                $delete->where([$keyColumn => $id]);
+                $result[] = $this->query($delete);
             }
         }
         return $result;

@@ -23,12 +23,32 @@ class DataUpdater extends AbstractUpdater
             'Config_Value' => ''
         ];
         $data_Map[] = [
-            'Config_Code' => 'timezone',
+            'Config_Code' => 'locale.default',
+            'Config_Value' => 'de_AT'
+        ];
+        $data_Map[] = [
+            'Config_Code' => 'admin.timezone',
             'Config_Value' => 'UTC'
         ];
         $data_Map[] = [
-            'Config_Code' => 'locale.default',
-            'Config_Value' => 'de_AT'
+            'Config_Code' => 'admin.title',
+            'Config_Value' => 'PARS Admin'
+        ];
+        $data_Map[] = [
+            'Config_Code' => 'admin.author',
+            'Config_Value' => 'PARS'
+        ];
+        $data_Map[] = [
+            'Config_Code' => 'admin.favicon',
+            'Config_Value' => '/favicon.ico'
+        ];
+        $data_Map[] = [
+            'Config_Code' => 'admin.description',
+            'Config_Value' => 'PARS Admin'
+        ];
+        $data_Map[] = [
+            'Config_Code' => 'admin.charset',
+            'Config_Value' => 'utf-8'
         ];
         return $this->saveDataMap('Config', 'Config_Code', $data_Map, true);
     }
@@ -346,22 +366,22 @@ class DataUpdater extends AbstractUpdater
         $data_Map[] = [
             'CmsMenuType_Code' => 'header',
             'CmsMenuType_Template' => 'cmsmenu::header',
-            'CmsMenuType_Active' => true,
+            'CmsMenuType_Active' => 1,
         ];
         $data_Map[] = [
             'CmsMenuType_Code' => 'footer',
             'CmsMenuType_Template' => 'cmsmenu::footer',
-            'CmsMenuType_Active' => false,
+            'CmsMenuType_Active' => 0,
         ];
         $data_Map[] = [
             'CmsMenuType_Code' => 'aside_left',
             'CmsMenuType_Template' => 'cmsmenu::aside_left',
-            'CmsMenuType_Active' => false,
+            'CmsMenuType_Active' => 0,
         ];
         $data_Map[] = [
             'CmsMenuType_Code' => 'aside_right',
             'CmsMenuType_Template' => 'cmsmenu::aside_right',
-            'CmsMenuType_Active' => false,
+            'CmsMenuType_Active' => 0,
         ];
         return $this->saveDataMap('CmsMenuType', 'CmsMenuType_Code', $data_Map);
     }
