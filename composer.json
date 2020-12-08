@@ -13,7 +13,7 @@
         "forum": "https://discourse.parsphp.org/"
     },
     "require": {
-        "php": "^7.4",
+        "php": ">=7.4",
         "ext-intl": "*",
         "ext-json": "*",
         "laminas/laminas-stdlib": "^3.2.1",
