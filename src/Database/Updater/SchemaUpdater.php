@@ -410,4 +410,33 @@ class SchemaUpdater extends AbstractUpdater
         $this->addDefaultColumnsToTable($table);
         return $this->query($table);
     }
+
+    public function updateTableImportType()
+    {
+        $table = $this->getTableStatement('ImportType');
+        $this->addColumnToTable($table, new Varchar('ImportType_Code', 255));
+        $this->addColumnToTable($table, new Boolean('ImportType_Active'));
+        $this->addConstraintToTable($table, new PrimaryKey('ImportType_Code'));
+        $this->addDefaultColumnsToTable($table);
+        return $this->query($table);
+    }
+
+    public function updateTableImport()
+    {
+        $table = $this->getTableStatement('Import');
+        $this->addColumnToTable($table, new Integer('Import_ID'))->setOption('AUTO_INCREMENT', true);
+        $this->addColumnToTable($table, new Varchar('ImportType_Code', 255, false));
+        $this->addColumnToTable($table, new Varchar('Import_Name', 255, false));
+        $this->addColumnToTable($table, new Text('Import_Data', 65535, true));
+        $this->addColumnToTable($table, new Boolean('Import_Active', false, 0));
+        $this->addColumnToTable($table, new Integer('Import_Day', true));
+        $this->addColumnToTable($table, new Integer('Import_Hour', true));
+        $this->addColumnToTable($table, new Integer('Import_Minute', true));
+        $this->addConstraintToTable($table, new PrimaryKey('Import_ID'));
+        $this->addConstraintToTable($table, new ForeignKey(null, 'ImportType_Code', 'ImportType', 'ImportType_Code'));
+        $this->addDefaultColumnsToTable($table);
+        return $this->query($table);
+    }
+
+
 }

@@ -38,7 +38,7 @@ class DatabaseBeanConverter extends AbstractBeanConverter
             case BeanInterface::class:
                 return json_encode($value);
         }
-        throw new \Exception("Unable to convert $name to db.");
+        throw new \Exception("Unable to convert $name to db. Type: " . $bean->type($name));
     }
 
     public function convertValueToBean(BeanInterface $bean, string $name, $value)
@@ -80,6 +80,6 @@ class DatabaseBeanConverter extends AbstractBeanConverter
                     return null;
                 }
         }
-        throw new \Exception("Unable to convert $name from db.");
+        throw new \Exception("Unable to convert $name from db. Type: " . $bean->type($name));
     }
 }
