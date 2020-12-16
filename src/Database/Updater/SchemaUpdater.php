@@ -425,6 +425,7 @@ class SchemaUpdater extends AbstractUpdater
     {
         $table = $this->getTableStatement('Import');
         $this->addColumnToTable($table, new Integer('Import_ID'))->setOption('AUTO_INCREMENT', true);
+        $this->addColumnToTable($table, new Integer('Article_ID', false));
         $this->addColumnToTable($table, new Varchar('ImportType_Code', 255, false));
         $this->addColumnToTable($table, new Varchar('Import_Name', 255, false));
         $this->addColumnToTable($table, new Text('Import_Data', 65535, true));
@@ -434,6 +435,7 @@ class SchemaUpdater extends AbstractUpdater
         $this->addColumnToTable($table, new Integer('Import_Minute', true));
         $this->addConstraintToTable($table, new PrimaryKey('Import_ID'));
         $this->addConstraintToTable($table, new ForeignKey(null, 'ImportType_Code', 'ImportType', 'ImportType_Code'));
+        $this->addConstraintToTable($table, new ForeignKey(null, 'Article_ID', 'Article', 'Article_ID'));
         $this->addDefaultColumnsToTable($table);
         return $this->query($table);
     }
