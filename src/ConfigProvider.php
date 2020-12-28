@@ -7,8 +7,12 @@ use Mezzio\Authentication\AuthenticationInterface;
 use Mezzio\Authentication\Session\PhpSession;
 use Mezzio\Session\Cache\CacheSessionPersistence;
 use Mezzio\Session\SessionPersistenceInterface;
+use Pars\Core\Assets\AssetsHandler;
+use Pars\Core\Assets\AssetsHandlerFactory;
 use Pars\Core\Authentication\AuthenticationMiddleware;
 use Pars\Core\Authentication\AuthenticationMiddlewareFactory;
+use Pars\Core\Bundles\BundlesHandler;
+use Pars\Core\Bundles\BundlesHandlerFactory;
 use Pars\Core\Database\DatabaseMiddleware;
 use Pars\Core\Database\DatabaseMiddlewareFactory;
 use Pars\Core\Localization\LocalizationMiddleware;
@@ -43,6 +47,8 @@ class ConfigProvider
                 TranslatorMiddleware::class => TranslatorMiddlewareFactory::class,
                 LoggingMiddleware::class => LoggingMiddlewareFactory::class,
                 LocalizationMiddleware::class => LocalizationMiddlewareFactory::class,
+                AssetsHandler::class => AssetsHandlerFactory::class,
+                BundlesHandler::class => BundlesHandlerFactory::class
             ],
             'delegators' => [
                 ErrorHandler::class => [
