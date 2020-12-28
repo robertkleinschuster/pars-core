@@ -61,13 +61,13 @@ class DatabaseBeanConverter extends AbstractBeanConverter
             case AbstractBaseBean::DATA_TYPE_FLOAT:
                 return (bool) $value;
             case AbstractBaseBean::DATA_TYPE_ARRAY:
-                return json_decode($value);
+                return (array) json_decode($value);
             case \DateTime::class:
                 return \DateTime::createFromFormat(self::DATE_FORMAT, $value);
             case BeanInterface::class:
                 if (is_string($value)) {
                     try {
-                        $decoded = json_decode($value, true);
+                        $decoded = (array) json_decode($value, true);
                         if ($decoded) {
                             return AbstractBaseBean::createFromArray($decoded);
                         } else {

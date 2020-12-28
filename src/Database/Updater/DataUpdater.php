@@ -715,13 +715,15 @@ class DataUpdater extends AbstractUpdater
         return $this->saveDataMap('UserPermission', 'UserPermission_Code', $data_Map);
     }
 
+    /**
+     * @return array
+     */
     public function updateDataImportType()
     {
         $data_Mao[] = [
-            'ImportType_Code' => 'oauth-rest',
+            'ImportType_Code' => 'tesla',
             'ImportType_Active' => 1
         ];
-
         return $this->saveDataMap('ImportType', 'ImportType_Code', $data_Mao);
     }
 }
