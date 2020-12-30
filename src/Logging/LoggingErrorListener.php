@@ -18,7 +18,7 @@ class LoggingErrorListener
      *
      * STATUS [METHOD] path: message
      */
-    const LOG_FORMAT = '%d [%s] %s: %s';
+    const LOG_FORMAT = '%d [%s] %s: %s %s:%s';
 
     private $logger;
 
@@ -34,7 +34,9 @@ class LoggingErrorListener
             $response->getStatusCode(),
             $request->getMethod(),
             (string) $request->getUri(),
-            $error->getMessage()
+            $error->getMessage(),
+            $error->getFile(),
+            (string) $error->getLine()
         ));
     }
 }
