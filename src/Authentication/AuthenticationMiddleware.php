@@ -7,7 +7,9 @@ use Mezzio\Authentication\AuthenticationInterface;
 use Mezzio\Authentication\UserInterface;
 use Mezzio\Csrf\CsrfMiddleware;
 use Mezzio\Flash\FlashMessageMiddleware;
+use Mezzio\Session\LazySession;
 use Mezzio\Session\SessionMiddleware;
+use Pars\Core\Logging\LoggingMiddleware;
 use Pars\Helper\Path\PathHelper;
 use Psr\Container\ContainerInterface;
 use Psr\Http\Message\ResponseInterface;
@@ -74,22 +76,27 @@ class AuthenticationMiddleware implements MiddlewareInterface
         $currentPath = $this->pathHelper->getUrlHelper()->generate();
         $current = $this->normalizePath($currentPath);
         $session = $request->getAttribute(SessionMiddleware::SESSION_ATTRIBUTE);
+        $log = $request->getAttribute(LoggingMiddleware::LOGGER_ATTRIBUTE);
+        try {
+            $user = $this->auth->authenticate($request);
 
-        $user = $this->auth->authenticate($request);
-
-        // Validation CSRF Token
-        if ($request->getMethod() === 'POST' && $user === null) {
-            if (isset($request->getParsedBody()['login_token']) && $guard->validateToken($request->getParsedBody()['login_token'] ?? '', 'login_token')) {
-                $user = $this->auth->authenticate($request);
-                if ($user === null) {
-                    $flash->flash('login_error', 'credentials');
+            // Validation CSRF Token
+            if ($request->getMethod() === 'POST' && $user === null) {
+                if (isset($request->getParsedBody()['login_token']) && $guard->validateToken($request->getParsedBody()['login_token'] ?? '', 'login_token')) {
+                    $user = $this->auth->authenticate($request);
+                    if ($user === null) {
+                        $flash->flash('login_error', 'credentials');
+                        $redirect = $currentPath;
+                    }
+                    $session->unset('locale');
+                } else {
+                    $flash->flash('login_error', 'token');
                     $redirect = $currentPath;
                 }
-                $session->unset('locale');
-            } else {
-                $flash->flash('login_error', 'token');
-                $redirect = $currentPath;
             }
+        } catch (\Throwable $exception) {
+            $session->clear();
+            $log->error('Authentication Error', ['exception' => $exception]);
         }
 
         if ($user !== null) {
