@@ -50,6 +50,10 @@ class DataUpdater extends AbstractUpdater
             'Config_Code' => 'admin.charset',
             'Config_Value' => 'utf-8'
         ];
+        $data_Map[] = [
+            'Config_Code' => 'frontend.brand',
+            'Config_Value' => 'PARS'
+        ];
         return $this->saveDataMap('Config', 'Config_Code', $data_Map, true);
     }
 
@@ -239,7 +243,7 @@ class DataUpdater extends AbstractUpdater
         $data_Map[] = [
             'CmsPostType_Code' => 'default',
             'CmsPostType_Template' => 'cmspost::default',
-            'CmsPostType_Active' => true,
+            'CmsPostType_Active' => 1,
         ];
         return $this->saveDataMap('CmsPostType', 'CmsPostType_Code', $data_Map);
     }
@@ -275,27 +279,27 @@ class DataUpdater extends AbstractUpdater
         $data_Map[] = [
             'CmsPageType_Code' => 'about',
             'CmsPageType_Template' => 'cmspage::about',
-            'CmsPageType_Active' => 0,
+            'CmsPageType_Active' => 1,
         ];
         $data_Map[] = [
             'CmsPageType_Code' => 'contact',
             'CmsPageType_Template' => 'cmspage::contact',
-            'CmsPageType_Active' => 0,
+            'CmsPageType_Active' => 1,
         ];
         $data_Map[] = [
             'CmsPageType_Code' => 'blog',
             'CmsPageType_Template' => 'cmspage::blog',
-            'CmsPageType_Active' => 0,
-        ];
-        $data_Map[] = [
-            'CmsPageType_Code' => 'post',
-            'CmsPageType_Template' => 'cmspage::post',
-            'CmsPageType_Active' => 0,
+            'CmsPageType_Active' => 1,
         ];
         $data_Map[] = [
             'CmsPageType_Code' => 'faq',
             'CmsPageType_Template' => 'cmspage::faq',
-            'CmsPageType_Active' => 0,
+            'CmsPageType_Active' => 1,
+        ];
+        $data_Map[] = [
+            'CmsPageType_Code' => 'gallery',
+            'CmsPageType_Template' => 'cmspage::gallery',
+            'CmsPageType_Active' => 1,
         ];
         return $this->saveDataMap('CmsPageType', 'CmsPageType_Code', $data_Map);
     }
@@ -337,9 +341,29 @@ class DataUpdater extends AbstractUpdater
     {
         $data_Map = [];
         $data_Map[] = [
-            'CmsParagraphType_Code' => 'default',
-            'CmsParagraphType_Template' => 'cmsparagraph::default',
-            'CmsParagraphType_Active' => true,
+            'CmsParagraphType_Code' => 'text',
+            'CmsParagraphType_Template' => 'cmsparagraph::text',
+            'CmsParagraphType_Active' => 1,
+        ];
+        $data_Map[] = [
+            'CmsParagraphType_Code' => 'banner',
+            'CmsParagraphType_Template' => 'cmsparagraph::banner',
+            'CmsParagraphType_Active' => 1,
+        ];
+        $data_Map[] = [
+            'CmsParagraphType_Code' => 'video',
+            'CmsParagraphType_Template' => 'cmsparagraph::video',
+            'CmsParagraphType_Active' => 1,
+        ];
+        $data_Map[] = [
+            'CmsParagraphType_Code' => 'picture',
+            'CmsParagraphType_Template' => 'cmsparagraph::picture',
+            'CmsParagraphType_Active' => 1,
+        ];
+        $data_Map[] = [
+            'CmsParagraphType_Code' => 'link',
+            'CmsParagraphType_Template' => 'cmsparagraph::link',
+            'CmsParagraphType_Active' => 1,
         ];
         return $this->saveDataMap('CmsParagraphType', 'CmsParagraphType_Code', $data_Map);
     }
@@ -371,17 +395,17 @@ class DataUpdater extends AbstractUpdater
         $data_Map[] = [
             'CmsMenuType_Code' => 'footer',
             'CmsMenuType_Template' => 'cmsmenu::footer',
-            'CmsMenuType_Active' => 0,
+            'CmsMenuType_Active' => 1,
         ];
         $data_Map[] = [
             'CmsMenuType_Code' => 'aside_left',
             'CmsMenuType_Template' => 'cmsmenu::aside_left',
-            'CmsMenuType_Active' => 0,
+            'CmsMenuType_Active' => 1,
         ];
         $data_Map[] = [
             'CmsMenuType_Code' => 'aside_right',
             'CmsMenuType_Template' => 'cmsmenu::aside_right',
-            'CmsMenuType_Active' => 0,
+            'CmsMenuType_Active' => 1,
         ];
         return $this->saveDataMap('CmsMenuType', 'CmsMenuType_Code', $data_Map);
     }

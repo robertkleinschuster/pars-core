@@ -5,7 +5,6 @@ namespace Pars\Core\Deployment;
 
 
 use Laminas\Diactoros\Response\RedirectResponse;
-use Pars\Core\Bundles\BundlesMiddleware;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
@@ -26,7 +25,7 @@ class DeploymentMiddleware implements MiddlewareInterface
 
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
-        if (isset($request->getQueryParams()['deploy'])){
+        if (isset($request->getQueryParams()['deploy'])) {
             if (file_exists($_SERVER['DOCUMENT_ROOT'] . '/../data/cache/admin-config-cache.php')) {
                 unlink($_SERVER['DOCUMENT_ROOT'] . '/../data/cache/admin-config-cache.php');
             }
@@ -35,7 +34,9 @@ class DeploymentMiddleware implements MiddlewareInterface
             }
             if (isset($this->config['bundles'])) {
                 foreach (array_column($this->config['bundles'], 'output') as $item) {
-                    unlink($_SERVER['DOCUMENT_ROOT'] . DIRECTORY_SEPARATOR . $item);
+                    if (file_exists($_SERVER['DOCUMENT_ROOT'] . DIRECTORY_SEPARATOR . $item)) {
+                        unlink($_SERVER['DOCUMENT_ROOT'] . DIRECTORY_SEPARATOR . $item);
+                    }
                 }
             }
             return new RedirectResponse('/');
