@@ -13,6 +13,8 @@ use Pars\Core\Bundles\BundlesMiddleware;
 use Pars\Core\Bundles\BundlesMiddlewareFactory;
 use Pars\Core\Database\DatabaseMiddleware;
 use Pars\Core\Database\DatabaseMiddlewareFactory;
+use Pars\Core\Deployment\DeploymentMiddleware;
+use Pars\Core\Deployment\DeploymentMiddlewareFactory;
 use Pars\Core\Localization\LocalizationMiddleware;
 use Pars\Core\Localization\LocalizationMiddlewareFactory;
 use Pars\Core\Logging\LoggingErrorListenerDelegatorFactory;
@@ -46,6 +48,7 @@ class ConfigProvider
                 LoggingMiddleware::class => LoggingMiddlewareFactory::class,
                 LocalizationMiddleware::class => LocalizationMiddlewareFactory::class,
                 BundlesMiddleware::class => BundlesMiddlewareFactory::class,
+                DeploymentMiddleware::class => DeploymentMiddlewareFactory::class,
             ],
             'delegators' => [
                 ErrorHandler::class => [
