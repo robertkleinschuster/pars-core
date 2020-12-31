@@ -6,7 +6,6 @@ use Niceshops\Bean\Converter\AbstractBeanConverter;
 use Niceshops\Bean\Type\Base\AbstractBaseBean;
 use Niceshops\Bean\Type\Base\BeanException;
 use Niceshops\Bean\Type\Base\BeanInterface;
-use Pars\Model\Article\ArticleDataBean;
 
 class DatabaseBeanConverter extends AbstractBeanConverter
 {
@@ -21,7 +20,7 @@ class DatabaseBeanConverter extends AbstractBeanConverter
             case AbstractBaseBean::DATA_TYPE_FLOAT:
             case AbstractBaseBean::DATA_TYPE_INT:
             case AbstractBaseBean::DATA_TYPE_STRING:
-                return (string) $value;
+                return (string)$value;
             case AbstractBaseBean::DATA_TYPE_BOOL:
                 if ($value) {
                     return 1;
@@ -48,7 +47,7 @@ class DatabaseBeanConverter extends AbstractBeanConverter
         }
         switch ($bean->type($name)) {
             case AbstractBaseBean::DATA_TYPE_STRING:
-                return (string) $value;
+                return (string)$value;
             case AbstractBaseBean::DATA_TYPE_BOOL:
                 if ($value == 1) {
                     return true;
@@ -57,17 +56,17 @@ class DatabaseBeanConverter extends AbstractBeanConverter
                 }
                 break;
             case AbstractBaseBean::DATA_TYPE_INT:
-                return (int) $value;
+                return (int)$value;
             case AbstractBaseBean::DATA_TYPE_FLOAT:
-                return (bool) $value;
+                return (bool)$value;
             case AbstractBaseBean::DATA_TYPE_ARRAY:
-                return (array) json_decode($value);
+                return (array)json_decode($value);
             case \DateTime::class:
                 return \DateTime::createFromFormat(self::DATE_FORMAT, $value);
             case BeanInterface::class:
                 if (is_string($value)) {
                     try {
-                        $decoded = (array) json_decode($value, true);
+                        $decoded = (array)json_decode($value, true);
                         if ($decoded) {
                             return AbstractBaseBean::createFromArray($decoded);
                         } else {

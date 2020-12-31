@@ -2,12 +2,11 @@
 
 namespace Pars\Core\Translation;
 
-use Laminas\Db\Adapter\AdapterInterface;
 use Laminas\I18n\Translator\Loader\RemoteLoaderInterface;
+use Laminas\I18n\Translator\Translator;
 use Pars\Core\Database\DatabaseMiddleware;
 use Pars\Core\Localization\LocaleInterface;
 use Pars\Core\Logging\LoggingMiddleware;
-use Laminas\I18n\Translator\Translator;
 use Pars\Model\Translation\TranslationLoader\TranslationBeanFinder;
 use Pars\Model\Translation\TranslationLoader\TranslationBeanProcessor;
 use Psr\Http\Message\ResponseInterface;

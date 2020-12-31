@@ -6,13 +6,10 @@ use Laminas\Diactoros\Response\RedirectResponse;
 use Locale;
 use Mezzio\Authentication\UserInterface;
 use Mezzio\Helper\UrlHelper;
-use Pars\Core\Database\DatabaseMiddleware;
-use Pars\Core\Logging\LoggingMiddleware;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
-use Psr\Log\LoggerInterface;
 
 /**
  * Class LocalizationMiddleware

@@ -41,7 +41,6 @@ abstract class AbstractUpdater implements ValidationHelperAwareInterface, Adapte
     protected $existingTableList;
 
 
-
     abstract public function getCode(): string;
 
     /**
@@ -308,13 +307,14 @@ abstract class AbstractUpdater implements ValidationHelperAwareInterface, Adapte
         }
     }
 
-    protected function abbreviate($string, $l = 2){
+    protected function abbreviate($string, $l = 2)
+    {
         $results = ''; // empty string
         $vowels = array('a', 'e', 'i', 'o', 'u', 'y'); // vowels
         preg_match_all('/[A-Z][a-z]*/', ucfirst($string), $m); // Match every word that begins with a capital letter, added ucfirst() in case there is no uppercase letter
-        foreach($m[0] as $substring){
+        foreach ($m[0] as $substring) {
             $substring = str_replace($vowels, '', $substring); // String to lower case and remove all vowels
-            $results .= preg_replace('/([a-z]{'.$l.'})(.*)/', '$1', $substring); // Extract the first N letters.
+            $results .= preg_replace('/([a-z]{' . $l . '})(.*)/', '$1', $substring); // Extract the first N letters.
         }
         return $results;
     }

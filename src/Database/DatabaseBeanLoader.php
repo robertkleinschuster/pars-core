@@ -102,18 +102,18 @@ class DatabaseBeanLoader extends AbstractBeanLoader implements AdapterAwareInter
     }
 
     /**
-    * @return int
-    */
+     * @return int
+     */
     public function getOffset(): int
     {
         return $this->offset;
     }
 
     /**
-    * @param int $offset
-    *
-    * @return $this
-    */
+     * @param int $offset
+     *
+     * @return $this
+     */
     public function setOffset(int $offset): self
     {
         $this->offset = $offset;
@@ -121,8 +121,8 @@ class DatabaseBeanLoader extends AbstractBeanLoader implements AdapterAwareInter
     }
 
     /**
-    * @return bool
-    */
+     * @return bool
+     */
     public function hasOffset(): bool
     {
         return $this->offset !== null;
@@ -314,7 +314,6 @@ class DatabaseBeanLoader extends AbstractBeanLoader implements AdapterAwareInter
         }
         return null;
     }
-
 
 
     /**

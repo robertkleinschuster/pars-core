@@ -200,6 +200,6 @@ class DatabaseBeanSaver extends AbstractBeanSaver implements AdapterAwareInterfa
         $select->where($data);
         $select->columns(['COUNT' => new Expression('COUNT(*)')], false);
         $result = $this->adapter->query($sql->buildSqlString($select), $this->adapter::QUERY_MODE_EXECUTE);
-        return (int) ($result->current()['COUNT'] ?? 0);
+        return (int)($result->current()['COUNT'] ?? 0);
     }
 }

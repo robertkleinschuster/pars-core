@@ -7,7 +7,6 @@ use Mezzio\Authentication\AuthenticationInterface;
 use Mezzio\Authentication\UserInterface;
 use Mezzio\Csrf\CsrfMiddleware;
 use Mezzio\Flash\FlashMessageMiddleware;
-use Mezzio\Session\LazySession;
 use Mezzio\Session\SessionMiddleware;
 use Pars\Core\Logging\LoggingMiddleware;
 use Pars\Helper\Path\PathHelper;
@@ -109,7 +108,6 @@ class AuthenticationMiddleware implements MiddlewareInterface
 
         return new RedirectResponse($redirect);
     }
-
 
 
     protected function normalizePath(string $path)

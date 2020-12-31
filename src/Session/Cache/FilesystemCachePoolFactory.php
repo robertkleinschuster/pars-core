@@ -17,7 +17,7 @@ class FilesystemCachePoolFactory
     {
         $config = $container->get('config');
         $filesystemAdapter = new Local($config['mezzio-session-cache']['filesystem_folder'], LOCK_NB);
-        $filesystem        = new Filesystem($filesystemAdapter);
+        $filesystem = new Filesystem($filesystemAdapter);
         return new FilesystemCachePool($filesystem);
     }
 }

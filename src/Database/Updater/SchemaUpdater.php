@@ -186,7 +186,6 @@ class SchemaUpdater extends AbstractUpdater
     }
 
 
-
     public function updateTableTranslation()
     {
         $table = $this->getTableStatement('Translation');
@@ -281,6 +280,7 @@ class SchemaUpdater extends AbstractUpdater
         $this->addDefaultColumnsToTable($table);
         return $this->query($table);
     }
+
     public function updateTableCmsParagraphState()
     {
         $table = $this->getTableStatement('CmsParagraphState');

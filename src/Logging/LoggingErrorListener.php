@@ -33,10 +33,10 @@ class LoggingErrorListener
             self::LOG_FORMAT,
             $response->getStatusCode(),
             $request->getMethod(),
-            (string) $request->getUri(),
+            (string)$request->getUri(),
             $error->getMessage(),
             $error->getFile(),
-            (string) $error->getLine()
+            (string)$error->getLine()
         ));
     }
 }

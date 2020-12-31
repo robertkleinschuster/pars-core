@@ -3,8 +3,6 @@
 namespace Pars\Core\Database\Updater;
 
 
-use Pars\Core\Database\DatabaseBeanConverter;
-
 class DataUpdater extends AbstractUpdater
 {
 
@@ -409,8 +407,6 @@ class DataUpdater extends AbstractUpdater
         ];
         return $this->saveDataMap('CmsMenuType', 'CmsMenuType_Code', $data_Map);
     }
-
-
 
 
     public function updateDataUserPermission()

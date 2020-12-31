@@ -36,6 +36,6 @@ class DatabaseMiddleware implements MiddlewareInterface
 
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
-         return $handler->handle($request->withAttribute(self::ADAPTER_ATTRIBUTE, $this->adapter));
+        return $handler->handle($request->withAttribute(self::ADAPTER_ATTRIBUTE, $this->adapter));
     }
 }

@@ -175,7 +175,7 @@ trait DatabaseInfoTrait
         if (!isset($this->dbInfo_Map[$field]) || $this->dbInfo_Map[$field] === null) {
             throw new \Exception("Field $field not found in db info.");
         }
-        if (!isset($this->dbInfo_Map[$field][$key]) ||  $this->dbInfo_Map[$field][$key] === null) {
+        if (!isset($this->dbInfo_Map[$field][$key]) || $this->dbInfo_Map[$field][$key] === null) {
             if (null !== $default) {
                 return $default;
             }

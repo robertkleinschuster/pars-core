@@ -6,11 +6,11 @@ namespace Pars\Core\Bundles;
 
 use League\Flysystem\Adapter\Local;
 use League\Flysystem\Filesystem;
+use MatthiasMullie\Minify;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
-use MatthiasMullie\Minify;
 
 class BundlesMiddleware implements MiddlewareInterface
 {
