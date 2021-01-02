@@ -84,7 +84,7 @@ class DatabaseBeanSaver extends AbstractBeanSaver implements AdapterAwareInterfa
             $insert->values(array_values($insertdata));
 
             $result = $this->adapter->query($sql->buildSqlString($insert), $this->adapter::QUERY_MODE_EXECUTE);
-            $keyField_List = $this->getKeyField_List($table);
+            $keyField_List = $this->getKeyField_List($table, true);
             if (count($keyField_List) == 1) {
                 foreach ($keyField_List as $field) {
                     $converter = new DatabaseBeanConverter();

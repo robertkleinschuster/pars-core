@@ -281,6 +281,18 @@ class SchemaUpdater extends AbstractUpdater
         return $this->query($table);
     }
 
+
+    public function updateTableCmsPageLayout()
+    {
+        $table = $this->getTableStatement('CmsPageLayout');
+        $this->addColumnToTable($table, new Varchar('CmsPageLayout_Code', 255));
+        $this->addColumnToTable($table, new Varchar('CmsPageLayout_Template', 255));
+        $this->addColumnToTable($table, new Boolean('CmsPageLayout_Active'));
+        $this->addConstraintToTable($table, new PrimaryKey('CmsPageLayout_Code'));
+        $this->addDefaultColumnsToTable($table);
+        return $this->query($table);
+    }
+
     public function updateTableCmsParagraphState()
     {
         $table = $this->getTableStatement('CmsParagraphState');
@@ -331,9 +343,11 @@ class SchemaUpdater extends AbstractUpdater
         $this->addColumnToTable($table, new Integer('Article_ID'));
         $this->addColumnToTable($table, new Varchar('CmsPageState_Code', 255));
         $this->addColumnToTable($table, new Varchar('CmsPageType_Code', 255));
+        $this->addColumnToTable($table, new Varchar('CmsPageLayout_Code', 255, false, 'default'));
         $this->addColumnToTable($table, new Integer('CmsPage_ID_Redirect', true));
         $this->addConstraintToTable($table, new ForeignKey(null, 'CmsPageState_Code', 'CmsPageState', 'CmsPageState_Code'));
         $this->addConstraintToTable($table, new ForeignKey(null, 'CmsPageType_Code', 'CmsPageType', 'CmsPageType_Code'));
+        $this->addConstraintToTable($table, new ForeignKey(null, 'CmsPageLayout_Code', 'CmsPageLayout', 'CmsPageLayout_Code'));
         $this->addConstraintToTable($table, new PrimaryKey('CmsPage_ID'));
         $this->addConstraintToTable($table, new ForeignKey(null, 'Article_ID', 'Article', 'Article_ID'));
         $this->addConstraintToTable($table, new ForeignKey(null, 'CmsPage_ID_Redirect', 'CmsPage', 'CmsPage_ID'));
@@ -400,7 +414,7 @@ class SchemaUpdater extends AbstractUpdater
         $this->addColumnToTable($table, new Integer('CmsPage_ID_Parent', true));
         $this->addColumnToTable($table, new Integer('CmsMenu_Order', false, 0));
         $this->addColumnToTable($table, new Varchar('CmsMenuState_Code', 255));
-        $this->addColumnToTable($table, new Varchar('CmsMenuType_Code', 255));
+        $this->addColumnToTable($table, new Varchar('CmsMenuType_Code', 255, true));
         $this->addConstraintToTable($table, new ForeignKey(null, 'CmsMenuState_Code', 'CmsMenuState', 'CmsMenuState_Code'));
         $this->addConstraintToTable($table, new ForeignKey(null, 'CmsMenuType_Code', 'CmsMenuType', 'CmsMenuType_Code'));
         $this->addConstraintToTable($table, new PrimaryKey('CmsMenu_ID'));

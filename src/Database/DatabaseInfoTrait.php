@@ -186,12 +186,15 @@ trait DatabaseInfoTrait
 
     /**
      * @param string|null $table
+     * @param bool $primaryTable
      * @return array
      */
-    private function getKeyField_List(?string $table = null): array
+    private function getKeyField_List(?string $table = null, bool $primaryTable = false): array
     {
-        return array_keys(array_filter($this->dbInfo_Map, function ($item) use ($table) {
-            if ($table !== null) {
+        return array_keys(array_filter($this->dbInfo_Map, function ($item) use ($table, $primaryTable) {
+            if ($table !== null && $primaryTable) {
+                return $item['isKey'] && ($item['table'] == $table);
+            } elseif ($table !== null) {
                 return $item['isKey'] && ($item['table'] == $table || in_array($table, $item['table_List']));
             } else {
                 return $item['isKey'];

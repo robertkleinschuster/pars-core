@@ -52,6 +52,10 @@ class DataUpdater extends AbstractUpdater
             'Config_Code' => 'frontend.brand',
             'Config_Value' => 'PARS'
         ];
+        $data_Map[] = [
+            'Config_Code' => 'frontend.domain',
+            'Config_Value' => ''
+        ];
         return $this->saveDataMap('Config', 'Config_Code', $data_Map, true);
     }
 
@@ -300,6 +304,18 @@ class DataUpdater extends AbstractUpdater
             'CmsPageType_Active' => 1,
         ];
         return $this->saveDataMap('CmsPageType', 'CmsPageType_Code', $data_Map);
+    }
+
+
+    public function updateDataCmsPageLayout()
+    {
+        $data_Map = [];
+        $data_Map[] = [
+            'CmsPageLayout_Code' => 'default',
+            'CmsPageLayout_Template' => 'layout::default',
+            'CmsPageLayout_Active' => 1,
+        ];
+        return $this->saveDataMap('CmsPageLayout', 'CmsPageLayout_Code', $data_Map);
     }
 
     public function updateDataCmsParagraphState()
