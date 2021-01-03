@@ -56,6 +56,22 @@ class DataUpdater extends AbstractUpdater
             'Config_Code' => 'frontend.domain',
             'Config_Value' => ''
         ];
+        $data_Map[] = [
+            'Config_Code' => 'frontend.favicon',
+            'Config_Value' => ''
+        ];
+        $data_Map[] = [
+            'Config_Code' => 'frontend.charset',
+            'Config_Value' => 'utf-8'
+        ];
+        $data_Map[] = [
+            'Config_Code' => 'frontend.author',
+            'Config_Value' => ''
+        ];
+        $data_Map[] = [
+            'Config_Code' => 'frontend.keywords',
+            'Config_Value' => ''
+        ];
         return $this->saveDataMap('Config', 'Config_Code', $data_Map, true);
     }
 

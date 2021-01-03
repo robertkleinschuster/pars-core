@@ -223,6 +223,7 @@ class SchemaUpdater extends AbstractUpdater
         $this->addColumnToTable($table, new Varchar('ArticleTranslation_Code', 255));
         $this->addColumnToTable($table, new Varchar('ArticleTranslation_Name', 255));
         $this->addColumnToTable($table, new Varchar('ArticleTranslation_Title', 255, true));
+        $this->addColumnToTable($table, new Varchar('ArticleTranslation_Keywords', 255, true));
         $this->addColumnToTable($table, new Varchar('ArticleTranslation_Heading', 255, true));
         $this->addColumnToTable($table, new Varchar('ArticleTranslation_SubHeading', 255, true));
         $this->addColumnToTable($table, new Varchar('ArticleTranslation_Path', 255, true));
