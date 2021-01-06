@@ -7,6 +7,8 @@ use Mezzio\Authentication\AuthenticationInterface;
 use Mezzio\Authentication\Session\PhpSession;
 use Mezzio\Session\Cache\CacheSessionPersistence;
 use Mezzio\Session\SessionPersistenceInterface;
+use Pars\Core\Assets\AssetsMiddleware;
+use Pars\Core\Assets\AssetsMiddlewareFactory;
 use Pars\Core\Authentication\AuthenticationMiddleware;
 use Pars\Core\Authentication\AuthenticationMiddlewareFactory;
 use Pars\Core\Bundles\BundlesMiddleware;
@@ -29,7 +31,15 @@ class ConfigProvider
     public function __invoke()
     {
         return [
-            'dependencies' => $this->getDependencies()
+            'dependencies' => $this->getDependencies(),
+            'assets' => [
+                'development' => false,
+                'list' => []
+            ],
+            'bundles' => [
+                'development' => false,
+                'list' => []
+            ]
         ];
     }
 
@@ -49,6 +59,7 @@ class ConfigProvider
                 LocalizationMiddleware::class => LocalizationMiddlewareFactory::class,
                 BundlesMiddleware::class => BundlesMiddlewareFactory::class,
                 DeploymentMiddleware::class => DeploymentMiddlewareFactory::class,
+                AssetsMiddleware::class => AssetsMiddlewareFactory::class,
             ],
             'delegators' => [
                 ErrorHandler::class => [

@@ -18,13 +18,16 @@ class BundlesMiddleware implements MiddlewareInterface
      *
      * [
      *  1 => [
-     *      'type' => 'js',
+     * list => [
+     *  'type' => 'js',
      *       'output' => 'bundles/out/bundle.js'
      *        'sources' => [
      *              'bundles/js/jquery.js',
      *              'bundles/js/bootstrap.js',
      *              'bundles/js/my.js',
      *          ]
+     * ]
+     *
      * ];
      * ]
      * @var array
@@ -40,20 +43,29 @@ class BundlesMiddleware implements MiddlewareInterface
         $this->config = $config;
     }
 
-
+    /**
+     * @param ServerRequestInterface $request
+     * @param RequestHandlerInterface $handler
+     * @return ResponseInterface
+     */
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
         $documentRootPath = $request->getServerParams()['DOCUMENT_ROOT'];
         $documentRoot = new Filesystem(new Local($documentRootPath));
-        foreach ($this->config as $bundle) {
-            if (isset($bundle['output']) && !$documentRoot->has($bundle['output'])) {
-                if ($bundle['type'] == 'js') {
-                    $minify = new Minify\JS($bundle['sources']);
-                    $minify->minify($documentRootPath . DIRECTORY_SEPARATOR . $bundle['output']);
+        foreach ($this->config['list'] as $bundle) {
+            if (isset($bundle['output'])) {
+                if ($this->config['development']) {
+                    $documentRoot->delete($bundle['output']);
                 }
-                if ($bundle['type'] == 'css') {
-                    $minify = new Minify\CSS($bundle['sources']);
-                    $minify->minify($documentRootPath . DIRECTORY_SEPARATOR . $bundle['output']);
+                if (!$documentRoot->has($bundle['output'])) {
+                    if ($bundle['type'] == 'js') {
+                        $minify = new Minify\JS($bundle['sources']);
+                        $minify->minify($documentRootPath . DIRECTORY_SEPARATOR . $bundle['output']);
+                    }
+                    if ($bundle['type'] == 'css') {
+                        $minify = new Minify\CSS($bundle['sources']);
+                        $minify->minify($documentRootPath . DIRECTORY_SEPARATOR . $bundle['output']);
+                    }
                 }
             }
         }
