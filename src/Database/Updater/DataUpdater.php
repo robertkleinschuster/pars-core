@@ -325,6 +325,11 @@ class DataUpdater extends AbstractUpdater
             'CmsPageType_Active' => 1,
         ];
         $data_Map[] = [
+            'CmsPageType_Code' => 'columns',
+            'CmsPageType_Template' => 'cmspage::columns',
+            'CmsPageType_Active' => 1,
+        ];
+        $data_Map[] = [
             'CmsPageType_Code' => 'custom_1',
             'CmsPageType_Template' => 'cmspage::custom_1',
             'CmsPageType_Active' => 1,
@@ -357,8 +362,13 @@ class DataUpdater extends AbstractUpdater
     {
         $data_Map = [];
         $data_Map[] = [
-            'CmsPageLayout_Code' => 'default',
-            'CmsPageLayout_Template' => 'layout::default',
+            'CmsPageLayout_Code' => 'narrow',
+            'CmsPageLayout_Template' => 'layout::narrow',
+            'CmsPageLayout_Active' => 1,
+        ];
+        $data_Map[] = [
+            'CmsPageLayout_Code' => 'fluid',
+            'CmsPageLayout_Template' => 'layout::fluid',
             'CmsPageLayout_Active' => 1,
         ];
         return $this->saveDataMap('CmsPageLayout', 'CmsPageLayout_Code', $data_Map);
