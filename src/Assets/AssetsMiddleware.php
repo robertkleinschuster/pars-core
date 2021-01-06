@@ -49,7 +49,9 @@ class AssetsMiddleware implements MiddlewareInterface
         foreach ($this->config['list'] as $asset) {
             if (isset($asset['output'])) {
                 if ($this->config['development']) {
-                    $documentRoot->deleteDir($asset['output']);
+                    if ($documentRoot->has($asset['output'])) {
+                        $documentRoot->deleteDir($asset['output']);
+                    }
                 }
                 $sources = new Filesystem(new Local($asset['source']));
                 foreach ($sources->listContents() as $listContent) {

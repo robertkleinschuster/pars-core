@@ -55,7 +55,9 @@ class BundlesMiddleware implements MiddlewareInterface
         foreach ($this->config['list'] as $bundle) {
             if (isset($bundle['output'])) {
                 if ($this->config['development']) {
-                    $documentRoot->delete($bundle['output']);
+                    if ($documentRoot->has($bundle['output'])) {
+                        $documentRoot->delete($bundle['output']);
+                    }
                 }
                 if (!$documentRoot->has($bundle['output'])) {
                     if ($bundle['type'] == 'js') {
