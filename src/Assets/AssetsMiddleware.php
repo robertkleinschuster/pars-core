@@ -6,8 +6,6 @@ namespace Pars\Core\Assets;
 
 use League\Flysystem\Adapter\Local;
 use League\Flysystem\Filesystem;
-use MatthiasMullie\Minify;
-use Pars\Component\Base\Form\File;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
@@ -19,8 +17,9 @@ class AssetsMiddleware implements MiddlewareInterface
      *
      * [
      *  1 => [
-     *       'output' => 'assets'
-     *        'source' => 'mymodule/assets
+     *       'root' => 'assets'
+     *       'output' => 'assets/banner.png'
+     *       'source' => 'mymodule/assets/banner.png
      * ];
      * ]
      * @var array
@@ -50,18 +49,17 @@ class AssetsMiddleware implements MiddlewareInterface
             if (isset($asset['output'])) {
                 if ($this->config['development']) {
                     if ($documentRoot->has($asset['output'])) {
-                        $documentRoot->deleteDir($asset['output']);
+                        $documentRoot->delete($asset['output']);
                     }
                 }
-                $sources = new Filesystem(new Local($asset['source']));
-                foreach ($sources->listContents() as $listContent) {
-                    if (!$documentRoot->has($asset['output'] . DIRECTORY_SEPARATOR . $listContent['path'])) {
-                        $documentRoot->writeStream(
-                            $asset['output'] . DIRECTORY_SEPARATOR . $listContent['path'],
-                            $sources->readStream($listContent['path'])
-                        );
-                    }
-               }
+                $sources = new Filesystem(new Local($asset['root']));
+                if (!$documentRoot->has($asset['output'])) {
+                    $documentRoot->writeStream(
+                        $asset['output'],
+                        $sources->readStream($asset['source'])
+                    );
+                }
+
             }
         }
         return $handler->handle($request->withAttribute(AssetsMiddleware::class, $this->config));
