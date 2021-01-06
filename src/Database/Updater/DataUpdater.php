@@ -362,6 +362,11 @@ class DataUpdater extends AbstractUpdater
     {
         $data_Map = [];
         $data_Map[] = [
+            'CmsPageLayout_Code' => 'default',
+            'CmsPageLayout_Template' => 'layout::default',
+            'CmsPageLayout_Active' => 1,
+        ];
+        $data_Map[] = [
             'CmsPageLayout_Code' => 'narrow',
             'CmsPageLayout_Template' => 'layout::narrow',
             'CmsPageLayout_Active' => 1,
@@ -439,6 +444,11 @@ class DataUpdater extends AbstractUpdater
         $data_Map[] = [
             'CmsParagraphType_Code' => 'link',
             'CmsParagraphType_Template' => 'cmsparagraph::link',
+            'CmsParagraphType_Active' => 1,
+        ];
+        $data_Map[] = [
+            'CmsParagraphType_Code' => 'default',
+            'CmsParagraphType_Template' => 'cmsparagraph::default',
             'CmsParagraphType_Active' => 1,
         ];
         return $this->saveDataMap('CmsParagraphType', 'CmsParagraphType_Code', $data_Map);
