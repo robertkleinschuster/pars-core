@@ -60,11 +60,11 @@ class BundlesMiddleware implements MiddlewareInterface
                     }
                 }
                 if (!$documentRoot->has($bundle['output'])) {
-                    if ($bundle['type'] == 'js') {
+                    if ($bundle['type'] == 'js' && count($bundle['sources'])) {
                         $minify = new Minify\JS($bundle['sources']);
                         $minify->minify($documentRootPath . DIRECTORY_SEPARATOR . $bundle['output']);
                     }
-                    if ($bundle['type'] == 'css') {
+                    if ($bundle['type'] == 'css' && count($bundle['sources'])) {
                         $minify = new Minify\CSS($bundle['sources']);
                         $minify->minify($documentRootPath . DIRECTORY_SEPARATOR . $bundle['output']);
                     }
