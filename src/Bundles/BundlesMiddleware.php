@@ -52,6 +52,8 @@ class BundlesMiddleware implements MiddlewareInterface
     {
         $documentRootPath = $request->getServerParams()['DOCUMENT_ROOT'];
         $documentRoot = new Filesystem(new Local($documentRootPath));
+        $js = [];
+        $css = [];
         foreach ($this->config['list'] as $bundle) {
             if (isset($bundle['output'])) {
                 if ($this->config['development']) {
@@ -61,12 +63,16 @@ class BundlesMiddleware implements MiddlewareInterface
                 }
                 if (!$documentRoot->has($bundle['output'])) {
                     if ($bundle['type'] == 'js' && count($bundle['sources'])) {
-                        $minify = new Minify\JS($bundle['sources']);
+                        $sources = array_diff($bundle['sources'], $js);
+                        $minify = new Minify\JS($sources);
                         $minify->minify($documentRootPath . DIRECTORY_SEPARATOR . $bundle['output']);
+                        $js = array_merge($js, $sources);
                     }
                     if ($bundle['type'] == 'css' && count($bundle['sources'])) {
-                        $minify = new Minify\CSS($bundle['sources']);
+                        $sources = array_diff($bundle['sources'], $css);
+                        $minify = new Minify\CSS($sources);
                         $minify->minify($documentRootPath . DIRECTORY_SEPARATOR . $bundle['output']);
+                        #$css = array_merge($sources, $css);
                     }
                 }
             }
