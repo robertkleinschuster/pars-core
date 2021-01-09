@@ -61,6 +61,10 @@ class DataUpdater extends AbstractUpdater
             'Config_Value' => ''
         ];
         $data_Map[] = [
+            'Config_Code' => 'frontend.color',
+            'Config_Value' => '#FFFFFF'
+        ];
+        $data_Map[] = [
             'Config_Code' => 'frontend.charset',
             'Config_Value' => 'utf-8'
         ];
@@ -406,12 +410,6 @@ class DataUpdater extends AbstractUpdater
             'FileType_Code' => 'png',
             'FileType_Mime' => 'image/png',
             'FileType_Name' => 'PNG',
-            'FileType_Active' => true,
-        ];
-        $data_Map[] = [
-            'FileType_Code' => 'ico',
-            'FileType_Mime' => 'image/x-icon',
-            'FileType_Name' => 'Icon',
             'FileType_Active' => true,
         ];
         return $this->saveDataMap('FileType', 'FileType_Code', $data_Map);
