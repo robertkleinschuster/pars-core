@@ -34,11 +34,11 @@ class ConfigProvider
         return [
             'dependencies' => $this->getDependencies(),
             'assets' => [
-                'development' => true,
+                'development' => false,
                 'list' => []
             ],
             'bundles' => [
-                'development' => true,
+                'development' => false,
                 'list' => []
             ]
         ];
