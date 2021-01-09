@@ -23,6 +23,7 @@ use Pars\Core\Logging\LoggingErrorListenerDelegatorFactory;
 use Pars\Core\Logging\LoggingMiddleware;
 use Pars\Core\Logging\LoggingMiddlewareFactory;
 use Pars\Core\Session\Cache\FilesystemCachePoolFactory;
+use Pars\Core\Session\Cache\MemcachedCachePoolFactory;
 use Pars\Core\Translation\TranslatorMiddleware;
 use Pars\Core\Translation\TranslatorMiddlewareFactory;
 
@@ -33,11 +34,11 @@ class ConfigProvider
         return [
             'dependencies' => $this->getDependencies(),
             'assets' => [
-                'development' => false,
+                'development' => true,
                 'list' => []
             ],
             'bundles' => [
-                'development' => false,
+                'development' => true,
                 'list' => []
             ]
         ];
