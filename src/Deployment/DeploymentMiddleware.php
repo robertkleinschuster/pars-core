@@ -4,7 +4,12 @@
 namespace Pars\Core\Deployment;
 
 
+use Laminas\Db\Adapter\AdapterInterface;
 use Laminas\Diactoros\Response\RedirectResponse;
+use Laminas\I18n\Translator\TranslatorInterface;
+use Pars\Core\Database\DatabaseMiddleware;
+use Pars\Core\Translation\TranslatorMiddleware;
+use Pars\Model\Localization\Locale\LocaleBeanFinder;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
@@ -25,21 +30,116 @@ class DeploymentMiddleware implements MiddlewareInterface
 
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
-        if (isset($request->getQueryParams()['deploy'])) {
-            if (file_exists($_SERVER['DOCUMENT_ROOT'] . '/../data/cache/admin-config-cache.php')) {
-                unlink($_SERVER['DOCUMENT_ROOT'] . '/../data/cache/admin-config-cache.php');
+        if (isset($request->getQueryParams()['clearcache']) && $request->getQueryParams()['clearcache'] == 'pars') {
+            if (file_exists($this->config['config_cache_path'])) {
+                unlink($this->config['config_cache_path']);
             }
-            if (file_exists($_SERVER['DOCUMENT_ROOT'] . '/../data/cache/frontend-config-cache.php')) {
-                unlink($_SERVER['DOCUMENT_ROOT'] . '/../data/cache/frontend-config-cache.php');
-            }
-            if (isset($this->config['bundles'])) {
-                foreach (array_column($this->config['bundles'], 'output') as $item) {
-                    if (file_exists($_SERVER['DOCUMENT_ROOT'] . DIRECTORY_SEPARATOR . $item)) {
-                        unlink($_SERVER['DOCUMENT_ROOT'] . DIRECTORY_SEPARATOR . $item);
+            $redirect = false;
+            if (isset($this->config['bundles']['list'])) {
+                foreach ($this->config['bundles']['list'] as $item) {
+                    if (isset($item['output'])) {
+                        if (file_exists($_SERVER['DOCUMENT_ROOT'] . DIRECTORY_SEPARATOR . $item['output'])) {
+                            unlink($_SERVER['DOCUMENT_ROOT'] . DIRECTORY_SEPARATOR . $item['output']);
+                        }
                     }
                 }
             }
-            return new RedirectResponse('/');
+
+            if (isset($this->config['assets']['list'])) {
+                foreach ($this->config['assets']['list'] as $item) {
+                    if (isset($item['output'])) {
+                        if (file_exists($_SERVER['DOCUMENT_ROOT'] . DIRECTORY_SEPARATOR . $item['output'])) {
+                            unlink($_SERVER['DOCUMENT_ROOT'] . DIRECTORY_SEPARATOR . $item['output']);
+                        }
+                    }
+                }
+            }
+
+            $translator = $request->getAttribute(TranslatorMiddleware::TRANSLATOR_ATTRIBUTE);
+            $adapter = $request->getAttribute(DatabaseMiddleware::ADAPTER_ATTRIBUTE);
+            $localeList = null;
+            if ($adapter instanceof AdapterInterface) {
+                $localeFinder = new LocaleBeanFinder($adapter);
+                $localeFinder->setLocale_Active(true);
+                $localeList = $localeFinder->getBeanList();
+            }
+            if ($translator instanceof TranslatorInterface) {
+                $redirect = true;
+                if (isset($this->config['translator']['translation_file_patterns'])
+                    && is_array($this->config['translator']['translation_file_patterns'])) {
+                    foreach ($this->config['translator']['translation_file_patterns'] as $translation_file_pattern) {
+                        if (isset($translation_file_pattern['text_domain'])) {
+                            if ($localeList !== null) {
+                                foreach ($localeList as $locale) {
+                                    $translator->clearCache(
+                                        $translation_file_pattern['text_domain'],
+                                        $locale->get('Locale_Code')
+                                    );
+                                }
+                            } elseif (isset($this->config['translator']['locale'])
+                                && is_array($this->config['translator']['locale'])
+                            ) {
+                                foreach ($this->config['translator']['locale'] as $locale) {
+                                    $translator->clearCache($translation_file_pattern['text_domain'], $locale);
+                                }
+                            }
+                        }
+                    }
+                }
+
+                if (isset($this->config['translator']['translation_files'])
+                    && is_array($this->config['translator']['translation_files'])
+                ) {
+                    foreach ($this->config['translator']['translation_files'] as $translation_file) {
+                        if (isset($translation_file['text_domain'])) {
+                            if ($localeList !== null) {
+                                foreach ($localeList as $locale) {
+                                    $translator->clearCache(
+                                        $translation_file['text_domain'],
+                                        $locale->get('Locale_Code')
+                                    );
+                                }
+                            } elseif (isset($this->config['translator']['locale'])
+                                && is_array($this->config['translator']['locale'])
+                            ) {
+                                foreach ($this->config['translator']['locale'] as $locale) {
+                                    $translator->clearCache($translation_file['text_domain'], $locale);
+                                }
+                            }
+                        }
+                    }
+                }
+
+                if (isset($this->config['translator']['remote_translation'])
+                    && is_array($this->config['translator']['remote_translation'])
+                ) {
+                    foreach ($this->config['translator']['remote_translation'] as $item) {
+                        if (isset($item['text_domain'])) {
+                            if ($localeList !== null) {
+                                foreach ($localeList as $locale) {
+                                    $translator->clearCache(
+                                        $item['text_domain'],
+                                        $locale->get('Locale_Code')
+                                    );
+                                }
+                            } elseif (isset($this->config['translator']['locale'])
+                                && is_array($this->config['translator']['locale'])
+                            ) {
+                                foreach ($this->config['translator']['locale'] as $locale) {
+                                    $translator->clearCache($item['text_domain'], $locale);
+                                }
+                            }
+                        }
+                    }
+                }
+
+            }
+            if ($redirect) {
+                $query = str_replace('&clearcache=pars', '', $request->getUri()->getQuery());
+                $query = str_replace('?clearcache=pars', '', $query);
+                $query = str_replace('clearcache=pars', '', $query);
+                return new RedirectResponse($request->getUri()->withQuery($query));
+            }
         }
         return $handler->handle($request);
     }

@@ -17,6 +17,8 @@ use Pars\Core\Database\DatabaseMiddleware;
 use Pars\Core\Database\DatabaseMiddlewareFactory;
 use Pars\Core\Deployment\DeploymentMiddleware;
 use Pars\Core\Deployment\DeploymentMiddlewareFactory;
+use Pars\Core\Image\ImageMiddleware;
+use Pars\Core\Image\ImageMiddlewareFactory;
 use Pars\Core\Localization\LocalizationMiddleware;
 use Pars\Core\Localization\LocalizationMiddlewareFactory;
 use Pars\Core\Logging\LoggingErrorListenerDelegatorFactory;
@@ -40,6 +42,10 @@ class ConfigProvider
             'bundles' => [
                 'development' => false,
                 'list' => []
+            ],
+            'image' => [
+                'source' => '/u',
+                'cache' => '/c',
             ]
         ];
     }
@@ -61,6 +67,7 @@ class ConfigProvider
                 BundlesMiddleware::class => BundlesMiddlewareFactory::class,
                 DeploymentMiddleware::class => DeploymentMiddlewareFactory::class,
                 AssetsMiddleware::class => AssetsMiddlewareFactory::class,
+                ImageMiddleware::class => ImageMiddlewareFactory::class
             ],
             'delegators' => [
                 ErrorHandler::class => [
