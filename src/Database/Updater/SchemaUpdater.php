@@ -3,8 +3,10 @@
 namespace Pars\Core\Database\Updater;
 
 use Laminas\Db\Sql\Ddl\Column\Boolean;
+use Laminas\Db\Sql\Ddl\Column\Date;
 use Laminas\Db\Sql\Ddl\Column\Integer;
 use Laminas\Db\Sql\Ddl\Column\Text;
+use Laminas\Db\Sql\Ddl\Column\Timestamp;
 use Laminas\Db\Sql\Ddl\Column\Varchar;
 use Laminas\Db\Sql\Ddl\Constraint\ForeignKey;
 use Laminas\Db\Sql\Ddl\Constraint\PrimaryKey;
@@ -13,8 +15,6 @@ use Laminas\Db\Sql\Ddl\Index\Index;
 
 class SchemaUpdater extends AbstractUpdater
 {
-
-
     public function getCode(): string
     {
         return 'schema';
@@ -211,6 +211,21 @@ class SchemaUpdater extends AbstractUpdater
         $this->addColumnToTable($table, new Text('Article_Data', 65535, true));
         $this->addConstraintToTable($table, new PrimaryKey('Article_ID'));
         $this->addConstraintToTable($table, new UniqueKey('Article_Code'));
+        $this->addDefaultColumnsToTable($table);
+        return $this->query($table);
+    }
+
+    public function updateTableArticleData()
+    {
+        $table = $this->getTableStatement('ArticleData');
+        $this->addColumnToTable($table, new Integer('ArticleData_ID'))
+            ->setOption('AUTO_INCREMENT', true);
+        $this->addColumnToTable($table, new Integer('Article_ID'));
+        $this->addColumnToTable($table, new Text('ArticleData_Data', 65535, true));
+        $this->addColumnToTable($table, new Boolean('ArticleData_Active', true, 1));
+        $this->addColumnToTable($table, new Timestamp('ArticleData_Timestamp', true));
+        $this->addConstraintToTable($table, new PrimaryKey('ArticleData_ID'));
+        $this->addConstraintToTable($table, new ForeignKey(null, 'Article_ID', 'Article', 'Article_ID'));
         $this->addDefaultColumnsToTable($table);
         return $this->query($table);
     }
