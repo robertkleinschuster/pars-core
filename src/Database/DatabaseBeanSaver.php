@@ -54,7 +54,7 @@ class DatabaseBeanSaver extends AbstractBeanSaver implements AdapterAwareInterfa
         $tableList = $this->getTable_List();
         $tableList = array_reverse($tableList);
         foreach ($tableList as $table) {
-            $deletedata = $this->getDataFromBean($bean, $table);
+            $deletedata = $this->getDataFromBean($bean, $table, true, true);
             // ensure only a single row is deleted
             if (count($deletedata) && $this->count($table, $deletedata) === 1) {
                 $sql = new Sql($this->adapter);
@@ -149,14 +149,16 @@ class DatabaseBeanSaver extends AbstractBeanSaver implements AdapterAwareInterfa
      * @return array
      * @throws \Exception
      */
-    protected function getDataFromBean(BeanInterface $bean, string $table = null, bool $includeKeys = true): array
+    protected function getDataFromBean(BeanInterface $bean, string $table = null, bool $includeKeys = true, bool $onlyKeys = false): array
     {
         $converter = new DatabaseBeanConverter();
         $data = [];
-        $fieldList = $this->getField_List($table);
-        foreach ($fieldList as $field) {
-            if ($bean->initialized($field)) {
-                $data[$this->getColumn($field)] = $converter->convert($bean)->get($field);
+        if (!$onlyKeys) {
+            $fieldList = $this->getField_List($table);
+            foreach ($fieldList as $field) {
+                if ($bean->initialized($field)) {
+                    $data[$this->getColumn($field)] = $converter->convert($bean)->get($field);
+                }
             }
         }
         if ($includeKeys) {

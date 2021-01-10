@@ -14,11 +14,21 @@ class DataUpdater extends AbstractUpdater
 
     public function updateDataConfig()
     {
+        if (file_exists('data/image_signature')) {
+            $imageSignature = file_get_contents('data/image_signature');
+        } else {
+            $imageSignature = md5(random_bytes(5));
+            file_put_contents('data/image_signature', $imageSignature);
+        }
         $i = 1;
         $data_Map = [];
         $data_Map[] = [
             'Config_Code' => 'asset.domain',
             'Config_Value' => ''
+        ];
+        $data_Map[] = [
+            'Config_Code' => 'asset.key',
+            'Config_Value' => $imageSignature
         ];
         $data_Map[] = [
             'Config_Code' => 'locale.default',

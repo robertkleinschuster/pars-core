@@ -42,7 +42,11 @@ class ImageMiddleware implements MiddlewareInterface
             }
             $path = str_replace($source, '', $_GET['file']);
             try {
-                \League\Glide\Signatures\SignatureFactory::create('pars-sign')->validateRequest('/img', $_GET);
+                $key = '';
+                if (file_exists('data/image_signature')) {
+                    $key = file_get_contents('data/image_signature');
+                }
+                \League\Glide\Signatures\SignatureFactory::create($key)->validateRequest('/img', $_GET);
             } catch (\League\Glide\Signatures\SignatureException $e) {
                 return new \Laminas\Diactoros\Response\HtmlResponse($e->getMessage());
             }
