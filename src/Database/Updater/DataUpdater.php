@@ -24,67 +24,83 @@ class DataUpdater extends AbstractUpdater
         $data_Map = [];
         $data_Map[] = [
             'Config_Code' => 'asset.domain',
-            'Config_Value' => ''
+            'Config_Value' => '',
+            'Config_Locked' => 0
         ];
         $data_Map[] = [
             'Config_Code' => 'asset.key',
-            'Config_Value' => $imageSignature
+            'Config_Value' => $imageSignature,
+            'Config_Locked' => 1
         ];
         $data_Map[] = [
             'Config_Code' => 'locale.default',
-            'Config_Value' => 'de_AT'
+            'Config_Value' => 'de_AT',
+            'Config_Locked' => 0
         ];
         $data_Map[] = [
             'Config_Code' => 'admin.timezone',
-            'Config_Value' => 'UTC'
+            'Config_Value' => 'UTC',
+            'Config_Locked' => 0
         ];
         $data_Map[] = [
             'Config_Code' => 'admin.title',
-            'Config_Value' => 'PARS Admin'
+            'Config_Value' => 'PARS Admin',
+            'Config_Locked' => 0
         ];
         $data_Map[] = [
             'Config_Code' => 'admin.author',
-            'Config_Value' => 'PARS'
+            'Config_Value' => 'PARS',
+            'Config_Locked' => 0
         ];
         $data_Map[] = [
             'Config_Code' => 'admin.favicon',
-            'Config_Value' => '/favicon.ico'
+            'Config_Value' => '/favicon.ico',
+            'Config_Locked' => 0
         ];
         $data_Map[] = [
             'Config_Code' => 'admin.description',
-            'Config_Value' => 'PARS Admin'
+            'Config_Value' => 'PARS Admin',
+            'Config_Locked' => 0
         ];
         $data_Map[] = [
             'Config_Code' => 'admin.charset',
-            'Config_Value' => 'utf-8'
+            'Config_Value' => 'utf-8',
+            'Config_Locked' => 0
         ];
         $data_Map[] = [
             'Config_Code' => 'frontend.brand',
-            'Config_Value' => 'PARS'
+            'Config_Value' => 'PARS',
+            'Config_Locked' => 0
         ];
         $data_Map[] = [
             'Config_Code' => 'frontend.domain',
-            'Config_Value' => ''
+            'Config_Value' => '',
+            'Config_Locked' => 0
         ];
         $data_Map[] = [
             'Config_Code' => 'frontend.favicon',
-            'Config_Value' => ''
+            'Config_Value' => '',
+            'Config_Locked' => 0
         ];
         $data_Map[] = [
             'Config_Code' => 'frontend.color',
-            'Config_Value' => '#FFFFFF'
+            'Config_Value' => '#FFFFFF',
+            'Config_Locked' => 0
         ];
         $data_Map[] = [
             'Config_Code' => 'frontend.charset',
-            'Config_Value' => 'utf-8'
+            'Config_Value' => 'utf-8',
+            'Config_Locked' => 0
         ];
         $data_Map[] = [
             'Config_Code' => 'frontend.author',
-            'Config_Value' => ''
+            'Config_Value' => '',
+            'Config_Locked' => 0
         ];
         $data_Map[] = [
             'Config_Code' => 'frontend.keywords',
-            'Config_Value' => ''
+            'Config_Value' => '',
+            'Config_Locked' => 0
         ];
         return $this->saveDataMap('Config', 'Config_Code', $data_Map, true);
     }

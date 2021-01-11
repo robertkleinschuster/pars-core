@@ -39,6 +39,7 @@ class SchemaUpdater extends AbstractUpdater
         $table = $this->getTableStatement('Config');
         $this->addColumnToTable($table, new Varchar('Config_Code', 255));
         $this->addColumnToTable($table, new Varchar('Config_Value', 255, true));
+        $this->addColumnToTable($table, new Boolean('Config_Locked', true, 0));
         $this->addColumnToTable($table, new Text('Config_Data', 65535, true));
         $this->addConstraintToTable($table, new PrimaryKey('Config_Code'));
         $this->addDefaultColumnsToTable($table);
