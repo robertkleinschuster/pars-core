@@ -411,6 +411,7 @@ class SchemaUpdater extends AbstractUpdater
             ->setOption('AUTO_INCREMENT', true);
         $this->addColumnToTable($table, new Integer('CmsPage_ID'));
         $this->addColumnToTable($table, new Integer('Article_ID'));
+        $this->addColumnToTable($table, new Timestamp('CmsPost_PublishTimestamp'));
         $this->addColumnToTable($table, new Varchar('CmsPostState_Code', 255));
         $this->addColumnToTable($table, new Varchar('CmsPostType_Code', 255));
         $this->addConstraintToTable($table, new ForeignKey(null, 'CmsPostState_Code', 'CmsPostState', 'CmsPostState_Code'));

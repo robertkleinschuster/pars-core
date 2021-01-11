@@ -146,11 +146,16 @@ class DatabaseBeanLoader extends AbstractBeanLoader implements AdapterAwareInter
      * @return DatabaseBeanLoader
      * @throws \Exception
      */
-    public function filterValue(string $field, $value, $logic = Predicate::OP_AND)
+    public function filterValue($field, $value = null, $logic = Predicate::OP_AND)
     {
-        if ($this->hasField($field)) {
-            $this->where_Map[$logic]["{$this->getTable($field)}.{$this->getColumn($field)}"] = $value;
+        if ($field instanceof Predicate) {
+            $this->where_Map[$logic][] = $field;
+        } else {
+            if ($this->hasField($field)) {
+                $this->where_Map[$logic]["{$this->getTable($field)}.{$this->getColumn($field)}"] = $value;
+            }
         }
+
         return $this;
     }
 

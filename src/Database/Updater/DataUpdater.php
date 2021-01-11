@@ -42,6 +42,7 @@ class DataUpdater extends AbstractUpdater
             'Config_Value' => 'UTC',
             'Config_Locked' => 0
         ];
+
         $data_Map[] = [
             'Config_Code' => 'admin.title',
             'Config_Value' => 'PARS Admin',
@@ -100,6 +101,11 @@ class DataUpdater extends AbstractUpdater
         $data_Map[] = [
             'Config_Code' => 'frontend.keywords',
             'Config_Value' => '',
+            'Config_Locked' => 0
+        ];
+        $data_Map[] = [
+            'Config_Code' => 'frontend.timezone',
+            'Config_Value' => 'UTC',
             'Config_Locked' => 0
         ];
         return $this->saveDataMap('Config', 'Config_Code', $data_Map, true);
