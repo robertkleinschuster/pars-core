@@ -355,6 +355,11 @@ class DataUpdater extends AbstractUpdater
             'CmsPageType_Active' => 1,
         ];
         $data_Map[] = [
+            'CmsPageType_Code' => 'tiles',
+            'CmsPageType_Template' => 'cmspage::tiles',
+            'CmsPageType_Active' => 1,
+        ];
+        $data_Map[] = [
             'CmsPageType_Code' => 'columns',
             'CmsPageType_Template' => 'cmspage::columns',
             'CmsPageType_Active' => 1,
