@@ -55,6 +55,12 @@ class DeploymentMiddleware implements MiddlewareInterface
                 }
             }
 
+            if (isset($this->config['image']['cache'])) {
+                if (is_dir($_SERVER['DOCUMENT_ROOT'] . DIRECTORY_SEPARATOR . $this->config['image']['cache'])) {
+                    $this->delTree($_SERVER['DOCUMENT_ROOT'] . DIRECTORY_SEPARATOR .$this->config['image']['cache']);
+                }
+            }
+
             $translator = $request->getAttribute(TranslatorMiddleware::TRANSLATOR_ATTRIBUTE);
             $adapter = $request->getAttribute(DatabaseMiddleware::ADAPTER_ATTRIBUTE);
             $localeList = null;
@@ -144,5 +150,11 @@ class DeploymentMiddleware implements MiddlewareInterface
         return $handler->handle($request);
     }
 
-
+    public function delTree($dir) {
+        $files = array_diff(scandir($dir), array('.','..'));
+        foreach ($files as $file) {
+            (is_dir("$dir/$file")) ? $this->delTree("$dir/$file") : unlink("$dir/$file");
+        }
+        return rmdir($dir);
+    }
 }
