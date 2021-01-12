@@ -4,6 +4,9 @@
 namespace Pars\Core\Image;
 
 
+use Laminas\Db\Adapter\AdapterInterface;
+use Pars\Core\Database\DatabaseMiddleware;
+use Pars\Model\Config\ConfigBeanFinder;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
@@ -14,14 +17,16 @@ class ImageMiddleware implements MiddlewareInterface
     public const SERVER_ATTRIBUTE = 'image_server';
 
     protected array $config;
+    protected $dbAdapter = null;
 
     /**
      * ImageMiddleware constructor.
      * @param array $config
      */
-    public function __construct(array $config)
+    public function __construct(array $config, $dbAdapter)
     {
         $this->config = $config;
+        $this->dbAdapter = $dbAdapter;
     }
 
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
@@ -43,11 +48,23 @@ class ImageMiddleware implements MiddlewareInterface
             $path = str_replace($source, '', $_GET['file']);
             try {
                 $key = '';
+
                 if (file_exists('data/image_signature')) {
                     $key = file_get_contents('data/image_signature');
                 }
+                if (empty($key) && $this->dbAdapter instanceof AdapterInterface) {
+                    try {
+                        $finder = new ConfigBeanFinder($this->dbAdapter);
+                        $finder->setConfig_Code('asset.key');
+                        $key = $finder->getBean()->Config_Value;
+                        file_put_contents('data/image_signature', $key);
+                    } catch (\Throwable $exception) {}
+                }
                 \League\Glide\Signatures\SignatureFactory::create($key)->validateRequest('/img', $_GET);
             } catch (\League\Glide\Signatures\SignatureException $e) {
+                if (file_exists('data/image_signature')) {
+                    unlink('data/image_signature');
+                }
                 return new \Laminas\Diactoros\Response\HtmlResponse($e->getMessage());
             }
             return $server->getImageResponse($path, $_GET);

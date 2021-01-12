@@ -60,6 +60,14 @@ class BundlesMiddleware implements MiddlewareInterface
                     if ($documentRoot->has($bundle['output'])) {
                         $documentRoot->delete($bundle['output']);
                     }
+                    if (isset($bundle['unlink'])) {
+                        $glob = glob($_SERVER['DOCUMENT_ROOT'] . DIRECTORY_SEPARATOR . $bundle['unlink']);
+                       if (is_array($glob)) {
+                           foreach ($glob as $file) {
+                               unlink($file);
+                           }
+                       }
+                    }
                 }
                 if (!$documentRoot->has($bundle['output'])) {
                     if ($bundle['type'] == 'js' && count($bundle['sources'])) {
