@@ -56,7 +56,7 @@ class BundlesMiddleware implements MiddlewareInterface
         $css = [];
         foreach ($this->config['list'] as $bundle) {
             if (isset($bundle['output'])) {
-                if ($this->config['development']) {
+                if (isset($this->config['development']) && $this->config['development'] === true) {
                     if ($documentRoot->has($bundle['output'])) {
                         $documentRoot->delete($bundle['output']);
                     }
