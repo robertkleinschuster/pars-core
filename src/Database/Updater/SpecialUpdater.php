@@ -37,7 +37,11 @@ class SpecialUpdater extends AbstractUpdater
            $list->push($bean);
            $processor->setBeanList($list);
            $processor->save();
+            foreach ($output as $item) {
+                $this->getValidationHelper()->addError('updateVersion', $item);
+           }
         }
+
         return implode('<br>', $output);
     }
 
