@@ -18,6 +18,19 @@ class SpecialUpdater extends AbstractUpdater
         return 'special';
     }
 
+    public function updateVersion()
+    {
+        $output = [];
+        exec('pwd', $output);
+        exec('git fetch --dry-run', $output);
+        if ($this->getMode() == self::MODE_EXECUTE) {
+           exec('git pull', $output);
+           exec('composer update', $output);
+        }
+        return implode('<br>', $output);
+    }
+
+
     public function updateAdminPermissions()
     {
         $roleFinder = new RoleBeanFinder($this->adapter);
