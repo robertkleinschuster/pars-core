@@ -5,7 +5,6 @@ namespace Pars\Core\Image;
 
 
 use Laminas\Db\Adapter\AdapterInterface;
-use Pars\Core\Database\DatabaseMiddleware;
 use Pars\Model\Config\ConfigBeanFinder;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
