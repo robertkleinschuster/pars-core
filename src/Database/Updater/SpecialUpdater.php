@@ -27,6 +27,7 @@ class SpecialUpdater extends AbstractUpdater
            exec('git pull', $output);
            exec('composer update', $output);
            $processor = new ConfigBeanProcessor($this->adapter);
+           $processor->force = true;
            $finder = new ConfigBeanFinder($this->adapter);
            $list = $finder->getBeanFactory()->getEmptyBeanList();
            $bean = $finder->getBeanFactory()->getEmptyBean([]);
