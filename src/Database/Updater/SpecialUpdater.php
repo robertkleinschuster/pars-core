@@ -26,6 +26,16 @@ class SpecialUpdater extends AbstractUpdater
         if ($this->getMode() == self::MODE_EXECUTE) {
            exec('git pull', $output);
            exec('composer update', $output);
+           $processor = new ConfigBeanProcessor($this->adapter);
+           $finder = new ConfigBeanFinder($this->adapter);
+           $list = $finder->getBeanFactory()->getEmptyBeanList();
+           $bean = $finder->getBeanFactory()->getEmptyBean([]);
+           $bean->set('Config_Code', 'frontend.update');
+           $bean->set('Config_Value', 'true');
+           $bean->set('Config_Locked', true);
+           $list->push($bean);
+           $processor->setBeanList($list);
+           $processor->save();
         }
         return implode('<br>', $output);
     }

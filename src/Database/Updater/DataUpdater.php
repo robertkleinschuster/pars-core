@@ -79,6 +79,11 @@ class DataUpdater extends AbstractUpdater
             'Config_Locked' => 0
         ];
         $data_Map[] = [
+            'Config_Code' => 'frontend.update',
+            'Config_Value' => 'true',
+            'Config_Locked' => 1
+        ];
+        $data_Map[] = [
             'Config_Code' => 'frontend.favicon',
             'Config_Value' => '',
             'Config_Locked' => 0
