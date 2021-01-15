@@ -5,6 +5,7 @@ namespace Pars\Core\Image;
 
 
 use Laminas\Db\Adapter\AdapterInterface;
+use Pars\Core\Cache\ParsCache;
 use Pars\Model\Config\ConfigBeanFinder;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -47,15 +48,18 @@ class ImageMiddleware implements MiddlewareInterface
             $path = str_replace($source, '', $_GET['file']);
             try {
                 $key = '';
-
-                if (file_exists('data/image_signature')) {
+                $cache = new ParsCache('image');
+                $key = $cache->get('key', '');
+                if ($key == '' && file_exists('data/image_signature')) {
                     $key = file_get_contents('data/image_signature');
+                    $cache->set('key', $key);
                 }
                 if (empty($key) && $this->dbAdapter instanceof AdapterInterface) {
                     try {
                         $finder = new ConfigBeanFinder($this->dbAdapter);
                         $finder->setConfig_Code('asset.key');
                         $key = $finder->getBean()->Config_Value;
+                        $cache->set('key', $key);
                         file_put_contents('data/image_signature', $key);
                     } catch (\Throwable $exception) {}
                 }
@@ -64,6 +68,7 @@ class ImageMiddleware implements MiddlewareInterface
                 if (file_exists('data/image_signature')) {
                     unlink('data/image_signature');
                 }
+                $cache->clear();
                 return new \Laminas\Diactoros\Response\HtmlResponse($e->getMessage());
             }
             return $server->getImageResponse($path, $_GET);
