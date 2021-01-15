@@ -43,9 +43,11 @@ class DeploymentMiddleware implements MiddlewareInterface
                 $dir = $this->config['mezzio-session-cache']['filesystem_folder'];
                 $files = array_diff(scandir($dir), array('.','..'));
                 foreach ($files as $file) {
-                    $data = require "$dir/$file";
-                    if (!isset($data[3]) || $data[3] < time()) {
-                        unlink("$dir/$file");
+                    if (is_file("$dir/$file")) {
+                        $data = require "$dir/$file";
+                        if (!isset($data[3]) || $data[3] < time()) {
+                            unlink("$dir/$file");
+                        }
                     }
                 }
             }
