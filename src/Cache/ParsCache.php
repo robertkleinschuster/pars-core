@@ -26,16 +26,22 @@ class ParsCache extends AbstractCachePool
             mkdir($basePath);
         }
         $this->file = $basePath . $file . '.php';
-        $agg = new ConfigAggregator([], $this->file);
-        $this->cache = $agg->getMergedConfig();
     }
 
+    protected function loadFile()
+    {
+        if ($this->cache == null) {
+            $agg = new ConfigAggregator([], $this->file);
+            $this->cache = $agg->getMergedConfig();
+        }
+    }
 
     /**
      * {@inheritdoc}
      */
     protected function fetchObjectFromCache($key)
     {
+        $this->loadFile();
         if (!$this->cacheIsset($key)) {
             return [false, null, [], null];
         }
@@ -91,6 +97,7 @@ class ParsCache extends AbstractCachePool
      */
     protected function getList($name)
     {
+        $this->loadFile();
         if (!isset($this->cache[$name])) {
             $this->cache[$name] = [];
         }
@@ -113,6 +120,7 @@ class ParsCache extends AbstractCachePool
      */
     protected function appendListItem($name, $key)
     {
+        $this->loadFile();
         $this->cache[$name][] = $key;
         $this->saveToFile();
     }
@@ -171,6 +179,7 @@ class ParsCache extends AbstractCachePool
      */
     private function cacheIsset($key)
     {
+        $this->loadFile();
         return isset($this->cache[$key]);
     }
 
