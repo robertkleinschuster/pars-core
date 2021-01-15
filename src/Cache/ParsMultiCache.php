@@ -162,6 +162,9 @@ class ParsMultiCache extends AbstractCachePool
             ],
             $this->folder . DIRECTORY_SEPARATOR . $key . '.php'
         );
+        if (function_exists('opcache_compile_file')) {
+            opcache_compile_file($this->folder . DIRECTORY_SEPARATOR . $key . '.php');
+        }
     }
 
     private function loadFromFile(string $key)

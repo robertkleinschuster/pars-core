@@ -31,6 +31,10 @@ class DeploymentMiddleware implements MiddlewareInterface
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
         if (isset($request->getQueryParams()['clearcache']) && $request->getQueryParams()['clearcache'] == 'pars') {
+            if (function_exists('opcache_reset')) {
+                opcache_reset();
+            }
+
             if (file_exists($this->config['config_cache_path'])) {
                 unlink($this->config['config_cache_path']);
             }

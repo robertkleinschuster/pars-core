@@ -132,6 +132,17 @@ class ParsCache extends AbstractCachePool
         }
     }
 
+    /**
+     * {@inheritdoc}
+     */
+    public function set($key, $value, $ttl = null)
+    {
+        $item = $this->getItem($key);
+        $item->set($value);
+        $item->expiresAfter($ttl);
+
+        return $this->saveDeferred($item);
+    }
 
     private function saveToFile()
     {
@@ -146,6 +157,9 @@ class ParsCache extends AbstractCachePool
             ],
             $this->file
         );
+        if (function_exists('opcache_compile_file')) {
+            opcache_compile_file($this->file);
+        }
     }
 
     /**
