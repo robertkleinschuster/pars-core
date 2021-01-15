@@ -38,10 +38,11 @@ class ImageMiddleware implements MiddlewareInterface
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
         $source = $this->config['source'] ?? '/i';
-        $cache = $this->config['cache'] ?? '/c';
+        $cacheDir = $this->config['cache'] ?? '/c';
         $server = \League\Glide\ServerFactory::create([
+            'cache_with_file_extensions' => true,
             'source' => $_SERVER['DOCUMENT_ROOT'] . $source,
-            'cache' => $_SERVER['DOCUMENT_ROOT'] . $cache,
+            'cache' => $_SERVER['DOCUMENT_ROOT'] . $cacheDir,
             'max_image_size' => 2000 * 2000,
             'response' => new \League\Glide\Responses\PsrResponseFactory(new \Laminas\Diactoros\Response(), function ($stream) {
                 return new \Laminas\Diactoros\Stream($stream);
