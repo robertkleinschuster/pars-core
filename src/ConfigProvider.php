@@ -24,8 +24,7 @@ use Pars\Core\Localization\LocalizationMiddlewareFactory;
 use Pars\Core\Logging\LoggingErrorListenerDelegatorFactory;
 use Pars\Core\Logging\LoggingMiddleware;
 use Pars\Core\Logging\LoggingMiddlewareFactory;
-use Pars\Core\Session\Cache\FilesystemCachePoolFactory;
-use Pars\Core\Session\Cache\MemcachedCachePoolFactory;
+use Pars\Core\Session\Cache\ParsMultiCachePoolFactory;
 use Pars\Core\Translation\TranslatorMiddleware;
 use Pars\Core\Translation\TranslatorMiddlewareFactory;
 
@@ -58,7 +57,7 @@ class ConfigProvider
                 AuthenticationInterface::class => PhpSession::class,
             ],
             'factories' => [
-                'SessionCache' => FilesystemCachePoolFactory::class,
+                'SessionCache' => ParsMultiCachePoolFactory::class,
                 AuthenticationMiddleware::class => AuthenticationMiddlewareFactory::class,
                 DatabaseMiddleware::class => DatabaseMiddlewareFactory::class,
                 TranslatorMiddleware::class => TranslatorMiddlewareFactory::class,

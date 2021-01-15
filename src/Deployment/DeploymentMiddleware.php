@@ -34,6 +34,22 @@ class DeploymentMiddleware implements MiddlewareInterface
             if (file_exists($this->config['config_cache_path'])) {
                 unlink($this->config['config_cache_path']);
             }
+
+            if (is_dir('data/cache/pool')) {
+                $this->delTree('data/cache/pool');
+            }
+
+            if (is_dir($this->config['mezzio-session-cache']['filesystem_folder'])) {
+                $dir = $this->config['mezzio-session-cache']['filesystem_folder'];
+                $files = array_diff(scandir($dir), array('.','..'));
+                foreach ($files as $file) {
+                    $data = require "$dir/$file";
+                    if (!isset($data[3]) || $data[3] < time()) {
+                        unlink("$dir/$file");
+                    }
+                }
+            }
+
             $redirect = false;
             if (isset($this->config['bundles']['list'])) {
                 foreach ($this->config['bundles']['list'] as $item) {
