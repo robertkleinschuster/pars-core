@@ -45,11 +45,13 @@ class DeploymentMiddleware implements MiddlewareInterface
 
             if (is_dir($this->config['mezzio-session-cache']['filesystem_folder'])) {
                 $dir = $this->config['mezzio-session-cache']['filesystem_folder'];
-                $files = array_diff(scandir($dir), array('.','..'));
+                $files = array_diff(scandir($dir), array('.', '..'));
                 foreach ($files as $file) {
                     if (is_file("$dir/$file")) {
                         $data = require "$dir/$file";
-                        if (!isset($data[3]) || $data[3] < time()) {
+                        if (isset($data[3]) && $data[3] < time()
+                            || (time() - filemtime("$dir/$file") > 3600)
+                        ) {
                             unlink("$dir/$file");
                         }
                     }
@@ -79,7 +81,7 @@ class DeploymentMiddleware implements MiddlewareInterface
 
             if (isset($this->config['image']['cache'])) {
                 if (is_dir($_SERVER['DOCUMENT_ROOT'] . DIRECTORY_SEPARATOR . $this->config['image']['cache'])) {
-                    $this->delTree($_SERVER['DOCUMENT_ROOT'] . DIRECTORY_SEPARATOR .$this->config['image']['cache']);
+                    $this->delTree($_SERVER['DOCUMENT_ROOT'] . DIRECTORY_SEPARATOR . $this->config['image']['cache']);
                 }
             }
 
@@ -172,8 +174,9 @@ class DeploymentMiddleware implements MiddlewareInterface
         return $handler->handle($request);
     }
 
-    public function delTree($dir) {
-        $files = array_diff(scandir($dir), array('.','..'));
+    public function delTree($dir)
+    {
+        $files = array_diff(scandir($dir), array('.', '..'));
         foreach ($files as $file) {
             (is_dir("$dir/$file")) ? $this->delTree("$dir/$file") : unlink("$dir/$file");
         }
