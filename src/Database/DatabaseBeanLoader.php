@@ -12,6 +12,7 @@ use Laminas\Db\Sql\Predicate\Like;
 use Laminas\Db\Sql\Predicate\Predicate;
 use Laminas\Db\Sql\Select;
 use Laminas\Db\Sql\Sql;
+use Laminas\Db\Sql\Where;
 use Niceshops\Bean\Finder\BeanFinderInterface;
 use Niceshops\Bean\Loader\AbstractBeanLoader;
 use Niceshops\Bean\Type\Base\BeanInterface;
@@ -188,12 +189,16 @@ class DatabaseBeanLoader extends AbstractBeanLoader implements AdapterAwareInter
 
     /**
      * @param string $str
-     * @param array $fields
+     * @param string|array $fields
+     * @param string $mode
      * @return $this
      */
-    public function addLike(string $str, ...$fields)
+    public function addLike(string $str, $fields, $mode = Predicate::OP_AND)
     {
-        $this->like_Map[$str] = $fields;
+        $this->like_Map[$str] = [
+            'fields' => $fields,
+            'mode' => $mode
+        ];
         return $this;
     }
 
@@ -270,10 +275,23 @@ class DatabaseBeanLoader extends AbstractBeanLoader implements AdapterAwareInter
      */
     protected function handleLike(Select $select)
     {
+        $likePredicate = null;
+        if ($likePredicate == null) {
+            $likePredicate  = new Predicate();
+        }
         foreach ($this->like_Map as $str => $like) {
-            foreach ($like as $field) {
-                $select->where(new Like("{$this->getTable($field)}.{$this->getColumn($field)}", $str), Predicate::OP_OR);
+            if (is_array($like['fields'])) {
+                $predicate = new Predicate();
+                foreach ($like['fields'] as $field) {
+                    $predicate->addPredicate(new Like("{$this->getTable($field)}.{$this->getColumn($field)}", $str), $like['mode']);
+                }
+                $likePredicate->addPredicate($predicate, $like['mode']);
+            } elseif (is_string($like['fields'])) {
+                $likePredicate->addPredicate(new Like("{$this->getTable($like['fields'])}.{$this->getColumn($like['fields'])}", $str), $like['mode']);
             }
+        }
+        if ($likePredicate->count()) {
+            $select->where($likePredicate);
         }
         return $this;
     }
@@ -441,7 +459,7 @@ class DatabaseBeanLoader extends AbstractBeanLoader implements AdapterAwareInter
         if (null === $field_List) {
             $field_List = $this->getField_List();
         }
-        $this->addLike($search, ...$field_List);
+        $this->addLike("%$search%", $field_List, Predicate::OP_OR);
         return $this;
     }
 
