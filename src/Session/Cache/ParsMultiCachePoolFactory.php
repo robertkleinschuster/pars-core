@@ -2,9 +2,6 @@
 
 namespace Pars\Core\Session\Cache;
 
-use Cache\Adapter\Filesystem\FilesystemCachePool;
-use League\Flysystem\Adapter\Local;
-use League\Flysystem\Filesystem;
 use Pars\Core\Cache\ParsMultiCache;
 use Psr\Container\ContainerInterface;
 

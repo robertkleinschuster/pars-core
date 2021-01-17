@@ -12,7 +12,6 @@ use Laminas\Db\Sql\Predicate\Like;
 use Laminas\Db\Sql\Predicate\Predicate;
 use Laminas\Db\Sql\Select;
 use Laminas\Db\Sql\Sql;
-use Laminas\Db\Sql\Where;
 use Niceshops\Bean\Finder\BeanFinderInterface;
 use Niceshops\Bean\Loader\AbstractBeanLoader;
 use Niceshops\Bean\Type\Base\BeanInterface;

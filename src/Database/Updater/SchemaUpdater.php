@@ -3,7 +3,6 @@
 namespace Pars\Core\Database\Updater;
 
 use Laminas\Db\Sql\Ddl\Column\Boolean;
-use Laminas\Db\Sql\Ddl\Column\Date;
 use Laminas\Db\Sql\Ddl\Column\Integer;
 use Laminas\Db\Sql\Ddl\Column\Text;
 use Laminas\Db\Sql\Ddl\Column\Timestamp;
