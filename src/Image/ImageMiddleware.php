@@ -72,7 +72,11 @@ class ImageMiddleware implements MiddlewareInterface
                 $cache->clear();
                 return new \Laminas\Diactoros\Response\HtmlResponse($e->getMessage());
             }
-            return $server->getImageResponse($path, $_GET);
+            /**
+             * @var $response ResponseInterface
+             */
+            $response = $server->getImageResponse($path, $_GET);
+            return $response;
         }
         return $handler->handle($request->withAttribute(self::SERVER_ATTRIBUTE, $server));
     }
