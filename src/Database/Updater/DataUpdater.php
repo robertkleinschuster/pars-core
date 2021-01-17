@@ -113,6 +113,11 @@ class DataUpdater extends AbstractUpdater
             'Config_Value' => 'UTC',
             'Config_Locked' => 0
         ];
+        $data_Map[] = [
+            'Config_Code' => 'frontend.google-key',
+            'Config_Value' => '',
+            'Config_Locked' => 0
+        ];
         return $this->saveDataMap('Config', 'Config_Code', $data_Map, true);
     }
 
