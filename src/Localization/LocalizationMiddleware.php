@@ -46,7 +46,9 @@ class LocalizationMiddleware implements MiddlewareInterface
             if ($routeLocaleCode != $locale->getLocale_Code()) {
                 if ($this->config['redirect'] === true) {
                     if ($this->urlHelper->getRouteResult()->isSuccess()) {
-                        return new RedirectResponse($this->urlHelper->generate('cms', ['locale' => $locale->getUrl_Code()]));
+                        return new RedirectResponse(
+                            rtrim($this->urlHelper->generate('cms', ['locale' => $locale->getUrl_Code()]), "/")
+                        );
                     }
                 }
             }
@@ -66,7 +68,7 @@ class LocalizationMiddleware implements MiddlewareInterface
             if ($this->config['redirect'] === true) {
                 $this->urlHelper->setBasePath($locale->getUrl_Code());
                 if ($this->urlHelper->getRouteResult()->isSuccess()) {
-                    return new RedirectResponse($this->urlHelper->generate());
+                    return new RedirectResponse(rtrim($this->urlHelper->generate(), '/'));
                 }
             }
         }
