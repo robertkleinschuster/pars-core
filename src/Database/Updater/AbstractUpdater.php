@@ -217,6 +217,19 @@ abstract class AbstractUpdater implements ValidationHelperAwareInterface, Adapte
                     unset($item[$keyColumn]);
                     $update->set($item);
                     $result[] = $this->query($update);
+                } elseif (isset($item['Config_Description']) || isset($item['Config_Options'])) {
+                    $update = $sql->update($table);
+                    $update->where([$keyColumn => $item[$keyColumn]]);
+                    unset($item[$keyColumn]);
+                    $data = [];
+                    if (isset($item['Config_Description'])) {
+                        $data['Config_Description'] = $item['Config_Description'];
+                    }
+                    if (isset($item['Config_Options'])) {
+                        $data['Config_Options'] = $item['Config_Options'];
+                    }
+                    $update->set($data);
+                    $result[] = $this->query($update);
                 }
             } else {
                 $insert = $sql->insert($table);

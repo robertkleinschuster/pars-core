@@ -24,7 +24,7 @@ class DataUpdater extends AbstractUpdater
         $data_Map = [];
         $data_Map[] = [
             'Config_Code' => 'asset.domain',
-            'Config_Value' => '',
+            'Config_Value' => isset($_SERVER['HTTP_HOST']) ? 'https://' . $_SERVER['HTTP_HOST'] . '/img' : '',
             'Config_Locked' => 0
         ];
         $data_Map[] = [
@@ -35,6 +35,7 @@ class DataUpdater extends AbstractUpdater
         $data_Map[] = [
             'Config_Code' => 'locale.default',
             'Config_Value' => 'de_AT',
+            'Config_Options' => json_encode($this->getKeyList('Locale', 'Locale_Code')),
             'Config_Locked' => 0
         ];
         $data_Map[] = [
@@ -69,13 +70,61 @@ class DataUpdater extends AbstractUpdater
             'Config_Locked' => 0
         ];
         $data_Map[] = [
+            'Config_Code' => 'mail.smtp',
+            'Config_Value' => 'false',
+            'Config_Description' => 'true, false',
+            'Config_Options' => json_encode(['true', 'false']),
+            'Config_Locked' => 0
+        ];
+        $data_Map[] = [
+            'Config_Code' => 'mail.smtp.name',
+            'Config_Value' => '',
+            'Config_Locked' => 0
+        ];
+        $data_Map[] = [
+            'Config_Code' => 'mail.smtp.host',
+            'Config_Value' => '127.0.0.1',
+            'Config_Description' => '127.0.0.1',
+            'Config_Locked' => 0
+        ];
+        $data_Map[] = [
+            'Config_Code' => 'mail.smtp.port',
+            'Config_Value' => '25',
+            'Config_Description' => '25, 587',
+            'Config_Locked' => 0
+        ];
+        $data_Map[] = [
+            'Config_Code' => 'mail.smtp.authentication',
+            'Config_Value' => '',
+            'Config_Description' => 'plain, login',
+            'Config_Options' => json_encode(['plain', 'login']),
+            'Config_Locked' => 0
+        ];
+        $data_Map[] = [
+            'Config_Code' => 'mail.smtp.authentication.username',
+            'Config_Value' => '',
+            'Config_Locked' => 0
+        ];
+        $data_Map[] = [
+            'Config_Code' => 'mail.smtp.authentication.password',
+            'Config_Value' => '',
+            'Config_Locked' => 0
+        ];
+        $data_Map[] = [
+            'Config_Code' => 'mail.smtp.authentication.ssl',
+            'Config_Value' => 'tls',
+            'Config_Description' => 'tls, ssl',
+            'Config_Options' => json_encode(['tls', 'ssl']),
+            'Config_Locked' => 0
+        ];
+        $data_Map[] = [
             'Config_Code' => 'frontend.brand',
             'Config_Value' => 'PARS',
             'Config_Locked' => 0
         ];
         $data_Map[] = [
             'Config_Code' => 'frontend.domain',
-            'Config_Value' => '',
+            'Config_Value' => isset($_SERVER['HTTP_HOST']) ? 'https://' . ltrim($_SERVER['HTTP_HOST'], 'admin.') : '',
             'Config_Locked' => 0
         ];
         $data_Map[] = [
