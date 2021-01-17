@@ -152,6 +152,17 @@ abstract class AbstractUpdater implements ValidationHelperAwareInterface, Adapte
         return $resultMap;
     }
 
+    public function executeSilent()
+    {
+        $this->setMode(self::MODE_EXECUTE);
+        $methodList = $this->getUpdateMethodList();
+        $resultMap = [];
+        foreach ($methodList as $method) {
+            $resultMap[$method] = $this->executeMethod($method);
+        }
+        return $resultMap;
+    }
+
     /**
      * @param string $method
      */
