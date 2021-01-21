@@ -3,6 +3,8 @@
 namespace Pars\Core\Database\Updater;
 
 
+use Pars\Model\File\FileBeanFinder;
+
 class DataUpdater extends AbstractUpdater
 {
 
@@ -19,6 +21,12 @@ class DataUpdater extends AbstractUpdater
         } else {
             $imageSignature = md5(random_bytes(5));
             file_put_contents('data/image_signature', $imageSignature);
+        }
+        $imageOptions = [];
+        $fileFinder = new FileBeanFinder($this->adapter);
+        foreach ($fileFinder->getBeanList() as $bean) {
+            $filename = $bean->get('FileDirectory_Code') . '/' . $bean->get('File_Code') . '.' . $bean->get('FileType_Code');
+            $imageOptions[] = $filename;
         }
         $i = 1;
         $data_Map = [];
@@ -132,11 +140,20 @@ class DataUpdater extends AbstractUpdater
             'Config_Value' => 'true',
             'Config_Locked' => 1
         ];
-        $data_Map[] = [
+        $favicon = [
             'Config_Code' => 'frontend.favicon',
             'Config_Value' => '',
-            'Config_Locked' => 0
+            'Config_Locked' => 0,
+            'Config_Options' => count($imageOptions) ? $imageOptions : ''
         ];
+        $data_Map[] = $favicon;
+        $logo = [
+            'Config_Code' => 'frontend.logo',
+            'Config_Value' => '',
+            'Config_Locked' => 0,
+            'Config_Options' => count($imageOptions) ? $imageOptions : ''
+        ];
+        $data_Map[] = $logo;
         $data_Map[] = [
             'Config_Code' => 'frontend.color',
             'Config_Value' => '#FFFFFF',
@@ -167,7 +184,7 @@ class DataUpdater extends AbstractUpdater
             'Config_Value' => '',
             'Config_Locked' => 0
         ];
-        return $this->saveDataMap('Config', 'Config_Code', $data_Map, true);
+        return $this->saveDataMap('Config', 'Config_Code', $data_Map, true, ['Config_Description', 'Config_Options']);
     }
 
 

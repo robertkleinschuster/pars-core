@@ -213,13 +213,20 @@ abstract class AbstractUpdater implements ValidationHelperAwareInterface, Adapte
      * @param string $table
      * @param string $keyColumn
      * @param array $data_Map
+     * @param bool $noUpdate
+     * @param array $forceUpdateColumns
      * @return array
      */
-    protected function saveDataMap(string $table, string $keyColumn, array $data_Map, bool $noUpdate = false)
+    protected function saveDataMap(string $table, string $keyColumn, array $data_Map, bool $noUpdate = false, array $forceUpdateColumns = [])
     {
         $existingKey_List = $this->getKeyList($table, $keyColumn);
         $result = [];
         foreach ($data_Map as $item) {
+            foreach ($item as $key => $value) {
+                if (is_array($value)) {
+                    $item[$key] = json_encode($value);
+                }
+            }
             $sql = new Sql($this->adapter);
             if (in_array($item[$keyColumn], $existingKey_List)) {
                 if (!$noUpdate) {
@@ -228,16 +235,15 @@ abstract class AbstractUpdater implements ValidationHelperAwareInterface, Adapte
                     unset($item[$keyColumn]);
                     $update->set($item);
                     $result[] = $this->query($update);
-                } elseif (isset($item['Config_Description']) || isset($item['Config_Options'])) {
+                } elseif (count(array_intersect(array_keys($item), $forceUpdateColumns))) {
                     $update = $sql->update($table);
                     $update->where([$keyColumn => $item[$keyColumn]]);
                     unset($item[$keyColumn]);
                     $data = [];
-                    if (isset($item['Config_Description'])) {
-                        $data['Config_Description'] = $item['Config_Description'];
-                    }
-                    if (isset($item['Config_Options'])) {
-                        $data['Config_Options'] = $item['Config_Options'];
+                    foreach ($forceUpdateColumns as $forceUpdateColumn) {
+                        if (isset($item[$forceUpdateColumn])) {
+                            $data[$forceUpdateColumn] = $item[$forceUpdateColumn];
+                        }
                     }
                     $update->set($data);
                     $result[] = $this->query($update);
