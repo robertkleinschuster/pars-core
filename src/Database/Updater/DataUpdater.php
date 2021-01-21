@@ -59,7 +59,7 @@ class DataUpdater extends AbstractUpdater
         ];
         $data_Map[] = [
             'Config_Code' => 'admin.author',
-            'Config_Value' => 'PARS',
+            'Config_Value' => '',
             'Config_Locked' => 0
         ];
         $data_Map[] = [
@@ -127,7 +127,7 @@ class DataUpdater extends AbstractUpdater
         ];
         $data_Map[] = [
             'Config_Code' => 'frontend.brand',
-            'Config_Value' => 'PARS',
+            'Config_Value' => '{frontend.brand}',
             'Config_Locked' => 0
         ];
         $data_Map[] = [
