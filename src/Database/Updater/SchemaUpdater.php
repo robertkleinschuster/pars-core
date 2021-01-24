@@ -228,7 +228,7 @@ class SchemaUpdater extends AbstractUpdater
         $this->addColumnToTable($table, new Boolean('ArticleData_Active', true, 1));
         $this->addColumnToTable($table, new Timestamp('ArticleData_Timestamp', true));
         $this->addConstraintToTable($table, new PrimaryKey('ArticleData_ID'));
-        $this->addConstraintToTable($table, new ForeignKey(null, 'Article_ID', 'Article', 'Article_ID'));
+        $this->addConstraintToTable($table, new ForeignKey(null, 'Article_ID', 'Article', 'Article_ID', 'CASCADE'));
         $this->addDefaultColumnsToTable($table);
         return $this->query($table);
     }

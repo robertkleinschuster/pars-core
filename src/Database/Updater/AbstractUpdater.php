@@ -330,10 +330,20 @@ abstract class AbstractUpdater implements ValidationHelperAwareInterface, Adapte
 
         if (
             $table instanceof CreateTable ||
-            (!$this->hasConstraints($tableName, $constraintName) && $constraint instanceof ForeignKey)
+            ($constraint instanceof ForeignKey)
         ) {
-            $constraint->setName($constraintName);
-            $table->addConstraint($constraint);
+            if ($this->hasConstraints($tableName, $constraintName)) {
+                $table->dropConstraint($constraintName);
+                $constraint->setName($constraintName . '_');
+                $table->addConstraint($constraint);
+            } elseif ($this->hasConstraints($tableName, $constraintName . '_')) {
+                $table->dropConstraint($constraintName . '_');
+                $constraint->setName($constraintName);
+                $table->addConstraint($constraint);
+            } else {
+                $constraint->setName($constraintName);
+                $table->addConstraint($constraint);
+            }
         }
     }
 
