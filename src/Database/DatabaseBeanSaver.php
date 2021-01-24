@@ -105,10 +105,9 @@ class DatabaseBeanSaver extends AbstractBeanSaver implements AdapterAwareInterfa
                     $converter->convert($bean)->set($field, $result->getGeneratedValue());
                 }
             }
-            return $result->getAffectedRows() > 0;
+            return $result->getAffectedRows() > 0 || $result->getAffectedRows() == 0;
         }
-
-        return false;
+        return count($insertdata) == 0;
     }
 
 
@@ -133,10 +132,9 @@ class DatabaseBeanSaver extends AbstractBeanSaver implements AdapterAwareInterfa
             }
             $update->set($data);
             $result = $this->adapter->query($sql->buildSqlString($update), $this->adapter::QUERY_MODE_EXECUTE);
-            return $result->getAffectedRows() > 0;
+            return $result->getAffectedRows() > 0 || $result->getAffectedRows() == 0;
         }
-
-        return false;
+        return count($data) == 0;
     }
 
 
