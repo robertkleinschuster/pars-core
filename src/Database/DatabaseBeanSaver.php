@@ -31,16 +31,23 @@ class DatabaseBeanSaver extends AbstractBeanSaver implements AdapterAwareInterfa
      */
     protected function saveBean(BeanInterface $bean): bool
     {
-        $result = [];
+        $result_List = [];
+        $this->adapter->getDriver()->getConnection()->beginTransaction();
         $tableList = $this->getTable_List();
         foreach ($tableList as $table) {
             if ($this->beanExistsUnique($bean, $table)) {
-                $result[] = $this->update($bean, $table);
+                $result_List[] = $this->update($bean, $table);
             } else {
-                $result[] = $this->insert($bean, $table);
+                $result_List[] = $this->insert($bean, $table);
             }
         }
-        return !in_array(false, $result) && count($result) > 0;
+        $result = !in_array(false, $result_List) && count($result_List) > 0;
+        if ($result) {
+            $this->adapter->getDriver()->getConnection()->commit();
+        } else {
+            $this->adapter->getDriver()->getConnection()->rollback();
+        }
+        return $result;
     }
 
     /**
@@ -51,6 +58,7 @@ class DatabaseBeanSaver extends AbstractBeanSaver implements AdapterAwareInterfa
     protected function deleteBean(BeanInterface $bean): bool
     {
         $result_List = [];
+        $this->adapter->getDriver()->getConnection()->beginTransaction();
         $tableList = $this->getTable_List();
         $tableList = array_reverse($tableList);
         foreach ($tableList as $table) {
@@ -64,7 +72,13 @@ class DatabaseBeanSaver extends AbstractBeanSaver implements AdapterAwareInterfa
                 $result_List[] = $result->getAffectedRows() > 0;
             }
         }
-        return !in_array(false, $result_List, true) && count($result_List) > 0;
+        $result = !in_array(false, $result_List, true) && count($result_List) > 0;
+        if ($result) {
+            $this->adapter->getDriver()->getConnection()->commit();
+        } else {
+            $this->adapter->getDriver()->getConnection()->rollback();
+        }
+        return $result;
     }
 
 
