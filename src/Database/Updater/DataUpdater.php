@@ -419,6 +419,11 @@ class DataUpdater extends AbstractUpdater
             'CmsPageType_Active' => 1,
         ];
         $data_Map[] = [
+            'CmsPageType_Code' => 'redirect',
+            'CmsPageType_Template' => 'cmspage::redirect',
+            'CmsPageType_Active' => 1,
+        ];
+        $data_Map[] = [
             'CmsPageType_Code' => 'contact',
             'CmsPageType_Template' => 'cmspage::contact',
             'CmsPageType_Active' => 1,
