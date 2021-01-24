@@ -182,7 +182,14 @@ class DataUpdater extends AbstractUpdater
         $data_Map[] = [
             'Config_Code' => 'frontend.google-key',
             'Config_Value' => '',
-            'Config_Locked' => 0
+            'Config_Locked' => 0,
+            'Config_Description' => 'Google Site Verification'
+        ];
+        $data_Map[] = [
+            'Config_Code' => 'frontend.google-maps-key',
+            'Config_Value' => '',
+            'Config_Locked' => 0,
+            'Config_Description' => 'Google Maps API-Key'
         ];
         return $this->saveDataMap('Config', 'Config_Code', $data_Map, true, ['Config_Description', 'Config_Options']);
     }
