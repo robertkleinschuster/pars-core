@@ -29,6 +29,7 @@
     "laminas/laminas-config-aggregator": "^1.2",
     "laminas/laminas-serializer": "^2.9",
     "laminas/laminas-zendframework-bridge": "^1.0",
+    "laminas/laminas-component-installer": "^2.1.2",
     "mezzio/mezzio": "^3.2.1",
     "mezzio/mezzio-fastroute": "^3.0.3",
     "mezzio/mezzio-platesrenderer": "^2.2",
