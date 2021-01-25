@@ -16,7 +16,6 @@ class SpecialUpdater extends AbstractUpdater
         return 'special';
     }
 
-
     public function updateAdminPermissions()
     {
         $roleFinder = new RoleBeanFinder($this->adapter);
