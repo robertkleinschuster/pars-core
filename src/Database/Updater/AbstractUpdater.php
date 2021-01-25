@@ -40,6 +40,7 @@ abstract class AbstractUpdater implements ValidationHelperAwareInterface, Adapte
      */
     protected $existingTableList;
 
+    protected $constraintsOnly = false;
 
     abstract public function getCode(): string;
 
@@ -124,6 +125,14 @@ abstract class AbstractUpdater implements ValidationHelperAwareInterface, Adapte
             }
         }
         return $methods;
+    }
+
+    /**
+     * @param bool $constraintsOnly
+     */
+    public function setConstraintsOnly(bool $constraintsOnly): void
+    {
+        $this->constraintsOnly = $constraintsOnly;
     }
 
     /**
@@ -291,6 +300,7 @@ abstract class AbstractUpdater implements ValidationHelperAwareInterface, Adapte
     }
 
 
+
     /**
      * @param AbstractSql $table
      * @param Column $column
@@ -299,15 +309,17 @@ abstract class AbstractUpdater implements ValidationHelperAwareInterface, Adapte
      */
     protected function addColumnToTable(AbstractSql $table, Column $column)
     {
-        if ($table instanceof CreateTable) {
-            $table->addColumn($column);
-        }
-        if ($table instanceof AlterTable) {
-            $columns = $this->metadata->getColumnNames((string)$table->getRawState(AlterTable::TABLE), $this->adapter->getCurrentSchema());
-            if (!in_array($column->getName(), $columns)) {
+        if (!$this->constraintsOnly) {
+            if ($table instanceof CreateTable) {
                 $table->addColumn($column);
-            } else {
-                $table->changeColumn($column->getName(), $column);
+            }
+            if ($table instanceof AlterTable) {
+                $columns = $this->metadata->getColumnNames((string)$table->getRawState(AlterTable::TABLE), $this->adapter->getCurrentSchema());
+                if (!in_array($column->getName(), $columns)) {
+                    $table->addColumn($column);
+                } else {
+                    $table->changeColumn($column->getName(), $column);
+                }
             }
         }
         return $column;
@@ -333,13 +345,13 @@ abstract class AbstractUpdater implements ValidationHelperAwareInterface, Adapte
             ($constraint instanceof ForeignKey)
         ) {
             if ($this->hasConstraints($tableName, $constraintName)) {
-             #   $table->dropConstraint($constraintName);
+                $table->dropConstraint($constraintName);
                 $constraint->setName($constraintName . '_');
-                #$table->addConstraint($constraint);
+                $table->addConstraint($constraint);
             } elseif ($this->hasConstraints($tableName, $constraintName . '_')) {
                 $table->dropConstraint($constraintName . '_');
                 $constraint->setName($constraintName);
-             #   $table->addConstraint($constraint);
+                $table->addConstraint($constraint);
             } else {
                 $constraint->setName($constraintName);
                 $table->addConstraint($constraint);

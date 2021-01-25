@@ -14,8 +14,12 @@ use Laminas\Db\Sql\Ddl\Index\Index;
 
 class SchemaUpdater extends AbstractUpdater
 {
+
     public function getCode(): string
     {
+        if ($this->constraintsOnly) {
+            return 'constraints';
+        }
         return 'schema';
     }
 
