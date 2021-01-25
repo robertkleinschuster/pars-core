@@ -61,7 +61,7 @@ abstract class AbstractUpdater implements ValidationHelperAwareInterface, Adapte
     public function hasConstraints(string $table, string $constraintName)
     {
         foreach ($this->metadata->getConstraints($table, $this->adapter->getCurrentSchema()) as $constraint) {
-            if ($constraint->getName() == $constraintName) {
+            if (trim(strtolower($constraint->getName())) == trim(strtolower($constraintName))) {
                 return true;
             }
         }
