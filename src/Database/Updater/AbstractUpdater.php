@@ -329,29 +329,33 @@ abstract class AbstractUpdater implements ValidationHelperAwareInterface, Adapte
         }
         $constraintName_old = $this->abbreviate($type, 2) . '' . $this->abbreviate($tableName, 2) . '' . $this->abbreviate(implode('', $constraint->getColumns()), 2);
 
-        if (
-            $table instanceof CreateTable ||
-            ($constraint instanceof ForeignKey)
-        ) {
-            if ($constraintName_old != $constraintName && $this->hasConstraints($tableName, $constraintName_old)) {
-                $table->dropConstraint($constraintName_old);
-            }
-            if ($constraintName_old != $constraintName && $this->hasConstraints($tableName, $constraintName_old . '_')) {
-                $table->dropConstraint($constraintName_old . '_');
-            }
+        if ($table instanceof CreateTable || $constraint instanceof ForeignKey) {
+            $arrDropped = [];
 
             if ($this->hasConstraints($tableName, $constraintName)) {
                 $table->dropConstraint($constraintName);
+                $arrDropped[] = $constraintName;
                 $constraint->setName($constraintName . '_');
                 $table->addConstraint($constraint);
             } elseif ($this->hasConstraints($tableName, $constraintName . '_')) {
                 $table->dropConstraint($constraintName . '_');
+                $arrDropped[] = $constraintName . '_';
                 $constraint->setName($constraintName);
                 $table->addConstraint($constraint);
             } else {
                 $constraint->setName($constraintName);
                 $table->addConstraint($constraint);
             }
+
+            if (!in_array($constraintName_old, $arrDropped)
+                && $this->hasConstraints($tableName, $constraintName_old)) {
+                $table->dropConstraint($constraintName_old);
+            }
+            if (!in_array($constraintName_old . '_', $arrDropped)
+                && $this->hasConstraints($tableName, $constraintName_old . '_')) {
+                $table->dropConstraint($constraintName_old . '_');
+            }
+
         }
     }
 
