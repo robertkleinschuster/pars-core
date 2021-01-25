@@ -321,17 +321,25 @@ abstract class AbstractUpdater implements ValidationHelperAwareInterface, Adapte
     {
         $tableName = (string)$table->getRawState(AlterTable::TABLE);
         $path = explode('\\', get_class($constraint));
-        $type = $this->abbreviate(array_pop($path));
+        $type = array_pop($path);
         if ($constraint instanceof PrimaryKey) {
             $constraintName = "_laminas_{$tableName}_PRIMARY";
         } else {
-            $constraintName = $type . '' . $this->abbreviate($tableName) . '' . $this->abbreviate(implode('', $constraint->getColumns()));
+            $constraintName = $this->abbreviate($type, 2) . '' . $this->abbreviate($tableName, 4) . '' . $this->abbreviate(implode('', $constraint->getColumns()), 4);
         }
+        $constraintName_old = $this->abbreviate($type, 2) . '' . $this->abbreviate($tableName, 2) . '' . $this->abbreviate(implode('', $constraint->getColumns()), 2);
 
         if (
             $table instanceof CreateTable ||
             ($constraint instanceof ForeignKey)
         ) {
+            if ($constraintName_old != $constraintName && $this->hasConstraints($tableName, $constraintName_old)) {
+                $table->dropConstraint($constraintName_old);
+            }
+            if ($constraintName_old != $constraintName && $this->hasConstraints($tableName, $constraintName_old . '_')) {
+                $table->dropConstraint($constraintName_old . '_');
+            }
+
             if ($this->hasConstraints($tableName, $constraintName)) {
                 $table->dropConstraint($constraintName);
                 $constraint->setName($constraintName . '_');
