@@ -56,7 +56,14 @@ class LocalizationMiddleware implements MiddlewareInterface
             $headerLocaleCode = Locale::acceptFromHttp($request->getServerParams()['HTTP_ACCEPT_LANGUAGE']);
             $headerLanguageCode = Locale::getPrimaryLanguage($headerLocaleCode);
             $user = $request->getAttribute(UserInterface::class);
-            if ($user instanceof LocaleAwareInterface && $user->hasLocale()) {
+            $params = $request->getQueryParams();
+            if (isset($params['editlocale'])) {
+                $locale = $this->localization->findLocale(
+                    $params['editlocale'],
+                    Locale::getPrimaryLanguage($params['editlocale']),
+                    $this->config['fallback']
+                );
+            } elseif ($user instanceof LocaleAwareInterface && $user->hasLocale()) {
                 $locale = $user->getLocale();
             } else {
                 $locale = $this->localization->findLocale(
