@@ -140,6 +140,7 @@ abstract class AbstractUpdater implements ValidationHelperAwareInterface, Adapte
 
     public function execute(array $methods): array
     {
+        $this->adapter->getDriver()->getConnection()->beginTransaction();
         $this->setMode(self::MODE_EXECUTE);
         $methodList = $this->getUpdateMethodList();
         $resultMap = [];
@@ -148,17 +149,20 @@ abstract class AbstractUpdater implements ValidationHelperAwareInterface, Adapte
                 $resultMap[$method] = $this->executeMethod($method);
             }
         }
+        $this->adapter->getDriver()->getConnection()->commit();
         return $resultMap;
     }
 
     public function executeSilent()
     {
+        $this->adapter->getDriver()->getConnection()->beginTransaction();
         $this->setMode(self::MODE_EXECUTE);
         $methodList = $this->getUpdateMethodList();
         $resultMap = [];
         foreach ($methodList as $method) {
             $resultMap[$method] = $this->executeMethod($method);
         }
+        $this->adapter->getDriver()->getConnection()->commit();
         return $resultMap;
     }
 
@@ -179,14 +183,12 @@ abstract class AbstractUpdater implements ValidationHelperAwareInterface, Adapte
     {
         $sql = new Sql($this->adapter);
         $result = '';
+        $query = $sql->buildSqlString($statement, $this->adapter);
         if ($this->isExecute()) {
-            $result = $this->adapter->query(
-                $sql->buildSqlString($statement, $this->adapter),
-                Adapter::QUERY_MODE_EXECUTE
-            );
+            $result = $this->adapter->query($query, Adapter::QUERY_MODE_EXECUTE);
         }
         if ($this->isPreview()) {
-            $result = str_replace(PHP_EOL, '<br>', $sql->buildSqlString($statement, $this->adapter));
+            $result = str_replace(PHP_EOL, '<br>', $query);
         }
         return $result;
     }
@@ -285,8 +287,18 @@ abstract class AbstractUpdater implements ValidationHelperAwareInterface, Adapte
         $this->addColumnToTable($table, new Integer('Person_ID_Create', true));
         $this->addColumnToTable($table, new Timestamp('Timestamp_Edit', true));
         $this->addColumnToTable($table, new Integer('Person_ID_Edit', true));
+    }
+
+    protected function addDefaultConstraintsToTable(AbstractSql $table)
+    {
         $this->addConstraintToTable($table, new ForeignKey(null, 'Person_ID_Create', 'Person', 'Person_ID'));
         $this->addConstraintToTable($table, new ForeignKey(null, 'Person_ID_Edit', 'Person', 'Person_ID'));
+    }
+
+    protected function dropDefaultConstraintsFromTable(AbstractSql $table)
+    {
+        $this->dropConstraintFromTable($table, new ForeignKey(null, 'Person_ID_Create', 'Person', 'Person_ID'));
+        $this->dropConstraintFromTable($table, new ForeignKey(null, 'Person_ID_Edit', 'Person', 'Person_ID'));
     }
 
 
@@ -315,9 +327,48 @@ abstract class AbstractUpdater implements ValidationHelperAwareInterface, Adapte
 
     /**
      * @param AbstractSql $table
+     * @param Column $column
+     * @return Column
+     * @throws \Exception
+     */
+    protected function dropColumnFromTable(AbstractSql $table, Column $column)
+    {
+        if ($table instanceof AlterTable) {
+            $columns = $this->metadata->getColumnNames((string)$table->getRawState(AlterTable::TABLE), $this->adapter->getCurrentSchema());
+            if (in_array($column->getName(), $columns)) {
+                $table->dropColumn($column->getName(), $column);
+            }
+        }
+        return $column;
+    }
+
+    /**
+     * @param AbstractSql $table
      * @param AbstractConstraint $constraint
      */
     protected function addConstraintToTable(AbstractSql $table, AbstractConstraint $constraint)
+    {
+        $tableName = (string)$table->getRawState(AlterTable::TABLE);
+        $path = explode('\\', get_class($constraint));
+        $type = array_pop($path);
+        if ($constraint instanceof PrimaryKey) {
+            $constraintName = "_laminas_{$tableName}_PRIMARY";
+        } else {
+            $constraintName = $this->abbreviate($type, 2) . '' . $this->abbreviate($tableName, 4) . '' . $this->abbreviate(implode('', $constraint->getColumns()), 4);
+        }
+
+        if ($table instanceof CreateTable || $constraint instanceof ForeignKey) {
+            $constraint->setName($constraintName);
+            $table->addConstraint($constraint);
+        }
+    }
+
+
+    /**
+     * @param AbstractSql $table
+     * @param AbstractConstraint $constraint
+     */
+    protected function dropConstraintFromTable(AbstractSql $table, AbstractConstraint $constraint)
     {
         $tableName = (string)$table->getRawState(AlterTable::TABLE);
         $path = explode('\\', get_class($constraint));
@@ -335,29 +386,24 @@ abstract class AbstractUpdater implements ValidationHelperAwareInterface, Adapte
             if ($this->hasConstraints($tableName, $constraintName)) {
                 $table->dropConstraint($constraintName);
                 $arrDropped[] = $constraintName;
-                $constraint->setName($constraintName . '_');
-                $table->addConstraint($constraint);
-            } elseif ($this->hasConstraints($tableName, $constraintName . '_')) {
-                $table->dropConstraint($constraintName . '_');
-                $arrDropped[] = $constraintName . '_';
-                $constraint->setName($constraintName);
-                $table->addConstraint($constraint);
-            } else {
-                $constraint->setName($constraintName);
-                $table->addConstraint($constraint);
             }
 
             if (!in_array($constraintName_old, $arrDropped)
                 && $this->hasConstraints($tableName, $constraintName_old)) {
                 $table->dropConstraint($constraintName_old);
             }
+
             if (!in_array($constraintName_old . '_', $arrDropped)
                 && $this->hasConstraints($tableName, $constraintName_old . '_')) {
                 $table->dropConstraint($constraintName_old . '_');
             }
 
+            if ($this->hasConstraints($tableName, $constraintName . '_')) {
+                $table->dropConstraint($constraintName . '_');
+            }
         }
     }
+
 
     protected function abbreviate($string, $l = 2)
     {
