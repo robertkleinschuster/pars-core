@@ -2,11 +2,13 @@
 
 namespace Pars\Core\Translation;
 
+use Laminas\Db\Adapter\Adapter;
 use Laminas\I18n\Translator\Loader\RemoteLoaderInterface;
 use Laminas\I18n\Translator\Translator;
 use Pars\Core\Database\DatabaseMiddleware;
 use Pars\Core\Localization\LocaleInterface;
 use Pars\Core\Logging\LoggingMiddleware;
+use Pars\Model\Config\ConfigBeanFinder;
 use Pars\Model\Translation\TranslationLoader\TranslationBeanFinder;
 use Pars\Model\Translation\TranslationLoader\TranslationBeanProcessor;
 use Psr\Http\Message\ResponseInterface;
@@ -46,6 +48,10 @@ class TranslatorMiddleware implements MiddlewareInterface
         $logger = $request->getAttribute(LoggingMiddleware::LOGGER_ATTRIBUTE);
         if ($locale instanceof LocaleInterface) {
             $this->translator->setLocale($locale->getLocale_Code());
+        }
+        if ($adapter instanceof Adapter) {
+            $fallback = (new ConfigBeanFinder($adapter))->setConfig_Code('locale.default')->getBean()->get('Config_Value');
+            $this->translator->setFallbackLocale($fallback);
         }
         if ($logger instanceof LoggerInterface) {
             $this->translator->enableEventManager();
