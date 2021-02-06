@@ -137,7 +137,7 @@ class DataUpdater extends AbstractUpdater
         ];
         $data_Map[] = [
             'Config_Code' => 'frontend.domain',
-            'Config_Value' => isset($_SERVER['HTTP_HOST']) ? 'https://' . ltrim($_SERVER['HTTP_HOST'], 'admin.') : '',
+            'Config_Value' => isset($_SERVER['HTTP_HOST']) ? 'https://' . ltrim($_SERVER['HTTP_HOST'] ?? '', 'admin.') : '',
             'Config_Locked' => 0
         ];
         $data_Map[] = [
@@ -195,6 +195,11 @@ class DataUpdater extends AbstractUpdater
             'Config_Value' => '',
             'Config_Locked' => 0,
             'Config_Description' => 'Google Maps API-Key'
+        ];
+        $data_Map[] = [
+            'Config_Code' => 'frontend.data-privacy-email',
+            'Config_Value' => 'privacy@' . ltrim($_SERVER['HTTP_HOST'] ?? '', 'admin.'),
+            'Config_Locked' => 0,
         ];
         return $this->saveDataMap('Config', 'Config_Code', $data_Map, true, ['Config_Description', 'Config_Options']);
     }
