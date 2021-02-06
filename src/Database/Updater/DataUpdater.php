@@ -78,6 +78,11 @@ class DataUpdater extends AbstractUpdater
             'Config_Locked' => 0
         ];
         $data_Map[] = [
+            'Config_Code' => 'admin.pagination.limit',
+            'Config_Value' => '20',
+            'Config_Locked' => 0
+        ];
+        $data_Map[] = [
             'Config_Code' => 'mail.smtp',
             'Config_Value' => 'false',
             'Config_Description' => 'true, false',
