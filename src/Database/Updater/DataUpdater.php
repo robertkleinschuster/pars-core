@@ -165,6 +165,11 @@ class DataUpdater extends AbstractUpdater
             'Config_Locked' => 0
         ];
         $data_Map[] = [
+            'Config_Code' => 'frontend.cache',
+            'Config_Value' => '86400',
+            'Config_Locked' => 0
+        ];
+        $data_Map[] = [
             'Config_Code' => 'frontend.charset',
             'Config_Value' => 'utf-8',
             'Config_Locked' => 0
