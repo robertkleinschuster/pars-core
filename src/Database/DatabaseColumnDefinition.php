@@ -2,18 +2,18 @@
 
 namespace Pars\Core\Database;
 
-class DatabaseColumnDefinition
+class DatabaseColumnDefinition implements \ArrayAccess
 {
 
     /**
-     * @var string
+     * @var string|null
      */
-    private string $column;
+    private ?string $column = null;
 
     /**
-     * @var string
+     * @var string|null
      */
-    private string $table;
+    private ?string $table = null;
 
     /**
      * @var string[]
@@ -50,13 +50,14 @@ class DatabaseColumnDefinition
      */
     public function getColumn(): string
     {
-        return $this->column;
+        return $this->column ?? $this->field;
     }
 
     /**
      * @param string $column
+     * @return DatabaseColumnDefinition
      */
-    public function setColumn(string $column): self
+    public function setColumn(?string $column): self
     {
         $this->column = $column;
         return $this;
@@ -72,8 +73,9 @@ class DatabaseColumnDefinition
 
     /**
      * @param string $table
+     * @return DatabaseColumnDefinition
      */
-    public function setTable(string $table): self
+    public function setTable(?string $table): self
     {
         $this->table = $table;
         return $this;
@@ -89,6 +91,7 @@ class DatabaseColumnDefinition
 
     /**
      * @param string[] $additionalTable_List
+     * @return DatabaseColumnDefinition
      */
     public function setAdditionalTableList(array $additionalTable_List): self
     {
@@ -106,6 +109,7 @@ class DatabaseColumnDefinition
 
     /**
      * @param string|null $joinField
+     * @return DatabaseColumnDefinition
      */
     public function setJoinField(?string $joinField): self
     {
@@ -118,11 +122,12 @@ class DatabaseColumnDefinition
      */
     public function getField(): string
     {
-        return $this->field ?? $this->getColumn();
+        return $this->field ?? $this->column;
     }
 
     /**
      * @param string|null $field
+     * @return DatabaseColumnDefinition
      */
     public function setField(?string $field): self
     {
@@ -140,6 +145,7 @@ class DatabaseColumnDefinition
 
     /**
      * @param string|null $joinFieldSelf
+     * @return DatabaseColumnDefinition
      */
     public function setJoinFieldSelf(?string $joinFieldSelf): self
     {
@@ -160,11 +166,12 @@ class DatabaseColumnDefinition
      */
     public function hasJoinTableSelf(): bool
     {
-        return null !== $this->joinTableSelf;
+        return isset($this->joinTableSelf);
     }
 
     /**
      * @param string|null $joinTableSelf
+     * @return DatabaseColumnDefinition
      */
     public function setJoinTableSelf(?string $joinTableSelf): self
     {
@@ -182,6 +189,7 @@ class DatabaseColumnDefinition
 
     /**
      * @param bool $key
+     * @return DatabaseColumnDefinition
      */
     public function setKey(bool $key): self
     {
@@ -221,4 +229,26 @@ class DatabaseColumnDefinition
             ->setAdditionalTableList($definition['table_List'])
             ->setJoinTableSelf($definition['joinTableSelf']);
     }
+
+    public function offsetExists($offset)
+    {
+        return isset($this->{$offset});
+    }
+
+    public function offsetGet($offset)
+    {
+        return $this->{$offset};
+    }
+
+    public function offsetSet($offset, $value)
+    {
+        $this->{$offset} = $value;
+    }
+
+    public function offsetUnset($offset)
+    {
+        unset($this->{$offset});
+    }
+
+
 }

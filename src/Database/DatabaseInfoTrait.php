@@ -2,52 +2,94 @@
 
 namespace Pars\Core\Database;
 
+use Laminas\Db\Sql\ExpressionInterface;
+
 trait DatabaseInfoTrait
 {
     /**
-     * @var array
+     * @var DatabaseColumnDefinition[]
      */
-    private array $dbInfo_Map = [];
+    private array $dbColumnDefinition_Map = [];
 
-    private array $dbJoinInfo_Map = [];
+    /**
+     * @var DatabaseTableJoinDefinition[]
+     */
+    private array $dbTableJoinDefinition_Map = [];
 
     /**
      *
      * @param string $field
-     * @param string $column
-     * @param string $table
-     * @param string $joinField
+     * @param string|null $column
+     * @param string|null $table
+     * @param string|null $joinField
      * @param bool $isKey
      * @param string|null $joinFieldSelf
      * @param array $table_List
      * @param string|null $joinTableSelf
-     * @return $this
+     * @return DatabaseColumnDefinition
      */
-    public function addColumn(string $field, string $column, string $table, string $joinField, bool $isKey = false, string $joinFieldSelf = null, array $table_List = [], string $joinTableSelf = null)
-    {
+    public function addColumn(
+        string $field,
+        string $column = null,
+        string $table = null,
+        string $joinField = null,
+        bool $isKey = false,
+        string $joinFieldSelf = null,
+        array $table_List = [],
+        string $joinTableSelf = null
+    ): DatabaseColumnDefinition {
         if (null === $joinFieldSelf) {
             $joinFieldSelf = $joinField;
         }
-        $this->dbInfo_Map[$field] = ['column' => $column, 'table' => $table, 'joinField' => $joinField, 'isKey' => $isKey, 'joinFieldSelf' => $joinFieldSelf, 'table_List' => $table_List, 'joinTableSelf' => $joinTableSelf];
-        return $this;
+        $definitionMap = [
+            'column' => $column,
+            'table' => $table,
+            'joinField' => $joinField,
+            'isKey' => $isKey,
+            'joinFieldSelf' => $joinFieldSelf,
+            'table_List' => $table_List,
+            'joinTableSelf' => $joinTableSelf
+        ];
+        $columnDefinition = new DatabaseColumnDefinition();
+        $columnDefinition->setField($field);
+        $columnDefinition->fromArray($definitionMap);
+        $this->dbColumnDefinition_Map[$field] = $columnDefinition;
+        return $columnDefinition;
     }
 
+    /**
+     * @param string $field
+     * @return DatabaseColumnDefinition
+     */
+    public function addField(string $field): DatabaseColumnDefinition
+    {
+        $columnDefinition = new DatabaseColumnDefinition();
+        $columnDefinition->setField($field);
+        $this->dbColumnDefinition_Map[$field] = $columnDefinition;
+        return $columnDefinition;
+    }
+
+    /**
+     * @return $this
+     */
     public function resetDbInfo()
     {
-        $this->dbInfo_Map = [];
-        $this->dbJoinInfo_Map = [];
+        $this->dbColumnDefinition_Map = [];
+        $this->dbTableJoinDefinition_Map = [];
         return $this;
     }
 
     /**
      * @param string $table
      * @param string $type
-     * @param $on
+     * @param string|ExpressionInterface $on
+     * @return DatabaseTableJoinDefinition
      */
-    public function addJoinInfo(string $table, string $type, $on)
+    public function addJoinInfo(string $table, string $type, $on): DatabaseTableJoinDefinition
     {
-        $this->dbJoinInfo_Map[$table] = ['type' => $type, 'on' => $on];
-        return $this;
+        $joinInfo = (new DatabaseTableJoinDefinition())->setTable($table)->setType($type)->setOn($on);
+        $this->dbTableJoinDefinition_Map[$table] = $joinInfo;
+        return $joinInfo;
     }
 
     /**
@@ -56,7 +98,7 @@ trait DatabaseInfoTrait
      */
     public function hasJoinInfo(string $table): bool
     {
-        return isset($this->dbJoinInfo_Map[$table]);
+        return isset($this->dbTableJoinDefinition_Map[$table]);
     }
 
     /**
@@ -65,7 +107,7 @@ trait DatabaseInfoTrait
      */
     private function getJoinType(string $table): string
     {
-        return $this->dbJoinInfo_Map[$table]['type'];
+        return $this->dbTableJoinDefinition_Map[$table]->getType();
     }
 
     /**
@@ -74,7 +116,7 @@ trait DatabaseInfoTrait
      */
     private function getJoinOn(string $table)
     {
-        return $this->dbJoinInfo_Map[$table]['on'];
+        return $this->dbTableJoinDefinition_Map[$table]->getOn();
     }
 
     /**
@@ -84,10 +126,10 @@ trait DatabaseInfoTrait
     public function getField_List(string $table = null): array
     {
         if (null === $table) {
-            return array_keys($this->dbInfo_Map);
+            return array_keys($this->dbColumnDefinition_Map);
         } else {
-            return array_keys(array_filter($this->dbInfo_Map, function ($item) use ($table) {
-                return $item['table'] === $table || in_array($table, $item['table_List']);
+            return array_keys(array_filter($this->dbColumnDefinition_Map, function ($item) use ($table) {
+                return $item->getTable() === $table || in_array($table, $item->getAdditionalTableList());
             }));
         }
     }
@@ -98,7 +140,7 @@ trait DatabaseInfoTrait
      */
     private function hasField(string $field)
     {
-        return isset($this->dbInfo_Map[$field]);
+        return isset($this->dbColumnDefinition_Map[$field]);
     }
 
     /**
@@ -106,17 +148,23 @@ trait DatabaseInfoTrait
      */
     private function getTable_List(): array
     {
-        return array_unique(array_column($this->dbInfo_Map, 'table'));
+        $table_List = [];
+        foreach ($this->dbColumnDefinition_Map as $item) {
+            if (!in_array($item->getTable(), $table_List)) {
+                $table_List[] = $item->getTable();
+            }
+        }
+        return $table_List;
     }
 
     /**
      * @param string $field
-     * @return array
+     * @return string
      * @throws \Exception
      */
     private function getTable(string $field): string
     {
-        return $this->getInfo($field, 'table');
+        return $this->getDefinition($field)->getTable();
     }
 
     /**
@@ -126,7 +174,7 @@ trait DatabaseInfoTrait
      */
     private function getJoinField(string $field): string
     {
-        return $this->getInfo($field, 'joinField');
+        return $this->getDefinition($field)->getJoinField();
     }
 
     /**
@@ -136,7 +184,7 @@ trait DatabaseInfoTrait
      */
     private function getJoinFieldSelf(string $field): string
     {
-        return $this->getInfo($field, 'joinFieldSelf');
+        return $this->getDefinition($field)->getJoinFieldSelf();
     }
 
     /**
@@ -147,7 +195,8 @@ trait DatabaseInfoTrait
      */
     private function getJoinTableSelf(string $field, string $default): string
     {
-        return $this->getInfo($field, 'joinTableSelf', $default);
+        return $this->getDefinition($field)->hasJoinTableSelf()
+            ? $this->getDefinition($field)->getJoinTableSelf() : $default;
     }
 
     /**
@@ -157,31 +206,20 @@ trait DatabaseInfoTrait
      */
     private function getColumn(string $field): string
     {
-        if (!isset($this->dbInfo_Map[$field])) {
-            throw new \Exception('No column found for field ' . $field);
-        }
-        return $this->dbInfo_Map[$field]['column'];
+        return $this->getDefinition($field)->getColumn();
     }
 
     /**
      * @param string $field
-     * @param string $key
-     * @param string|null $default
-     * @return string
+     * @return DatabaseColumnDefinition
      * @throws \Exception
      */
-    private function getInfo(string $field, string $key, string $default = null): string
+    private function getDefinition(string $field): DatabaseColumnDefinition
     {
-        if (!isset($this->dbInfo_Map[$field]) || $this->dbInfo_Map[$field] === null) {
+        if (!isset($this->dbColumnDefinition_Map[$field])) {
             throw new \Exception("Field $field not found in db info.");
         }
-        if (!isset($this->dbInfo_Map[$field][$key]) || $this->dbInfo_Map[$field][$key] === null) {
-            if (null !== $default) {
-                return $default;
-            }
-            throw new \Exception("Info $key in field $field not found in db info.");
-        }
-        return $this->dbInfo_Map[$field][$key];
+        return $this->dbColumnDefinition_Map[$field];
     }
 
     /**
@@ -191,13 +229,14 @@ trait DatabaseInfoTrait
      */
     private function getKeyField_List(?string $table = null, bool $primaryTable = false): array
     {
-        return array_keys(array_filter($this->dbInfo_Map, function ($item) use ($table, $primaryTable) {
+        return array_keys(array_filter($this->dbColumnDefinition_Map, function ($item) use ($table, $primaryTable) {
             if ($table !== null && $primaryTable) {
-                return $item['isKey'] && ($item['table'] == $table);
+                return $item->isKey() && ($item->getTable() == $table);
             } elseif ($table !== null) {
-                return $item['isKey'] && ($item['table'] == $table || in_array($table, $item['table_List']));
+                return $item->isKey()
+                    && ($item->getTable() == $table || in_array($table, $item->getAdditionalTableList()));
             } else {
-                return $item['isKey'];
+                return $item->isKey();
             }
         }));
     }
@@ -210,8 +249,8 @@ trait DatabaseInfoTrait
      */
     private function getField(string $column): string
     {
-        foreach ($this->dbInfo_Map as $field => $item) {
-            if ($item['column'] === $column) {
+        foreach ($this->dbColumnDefinition_Map as $field => $item) {
+            if ($item->getColumn() === $column) {
                 return $field;
             }
         }
