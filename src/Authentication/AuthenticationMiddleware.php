@@ -105,7 +105,7 @@ class AuthenticationMiddleware implements MiddlewareInterface
         if (in_array($current, $whitelist)) {
             return $handler->handle($request);
         }
-
+        $session->set('requested_path', (string) $request->getUri());
         return new RedirectResponse($redirect);
     }
 
