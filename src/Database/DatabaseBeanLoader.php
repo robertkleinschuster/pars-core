@@ -163,6 +163,22 @@ class DatabaseBeanLoader extends AbstractBeanLoader implements AdapterAwareInter
      * @param string $field
      * @param $value
      * @param string $logic
+     * @return DatabaseBeanLoader
+     * @throws \Exception
+     */
+    public function unsetValue($field, $value = null, $logic = Predicate::OP_AND)
+    {
+        if ($this->hasField($field)) {
+            unset($this->where_Map[$logic]["{$this->getTable($field)}.{$this->getColumn($field)}"]);
+        }
+        return $this;
+    }
+
+
+    /**
+     * @param string $field
+     * @param $value
+     * @param string $logic
      * @throws \Exception
      */
     public function excludeValue(string $field, $value, $logic = Predicate::OP_AND)
@@ -276,7 +292,7 @@ class DatabaseBeanLoader extends AbstractBeanLoader implements AdapterAwareInter
     {
         $likePredicate = null;
         if ($likePredicate == null) {
-            $likePredicate  = new Predicate();
+            $likePredicate = new Predicate();
         }
         foreach ($this->like_Map as $str => $like) {
             if (is_array($like['fields'])) {
