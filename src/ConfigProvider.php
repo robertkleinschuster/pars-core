@@ -39,6 +39,7 @@ class ConfigProvider
                 'list' => []
             ],
             'bundles' => [
+                'hash' => md5(random_bytes(5)),
                 'development' => false,
                 'list' => []
             ],
