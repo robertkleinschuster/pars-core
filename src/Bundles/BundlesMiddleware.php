@@ -9,6 +9,7 @@ use League\Flysystem\Filesystem;
 use MatthiasMullie\Minify;
 use Niceshops\Core\Exception\CoreException;
 use Padaliyajay\PHPAutoprefixer\Autoprefixer;
+use Pars\Helper\Filesystem\FilesystemHelper;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
@@ -126,28 +127,12 @@ class BundlesMiddleware implements MiddlewareInterface
 
     protected function injectHash(string $filename, string $hash): string
     {
-        $exp = explode('.', $filename);
-        $result = '';
-        $count = count($exp);
-        foreach ($exp as $key => $item) {
-            if ($key === $count - 1) {
-                $result .= '_' . $hash;
-                $result .= '.' . $item;
-
-            } else {
-                $result .= $item;
-            }
-        }
-        return $result;
+        return FilesystemHelper::injectHash($filename, $hash);
     }
 
     protected function extractHash(string $filename)
     {
-        $exp = explode('.', $filename);
-        array_pop($exp);
-        $str = array_pop($exp);
-        $exp = explode('_', $str);
-        return array_pop($exp);
+        return FilesystemHelper::extractHash($filename);
     }
 
     /**
@@ -165,26 +150,6 @@ class BundlesMiddleware implements MiddlewareInterface
      */
     protected function newestTime($directory)
     {
-        $newestTime = 0;
-        $files = $directory;
-        if (!is_array($files)) {
-            $files = glob($files . '/*');
-        }
-        if (is_array($files)) {
-            foreach ($files as $file) {
-                if (is_file($file) && filemtime($file) > $newestTime) {
-                    $newestTime = filemtime($file);
-                }
-                if (is_dir($file)) {
-                    $newestTimeInDir = $this->newestTime($file);
-                    if ($newestTimeInDir > $newestTime) {
-                        $newestTime = $newestTimeInDir;
-                    }
-                }
-            }
-            return $newestTime;
-        } else {
-            throw new CoreException('Invalid directory');
-        }
+        return FilesystemHelper::lastModified($directory);
     }
 }

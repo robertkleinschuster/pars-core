@@ -16,6 +16,7 @@
     "php": "^7.4",
     "ext-intl": "*",
     "ext-json": "*",
+    "composer/composer": "^2.0",
     "laminas/laminas-stdlib": "^3.2.1",
     "laminas/laminas-diactoros": "^2.3.0",
     "laminas/laminas-servicemanager": "^3.4",
@@ -50,7 +51,7 @@
     "matthiasmullie/minify": "^1.3",
     "scssphp/scssphp": "^1.3",
     "twbs/bootstrap": "4.6.0",
-    "padaliyajay/php-autoprefixer": "^1.3"
+    "padaliyajay/php-autoprefixer": "^1.3",
   },
   "require-dev": {
     "phpunit/phpunit": "^9.3.7",

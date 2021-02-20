@@ -9,6 +9,8 @@ use Laminas\ConfigAggregator\ConfigAggregator;
 
 class ParsCache extends AbstractCachePool
 {
+    public const DEFAULT_BASE_PATH = 'data/cache/pool/';
+
     /**
      * @type PhpCacheItem[]
      */
@@ -20,7 +22,7 @@ class ParsCache extends AbstractCachePool
      * @param string $file
      * @param string $basePath
      */
-    public function __construct(string $file, $basePath = 'data/cache/pool/')
+    public function __construct(string $file, $basePath = self::DEFAULT_BASE_PATH)
     {
         if (!is_dir($basePath)) {
             mkdir($basePath);

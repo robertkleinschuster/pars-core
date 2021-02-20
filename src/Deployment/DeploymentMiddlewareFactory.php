@@ -10,7 +10,7 @@ class DeploymentMiddlewareFactory
 {
     public function __invoke(ContainerInterface $container)
     {
-        return new DeploymentMiddleware($container->get('config'));
+        return new DeploymentMiddleware($container);
     }
 
 }
