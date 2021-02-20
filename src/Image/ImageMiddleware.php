@@ -43,12 +43,11 @@ class ImageMiddleware implements MiddlewareInterface
             }),
         ]);
         if ($request->getUri()->getPath() == '/img') {
-            if (!isset($_GET['file'])) {
-                return new \Laminas\Diactoros\Response\HtmlResponse('file parameter missing');
+            if (empty($_GET['file'])) {
+                $this->placeholder($_GET['w'], $_GET['h'], 'aaaaaa', 'ffffff', 'file parameter missing');
             }
             $path = str_replace($source, '', $_GET['file']);
             try {
-                $key = '';
                 $cache = new ParsCache('image');
                 $key = $cache->get('key', '');
                 if ($key == '' && file_exists('data/image_signature')) {
@@ -62,7 +61,9 @@ class ImageMiddleware implements MiddlewareInterface
                         $key = $finder->getBean()->Config_Value;
                         $cache->set('key', $key);
                         file_put_contents('data/image_signature', $key);
-                    } catch (\Throwable $exception) {}
+                    } catch (\Throwable $exception) {
+                        $this->placeholder($_GET['w'], $_GET['h'], 'aaaaaa', 'ffffff', $exception->getMessage());
+                    }
                 }
                 \League\Glide\Signatures\SignatureFactory::create($key)->validateRequest('/img', $_GET);
             } catch (\League\Glide\Signatures\SignatureException $e) {
@@ -70,15 +71,39 @@ class ImageMiddleware implements MiddlewareInterface
                     unlink('data/image_signature');
                 }
                 $cache->clear();
-                return new \Laminas\Diactoros\Response\HtmlResponse($e->getMessage());
+                $this->placeholder($_GET['w'], $_GET['h'], 'aaaaaa', 'ffffff', $e->getMessage());
             }
-            /**
-             * @var $response ResponseInterface
-             */
-            $response = $server->getImageResponse($path, $_GET);
-            return $response;
+            try {
+                /**
+                 * @var $response ResponseInterface
+                 */
+                $response = $server->getImageResponse($path, $_GET);
+                return $response;
+            } catch (\Throwable $exception) {
+                $this->placeholder($_GET['w'], $_GET['h'], 'aaaaaa', 'ffffff', $e->getMessage());
+            }
         }
         return $handler->handle($request->withAttribute(self::SERVER_ATTRIBUTE, $server));
     }
 
+    function placeholder($width, $height, $bg_color, $txt_color, $text = null)
+    {
+        if (!$text) {
+            $text = "$width X $height";
+        }
+        $image = imagecreate($width, $height);
+        $bg_color = imagecolorallocate($image, base_convert(substr($bg_color, 0, 2), 16, 10),
+            base_convert(substr($bg_color, 2, 2), 16, 10),
+            base_convert(substr($bg_color, 4, 2), 16, 10));
+        $txt_color = imagecolorallocate($image, base_convert(substr($txt_color, 0, 2), 16, 10),
+            base_convert(substr($txt_color, 2, 2), 16, 10),
+            base_convert(substr($txt_color, 4, 2), 16, 10));
+        imagefill($image, 0, 0, $bg_color);
+        $fontsize = ($width > $height) ? ($height / 10) : ($width / 10);
+        imagettftext($image, $fontsize, 0, 0, ($height / 2) + ($fontsize * 0.2), $txt_color, __DIR__ . DIRECTORY_SEPARATOR . 'HelveticaNeue.ttf', $text);
+        header("Content-Type: image/png");
+        imagepng($image);
+        imagedestroy($image);
+        exit;
+    }
 }
