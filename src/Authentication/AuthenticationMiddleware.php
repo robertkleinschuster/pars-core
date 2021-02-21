@@ -102,7 +102,7 @@ class AuthenticationMiddleware implements MiddlewareInterface
             return $handler->handle($request->withAttribute(UserInterface::class, $user));
         }
 
-        if (in_array($current, $whitelist)) {
+        if (in_array($current, $whitelist) && $request->getMethod() === 'GET') {
             return $handler->handle($request);
         }
         $session->set('requested_path', (string) $request->getUri());
