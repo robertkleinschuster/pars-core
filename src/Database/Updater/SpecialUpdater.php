@@ -9,6 +9,8 @@ use Pars\Model\Authorization\Role\RoleBeanFinder;
 use Pars\Model\Authorization\Role\RoleBeanProcessor;
 use Pars\Model\Authorization\RolePermission\RolePermissionBeanFinder;
 use Pars\Model\Authorization\RolePermission\RolePermissionBeanProcessor;
+use Pars\Model\Translation\TranslationLoader\TranslationBeanFinder;
+use Pars\Model\Translation\TranslationLoader\TranslationBeanProcessor;
 
 class SpecialUpdater extends AbstractUpdater
 {
@@ -262,4 +264,29 @@ class SpecialUpdater extends AbstractUpdater
         return '';
     }
 
+
+  /*  public function updateBenchmarkBackend()
+    {
+        ini_set('max_execution_time', 300);
+        $finder = new TranslationBeanFinder($this->adapter);
+        $beanList = $finder->getBeanFactory()->getEmptyBeanList();
+        for ($i  = 0; $i < 10000; $i++) {
+            $bean = $finder->getBeanFactory()->getEmptyBean([]);
+            $bean->Locale_Code = 'de_AT';
+            $bean->Translation_Code = 'Benchmark ' . $i;
+            $bean->Translation_Text = 'Benchmark ' . $i;
+            $bean->Translation_Namespace = 'benchmark';
+            $finder->setTranslation_Code($bean->Translation_Code);
+            if ($finder->count() === 0) {
+                $beanList->push($bean);
+            }
+        }
+
+        $processor = new TranslationBeanProcessor($this->adapter);
+        $processor->setBeanList($beanList);
+        if ($this->getMode() == self::MODE_EXECUTE) {
+            $processor->save();
+        }
+        return $beanList->count();
+    }*/
 }
