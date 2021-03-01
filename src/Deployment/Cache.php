@@ -9,13 +9,27 @@ use Laminas\Db\Adapter\AdapterAwareTrait;
 use Laminas\Db\Adapter\AdapterInterface;
 use Laminas\I18n\Translator\TranslatorAwareInterface;
 use Laminas\I18n\Translator\TranslatorAwareTrait;
+use Niceshops\Core\Option\OptionAwareInterface;
+use Niceshops\Core\Option\OptionAwareTrait;
 use Pars\Core\Cache\ParsCache;
 use Pars\Helper\Filesystem\FilesystemHelper;
 use Pars\Model\Localization\Locale\LocaleBeanFinder;
 use Pars\Model\Localization\Locale\LocaleBeanList;
 
-class Cache implements AdapterAwareInterface, TranslatorAwareInterface
+/**
+ * Class Cache
+ * @package Pars\Core\Deployment
+ */
+class Cache implements AdapterAwareInterface, TranslatorAwareInterface, OptionAwareInterface
 {
+    public const OPTION_RESET_OPCACHE = 'reset_opcache';
+    public const OPTION_CLEAR_CONFIG = 'clear_config';
+    public const OPTION_CLEAR_BUNDLES = 'clear_bundles';
+    public const OPTION_CLEAR_ASSETS = 'clear_assets';
+    public const OPTION_CLEAR_CACHE_POOL = 'clear_cache_pool';
+    public const OPTION_CLEAR_IMAGES = 'clear_images';
+
+    use OptionAwareTrait;
     use AdapterAwareTrait;
     use TranslatorAwareTrait;
 
@@ -32,20 +46,38 @@ class Cache implements AdapterAwareInterface, TranslatorAwareInterface
     {
         $this->applicationConfig = $applicationConfig;
         $this->setDbAdapter($adapter);
+        $this->addOption(self::OPTION_CLEAR_ASSETS);
+        $this->addOption(self::OPTION_CLEAR_BUNDLES);
+        $this->addOption(self::OPTION_CLEAR_CACHE_POOL);
+        $this->addOption(self::OPTION_RESET_OPCACHE);
+        $this->addOption(self::OPTION_CLEAR_IMAGES);
     }
 
 
     public function clear()
     {
-        if (function_exists('opcache_reset')) {
+        if (
+            function_exists('opcache_reset')
+            && $this->hasOption(self::OPTION_RESET_OPCACHE)
+        ) {
             opcache_reset();
         }
-        $this->clearConfig();
-        $this->clearPool();
+        if ($this->hasOption(self::OPTION_CLEAR_CONFIG)) {
+            $this->clearConfig();
+        }
+        if ($this->hasOption(self::OPTION_CLEAR_CACHE_POOL)) {
+            $this->clearPool();
+        }
         $this->clearSession();
-        $this->clearBundles();
-        $this->clearAssets();
-        $this->clearImages();
+        if ($this->hasOption(self::OPTION_CLEAR_BUNDLES)) {
+            $this->clearBundles();
+        }
+        if ($this->hasOption(self::OPTION_CLEAR_ASSETS)) {
+            $this->clearAssets();
+        }
+        if ($this->hasOption(self::OPTION_CLEAR_IMAGES)) {
+            $this->clearImages();
+        }
         $this->clearTranslations();
     }
 
@@ -62,7 +94,6 @@ class Cache implements AdapterAwareInterface, TranslatorAwareInterface
         if (is_dir(ParsCache::DEFAULT_BASE_PATH)) {
             FilesystemHelper::deleteDirectory(ParsCache::DEFAULT_BASE_PATH);
         }
-
     }
 
 
