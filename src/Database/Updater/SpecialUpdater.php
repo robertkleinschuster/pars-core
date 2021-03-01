@@ -4,6 +4,11 @@
 namespace Pars\Core\Database\Updater;
 
 
+use Laminas\Db\Adapter\Adapter;
+use Laminas\Db\Sql\Ddl\DropTable;
+use Laminas\Db\Sql\Insert;
+use Laminas\Db\Sql\Select;
+use Laminas\Db\Sql\Sql;
 use Pars\Model\Authorization\Permission\PermissionBeanFinder;
 use Pars\Model\Authorization\Role\RoleBeanFinder;
 use Pars\Model\Authorization\Role\RoleBeanProcessor;
@@ -70,14 +75,14 @@ class SpecialUpdater extends AbstractUpdater
             'cmspage.create',
             'cmspage.edit',
             'cmspage.delete',
-            'cmspageparagraph',
-            'cmspageparagraph.create',
-            'cmspageparagraph.edit',
-            'cmspageparagraph.delete',
-            'cmsparagraph',
-            'cmsparagraph.create',
-            'cmsparagraph.edit',
-            'cmsparagraph.delete',
+            'cmspageblock',
+            'cmspageblock.create',
+            'cmspageblock.edit',
+            'cmspageblock.delete',
+            'cmsblock',
+            'cmsblock.create',
+            'cmsblock.edit',
+            'cmsblock.delete',
             'cmspost',
             'cmspost.create',
             'cmspost.edit',
@@ -116,14 +121,14 @@ class SpecialUpdater extends AbstractUpdater
             'cmspage.create',
           #  'cmspage.edit',
           #  'cmspage.delete',
-            'cmspageparagraph',
-            'cmspageparagraph.create',
-          #  'cmspageparagraph.edit',
-          #  'cmspageparagraph.delete',
-            'cmsparagraph',
-            'cmsparagraph.create',
-          #  'cmsparagraph.edit',
-          #  'cmsparagraph.delete',
+            'cmspageblock',
+            'cmspageblock.create',
+          #  'cmspageblock.edit',
+          #  'cmspageblock.delete',
+            'cmsblock',
+            'cmsblock.create',
+          #  'cmsblock.edit',
+          #  'cmsblock.delete',
             'cmspost',
             'cmspost.create',
           #  'cmspost.edit',
@@ -163,14 +168,14 @@ class SpecialUpdater extends AbstractUpdater
             #'cmspage.create',
             #  'cmspage.edit',
             #  'cmspage.delete',
-            #'cmspageparagraph',
-            #'cmspageparagraph.create',
-            #  'cmspageparagraph.edit',
-            #  'cmspageparagraph.delete',
-            #'cmsparagraph',
-            #'cmsparagraph.create',
-            #  'cmsparagraph.edit',
-            #  'cmsparagraph.delete',
+            #'cmspageblock',
+            #'cmspageblock.create',
+            #  'cmspageblock.edit',
+            #  'cmspageblock.delete',
+            #'cmsblock',
+            #'cmsblock.create',
+            #  'cmsblock.edit',
+            #  'cmsblock.delete',
             'cmspost',
             'cmspost.create',
             #  'cmspost.edit',
@@ -264,6 +269,85 @@ class SpecialUpdater extends AbstractUpdater
         return '';
     }
 
+    public function updateTransferParagraphToBlock()
+    {
+        if (in_array('CmsParagraph', $this->existingTableList)) {
+            $select = new Select('CmsParagraph');
+            $sql = new Sql($this->adapter);
+            $query = $sql->buildSqlString($select, $this->adapter);
+            $selectResult = $this->adapter->query($query, Adapter::QUERY_MODE_EXECUTE);
+            if (is_iterable($selectResult)) {
+                foreach ($selectResult as $item) {
+                    $datum = [];
+                    foreach ($item as $key => $value) {
+                        $datum[str_replace('Paragraph', 'Block', $key)] = $value;
+                    }
+                    $select = new Select('CmsBlock');
+                    $select->where($datum);
+                    $sql = new Sql($this->adapter);
+                    $query = $sql->buildSqlString($select, $this->adapter);
+                    $countResult = $this->adapter->query($query, Adapter::QUERY_MODE_EXECUTE);
+                    if (!$countResult->count()) {
+                        $insert = new Insert('CmsBlock');
+                        $insert->values($datum);
+                        $this->query($insert);
+                    }
+                }
+            }
+            $drop = new DropTable('CmsParagraph');
+            return $this->query($drop);
+        }
+        return '';
+    }
+
+    public function updateTransferPageParagraphToPageBlock()
+    {
+        if (in_array('CmsPage_CmsParagraph', $this->existingTableList)) {
+            $select = new Select('CmsPage_CmsParagraph');
+            $sql = new Sql($this->adapter);
+            $query = $sql->buildSqlString($select, $this->adapter);
+            $selectResult = $this->adapter->query($query, Adapter::QUERY_MODE_EXECUTE);
+            if (is_iterable($selectResult)) {
+                foreach ($selectResult as $item) {
+                    $datum = [];
+                    foreach ($item as $key => $value) {
+                        $datum[str_replace('Paragraph', 'Block', $key)] = $value;
+                    }
+                    $select = new Select('CmsPage_CmsBlock');
+                    $select->where($datum);
+                    $sql = new Sql($this->adapter);
+                    $query = $sql->buildSqlString($select, $this->adapter);
+                    $countResult = $this->adapter->query($query, Adapter::QUERY_MODE_EXECUTE);
+                    if (!$countResult->count()) {
+                        $insert = new Insert('CmsPage_CmsBlock');
+                        $insert->values($datum);
+                        $this->query($insert);
+                    }
+                }
+            }
+            $drop = new DropTable('CmsPage_CmsParagraph');
+            return $this->query($drop);
+        }
+        return '';
+    }
+
+    public function updateDropCmsPagragraphType()
+    {
+        if (in_array('CmsParagraphType', $this->existingTableList)) {
+            $drop = new DropTable('CmsParagraphType');
+            return $this->query($drop);
+        }
+        return '';
+    }
+
+    public function updateDropCmsPagragraphState()
+    {
+        if (in_array('CmsParagraphState', $this->existingTableList)) {
+            $drop = new DropTable('CmsParagraphState');
+            return $this->query($drop);
+        }
+        return '';
+    }
 
   /*  public function updateBenchmarkBackend()
     {

@@ -50,8 +50,11 @@ class TranslatorMiddleware implements MiddlewareInterface
             $this->translator->setLocale($locale->getLocale_Code());
         }
         if ($adapter instanceof Adapter) {
-            $fallback = (new ConfigBeanFinder($adapter))->setConfig_Code('locale.default')->getBean()->get('Config_Value');
-            $this->translator->setFallbackLocale($fallback);
+            try {
+                $fallback = (new ConfigBeanFinder($adapter))->setConfig_Code('locale.default')->getBean()->get('Config_Value');
+                $this->translator->setFallbackLocale($fallback);
+            } catch (\Throwable $exeption) {
+            }
         }
         if ($logger instanceof LoggerInterface) {
             $this->translator->enableEventManager();

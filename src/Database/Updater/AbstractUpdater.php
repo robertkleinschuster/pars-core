@@ -271,9 +271,9 @@ abstract class AbstractUpdater implements ValidationHelperAwareInterface, Adapte
      * @param string $table
      * @return AlterTable|CreateTable
      */
-    protected function getTableStatement(string $tableName)
+    protected function getTableStatement(string $tableName, bool $forceUpdate = false)
     {
-        if (!in_array($tableName, $this->existingTableList)) {
+        if (!in_array($tableName, $this->existingTableList) && !$forceUpdate) {
             $table = new CreateTable($tableName);
         } else {
             $table = new AlterTable($tableName);

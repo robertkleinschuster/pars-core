@@ -102,7 +102,10 @@ class AuthenticationMiddleware implements MiddlewareInterface
             return $handler->handle($request->withAttribute(UserInterface::class, $user));
         }
 
-        if (in_array($current, $whitelist) && $request->getMethod() === 'GET') {
+        if (
+               (in_array($current, $whitelist)  && $current !== $redirect ) // e.g. setup
+            || ($request->getMethod() === 'GET' && $current === $redirect) // login screen
+        ) {
             return $handler->handle($request);
         }
         $session->set('requested_path', (string) $request->getUri());

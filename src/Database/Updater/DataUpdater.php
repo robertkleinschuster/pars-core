@@ -533,18 +533,18 @@ class DataUpdater extends AbstractUpdater
         return $this->saveDataMap('CmsPageLayout', 'CmsPageLayout_Code', $data_Map);
     }
 
-    public function updateDataCmsParagraphState()
+    public function updateDataCmsBlockState()
     {
         $data_Map = [];
         $data_Map[] = [
-            'CmsParagraphState_Code' => 'active',
-            'CmsParagraphState_Active' => true,
+            'CmsBlockState_Code' => 'active',
+            'CmsBlockState_Active' => true,
         ];
         $data_Map[] = [
-            'CmsParagraphState_Code' => 'inactive',
-            'CmsParagraphState_Active' => true,
+            'CmsBlockState_Code' => 'inactive',
+            'CmsBlockState_Active' => true,
         ];
-        return $this->saveDataMap('CmsParagraphState', 'CmsParagraphState_Code', $data_Map);
+        return $this->saveDataMap('CmsBlockState', 'CmsBlockState_Code', $data_Map);
     }
 
     public function updateDataFileType()
@@ -566,40 +566,50 @@ class DataUpdater extends AbstractUpdater
     }
 
 
-    public function updateDataCmsParagraphType()
+    public function updateDataCmsBlockType()
     {
         $data_Map = [];
         $data_Map[] = [
-            'CmsParagraphType_Code' => 'text',
-            'CmsParagraphType_Template' => 'cmsparagraph::text',
-            'CmsParagraphType_Active' => 1,
+            'CmsBlockType_Code' => 'contact',
+            'CmsBlockType_Template' => 'cmsblock::contact',
+            'CmsBlockType_Active' => 1,
         ];
         $data_Map[] = [
-            'CmsParagraphType_Code' => 'banner',
-            'CmsParagraphType_Template' => 'cmsparagraph::banner',
-            'CmsParagraphType_Active' => 1,
+            'CmsBlockType_Code' => 'poll',
+            'CmsBlockType_Template' => 'cmsblock::poll',
+            'CmsBlockType_Active' => 1,
         ];
         $data_Map[] = [
-            'CmsParagraphType_Code' => 'video',
-            'CmsParagraphType_Template' => 'cmsparagraph::video',
-            'CmsParagraphType_Active' => 1,
+            'CmsBlockType_Code' => 'text',
+            'CmsBlockType_Template' => 'cmsblock::text',
+            'CmsBlockType_Active' => 1,
         ];
         $data_Map[] = [
-            'CmsParagraphType_Code' => 'picture',
-            'CmsParagraphType_Template' => 'cmsparagraph::picture',
-            'CmsParagraphType_Active' => 1,
+            'CmsBlockType_Code' => 'banner',
+            'CmsBlockType_Template' => 'cmsblock::banner',
+            'CmsBlockType_Active' => 1,
         ];
         $data_Map[] = [
-            'CmsParagraphType_Code' => 'link',
-            'CmsParagraphType_Template' => 'cmsparagraph::link',
-            'CmsParagraphType_Active' => 1,
+            'CmsBlockType_Code' => 'video',
+            'CmsBlockType_Template' => 'cmsblock::video',
+            'CmsBlockType_Active' => 1,
         ];
         $data_Map[] = [
-            'CmsParagraphType_Code' => 'default',
-            'CmsParagraphType_Template' => 'cmsparagraph::default',
-            'CmsParagraphType_Active' => 1,
+            'CmsBlockType_Code' => 'picture',
+            'CmsBlockType_Template' => 'cmsblock::picture',
+            'CmsBlockType_Active' => 1,
         ];
-        return $this->saveDataMap('CmsParagraphType', 'CmsParagraphType_Code', $data_Map);
+        $data_Map[] = [
+            'CmsBlockType_Code' => 'link',
+            'CmsBlockType_Template' => 'cmsblock::link',
+            'CmsBlockType_Active' => 1,
+        ];
+        $data_Map[] = [
+            'CmsBlockType_Code' => 'default',
+            'CmsBlockType_Template' => 'cmsblock::default',
+            'CmsBlockType_Active' => 1,
+        ];
+        return $this->saveDataMap('CmsBlockType', 'CmsBlockType_Code', $data_Map);
     }
 
 
@@ -754,36 +764,36 @@ class DataUpdater extends AbstractUpdater
 
 
         $data_Map[] = [
-            'UserPermission_Code' => 'cmsparagraph',
+            'UserPermission_Code' => 'cmsblock',
             'UserPermission_Active' => true,
         ];
         $data_Map[] = [
-            'UserPermission_Code' => 'cmsparagraph.delete',
+            'UserPermission_Code' => 'cmsblock.delete',
             'UserPermission_Active' => true,
         ];
         $data_Map[] = [
-            'UserPermission_Code' => 'cmsparagraph.create',
+            'UserPermission_Code' => 'cmsblock.create',
             'UserPermission_Active' => true,
         ];
         $data_Map[] = [
-            'UserPermission_Code' => 'cmsparagraph.edit',
+            'UserPermission_Code' => 'cmsblock.edit',
             'UserPermission_Active' => true,
         ];
 
         $data_Map[] = [
-            'UserPermission_Code' => 'cmspageparagraph',
+            'UserPermission_Code' => 'cmspageblock',
             'UserPermission_Active' => true,
         ];
         $data_Map[] = [
-            'UserPermission_Code' => 'cmspageparagraph.delete',
+            'UserPermission_Code' => 'cmspageblock.delete',
             'UserPermission_Active' => true,
         ];
         $data_Map[] = [
-            'UserPermission_Code' => 'cmspageparagraph.create',
+            'UserPermission_Code' => 'cmspageblock.create',
             'UserPermission_Active' => true,
         ];
         $data_Map[] = [
-            'UserPermission_Code' => 'cmspageparagraph.edit',
+            'UserPermission_Code' => 'cmspageblock.edit',
             'UserPermission_Active' => true,
         ];
 
