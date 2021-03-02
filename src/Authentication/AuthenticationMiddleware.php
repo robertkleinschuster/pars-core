@@ -103,8 +103,8 @@ class AuthenticationMiddleware implements MiddlewareInterface
         }
 
         if (
-               (in_array($current, $whitelist)  && $current !== $redirect ) // e.g. setup
-            || ($request->getMethod() === 'GET' && $current === $redirect) // login screen
+               (in_array($current, $whitelist)  && $current !== $this->normalizePath($redirect) ) // e.g. setup
+            || ($request->getMethod() === 'GET' && $current === $this->normalizePath($redirect)) // login screen
         ) {
             return $handler->handle($request);
         }
