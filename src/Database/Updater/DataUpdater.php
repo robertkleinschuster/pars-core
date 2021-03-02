@@ -577,7 +577,7 @@ class DataUpdater extends AbstractUpdater
         $data_Map[] = [
             'CmsBlockType_Code' => 'poll',
             'CmsBlockType_Template' => 'cmsblock::poll',
-            'CmsBlockType_Active' => 1,
+            'CmsBlockType_Active' => 0,
         ];
         $data_Map[] = [
             'CmsBlockType_Code' => 'text',
