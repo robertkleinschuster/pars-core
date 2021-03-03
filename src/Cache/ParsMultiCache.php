@@ -69,8 +69,8 @@ class ParsMultiCache extends AbstractCachePool
     protected function clearAllObjectsFromCache()
     {
         foreach ($this->cache as $key => $value) {
-            if (file_exists($this->folder. DIRECTORY_SEPARATOR  . $key . '.php')) {
-                unlink($this->folder. DIRECTORY_SEPARATOR  . $key . '.php');
+            if (file_exists($this->folder . DIRECTORY_SEPARATOR  . $key . '.php')) {
+                unlink($this->folder . DIRECTORY_SEPARATOR  . $key . '.php');
             }
         }
         $this->cache = [];
@@ -153,7 +153,7 @@ class ParsMultiCache extends AbstractCachePool
     private function saveToFile(string $key)
     {
         if (file_exists($this->folder . DIRECTORY_SEPARATOR . $key . '.php')) {
-            unlink($this->folder. DIRECTORY_SEPARATOR  . $key . '.php');
+            unlink($this->folder . DIRECTORY_SEPARATOR  . $key . '.php');
         }
         $agg = new ConfigAggregator(
             [
@@ -176,9 +176,9 @@ class ParsMultiCache extends AbstractCachePool
             [],
             $this->folder . DIRECTORY_SEPARATOR . $key . '.php'
         );
-       if (count($agg->getMergedConfig())) {
-           $this->cache[$key] = $agg->getMergedConfig();
-       }
+        if (count($agg->getMergedConfig())) {
+            $this->cache[$key] = $agg->getMergedConfig();
+        }
     }
 
 
@@ -193,6 +193,4 @@ class ParsMultiCache extends AbstractCachePool
     {
         return isset($this->cache[$key]);
     }
-
-
 }

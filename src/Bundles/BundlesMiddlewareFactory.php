@@ -1,8 +1,6 @@
 <?php
 
-
 namespace Pars\Core\Bundles;
-
 
 use Psr\Container\ContainerInterface;
 
@@ -12,5 +10,4 @@ class BundlesMiddlewareFactory
     {
         return new BundlesMiddleware($container->get('config')['bundles']);
     }
-
 }

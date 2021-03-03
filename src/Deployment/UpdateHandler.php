@@ -1,6 +1,5 @@
 <?php
 
-
 namespace Pars\Core\Deployment;
 
 use Composer\Script\Event;
@@ -27,12 +26,10 @@ class UpdateHandler
     public static function postPackageInstall(PackageEvent $event)
     {
         $installedPackage = $event->getOperation()->getPackage();
-
     }
 
     public static function postPackageUpdate(PackageEvent $event)
     {
         $operation = $event->getOperation();
-
     }
 }

@@ -1,8 +1,6 @@
 <?php
 
-
 namespace Pars\Core\Assets;
-
 
 use League\Flysystem\Adapter\Local;
 use League\Flysystem\Filesystem;
@@ -59,10 +57,8 @@ class AssetsMiddleware implements MiddlewareInterface
                         $sources->readStream($asset['source'])
                     );
                 }
-
             }
         }
         return $handler->handle($request->withAttribute(AssetsMiddleware::class, $this->config));
     }
-
 }

@@ -249,6 +249,4 @@ class DatabaseColumnDefinition implements \ArrayAccess
     {
         unset($this->{$offset});
     }
-
-
 }

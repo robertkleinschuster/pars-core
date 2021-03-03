@@ -2,7 +2,6 @@
 
 namespace Pars\Core\Database\Updater;
 
-
 use Pars\Model\File\FileBeanFinder;
 
 class DataUpdater extends AbstractUpdater

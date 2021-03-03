@@ -1,8 +1,6 @@
 <?php
 
-
 namespace Pars\Core\Deployment;
-
 
 use Psr\Container\ContainerInterface;
 
@@ -12,5 +10,4 @@ class DeploymentMiddlewareFactory
     {
         return new DeploymentMiddleware($container);
     }
-
 }

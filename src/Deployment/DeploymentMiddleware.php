@@ -1,8 +1,6 @@
 <?php
 
-
 namespace Pars\Core\Deployment;
-
 
 use Laminas\Db\Adapter\Adapter;
 use Laminas\Db\Adapter\AdapterInterface;
@@ -38,7 +36,8 @@ class DeploymentMiddleware implements MiddlewareInterface
         $key = 'pars';
         try {
             $key = (new ConfigBeanFinder($this->adapter))->setConfig_Code('asset.key')->getBean()->get('Config_Value');
-        } catch (\Throwable $exception){}
+        } catch (\Throwable $exception) {
+        }
         if (isset($request->getQueryParams()['clearcache']) && $request->getQueryParams()['clearcache'] == $key) {
             $cache = new Cache($this->config, $this->adapter);
             $cache->setTranslator($this->translator);

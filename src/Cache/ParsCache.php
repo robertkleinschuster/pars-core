@@ -184,6 +184,4 @@ class ParsCache extends AbstractCachePool
         $this->loadFile();
         return isset($this->cache[$key]);
     }
-
-
 }

@@ -1,8 +1,6 @@
 <?php
 
-
 namespace Pars\Core\Task\Order;
-
 
 use Niceshops\Bean\Finder\BeanFinderInterface;
 use Niceshops\Bean\Processor\BeanProcessorInterface;

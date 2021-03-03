@@ -1,8 +1,6 @@
 <?php
 
-
 namespace Pars\Core\Deployment;
-
 
 use Laminas\Db\Adapter\AdapterAwareInterface;
 use Laminas\Db\Adapter\AdapterAwareTrait;
@@ -101,7 +99,7 @@ class Cache implements AdapterAwareInterface, TranslatorAwareInterface, OptionAw
     {
         if (is_dir($this->applicationConfig['mezzio-session-cache']['filesystem_folder'])) {
             $dir = $this->applicationConfig['mezzio-session-cache']['filesystem_folder'];
-            $files = array_diff(scandir($dir), array('.', '..'));
+            $files = array_diff(scandir($dir), ['.', '..']);
             foreach ($files as $file) {
                 $path = $dir . DIRECTORY_SEPARATOR . $file;
                 if (is_file($path) && strpos($path, '.php') !== false) {
@@ -160,7 +158,6 @@ class Cache implements AdapterAwareInterface, TranslatorAwareInterface, OptionAw
                     $_SERVER['DOCUMENT_ROOT'] . DIRECTORY_SEPARATOR . $this->applicationConfig['image']['cache']
                 );
             }
-
         }
     }
 
@@ -187,7 +184,8 @@ class Cache implements AdapterAwareInterface, TranslatorAwareInterface, OptionAw
                     $locale->get('Locale_Code')
                 );
             }
-        } elseif (isset($this->applicationConfig['translator']['locale'])
+        } elseif (
+            isset($this->applicationConfig['translator']['locale'])
             && is_array($this->applicationConfig['translator']['locale'])
         ) {
             foreach ($this->applicationConfig['translator']['locale'] as $locale) {
@@ -198,14 +196,15 @@ class Cache implements AdapterAwareInterface, TranslatorAwareInterface, OptionAw
 
     protected function clearTranslationsSource(string $source, LocaleBeanList $localeList)
     {
-        if (isset($this->applicationConfig['translator'][$source])
-            && is_array($this->applicationConfig['translator'][$source])) {
+        if (
+            isset($this->applicationConfig['translator'][$source])
+            && is_array($this->applicationConfig['translator'][$source])
+        ) {
             foreach ($this->applicationConfig['translator'][$source] as $translation_file_pattern) {
                 if (isset($translation_file_pattern['text_domain'])) {
                     $this->clearTranslationsTextDomain($translation_file_pattern['text_domain'], $localeList);
                 }
             }
         }
-
     }
 }

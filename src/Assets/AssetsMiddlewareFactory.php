@@ -1,8 +1,6 @@
 <?php
 
-
 namespace Pars\Core\Assets;
-
 
 use Psr\Container\ContainerInterface;
 
@@ -12,5 +10,4 @@ class AssetsMiddlewareFactory
     {
         return new AssetsMiddleware($container->get('config')['assets']);
     }
-
 }

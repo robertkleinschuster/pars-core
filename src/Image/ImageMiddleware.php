@@ -1,8 +1,6 @@
 <?php
 
-
 namespace Pars\Core\Image;
-
 
 use Laminas\Db\Adapter\AdapterInterface;
 use Pars\Core\Cache\ParsCache;
@@ -92,12 +90,18 @@ class ImageMiddleware implements MiddlewareInterface
             $text = "$width X $height";
         }
         $image = imagecreate($width, $height);
-        $bg_color = imagecolorallocate($image, base_convert(substr($bg_color, 0, 2), 16, 10),
+        $bg_color = imagecolorallocate(
+            $image,
+            base_convert(substr($bg_color, 0, 2), 16, 10),
             base_convert(substr($bg_color, 2, 2), 16, 10),
-            base_convert(substr($bg_color, 4, 2), 16, 10));
-        $txt_color = imagecolorallocate($image, base_convert(substr($txt_color, 0, 2), 16, 10),
+            base_convert(substr($bg_color, 4, 2), 16, 10)
+        );
+        $txt_color = imagecolorallocate(
+            $image,
+            base_convert(substr($txt_color, 0, 2), 16, 10),
             base_convert(substr($txt_color, 2, 2), 16, 10),
-            base_convert(substr($txt_color, 4, 2), 16, 10));
+            base_convert(substr($txt_color, 4, 2), 16, 10)
+        );
         imagefill($image, 0, 0, $bg_color);
         $fontsize = ($width > $height) ? ($height / 10) : ($width / 10);
         imagettftext($image, $fontsize, 0, 0, ($height / 2) + ($fontsize * 0.2), $txt_color, __DIR__ . DIRECTORY_SEPARATOR . 'HelveticaNeue.ttf', $text);

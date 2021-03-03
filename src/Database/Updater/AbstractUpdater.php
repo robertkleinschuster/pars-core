@@ -388,13 +388,17 @@ abstract class AbstractUpdater implements ValidationHelperAwareInterface, Adapte
                 $arrDropped[] = $constraintName;
             }
 
-            if (!in_array($constraintName_old, $arrDropped)
-                && $this->hasConstraints($tableName, $constraintName_old)) {
+            if (
+                !in_array($constraintName_old, $arrDropped)
+                && $this->hasConstraints($tableName, $constraintName_old)
+            ) {
                 $table->dropConstraint($constraintName_old);
             }
 
-            if (!in_array($constraintName_old . '_', $arrDropped)
-                && $this->hasConstraints($tableName, $constraintName_old . '_')) {
+            if (
+                !in_array($constraintName_old . '_', $arrDropped)
+                && $this->hasConstraints($tableName, $constraintName_old . '_')
+            ) {
                 $table->dropConstraint($constraintName_old . '_');
             }
 
@@ -408,7 +412,7 @@ abstract class AbstractUpdater implements ValidationHelperAwareInterface, Adapte
     protected function abbreviate($string, $l = 2)
     {
         $results = ''; // empty string
-        $vowels = array('a', 'e', 'i', 'o', 'u', 'y'); // vowels
+        $vowels = ['a', 'e', 'i', 'o', 'u', 'y']; // vowels
         preg_match_all('/[A-Z][a-z]*/', ucfirst($string), $m); // Match every word that begins with a capital letter, added ucfirst() in case there is no uppercase letter
         foreach ($m[0] as $substring) {
             $substring = str_replace($vowels, '', $substring); // String to lower case and remove all vowels

@@ -1,8 +1,6 @@
 <?php
 
-
 namespace Pars\Core\Bundles;
-
 
 use League\Flysystem\Adapter\Local;
 use League\Flysystem\Filesystem;
@@ -55,7 +53,8 @@ class BundlesMiddleware implements MiddlewareInterface
      */
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
-        if (strtolower($request->getHeaderLine('X-Requested-With')) !== 'xmlhttprequest'
+        if (
+            strtolower($request->getHeaderLine('X-Requested-With')) !== 'xmlhttprequest'
             && strtolower($request->getMethod()) === 'get'
         ) {
             $hash = $this->config['hash'];
@@ -95,7 +94,6 @@ class BundlesMiddleware implements MiddlewareInterface
                                 }
                             }
                         }
-
                     }
                     if (!$documentRoot->has($bundle['output'])) {
                         if ($bundle['type'] == 'js' && count($bundle['sources'])) {

@@ -509,6 +509,4 @@ class DatabaseBeanLoader extends AbstractBeanLoader implements AdapterAwareInter
             $this->excludeValue($field, $value);
         }
     }
-
-
 }

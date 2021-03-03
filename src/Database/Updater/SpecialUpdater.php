@@ -1,8 +1,6 @@
 <?php
 
-
 namespace Pars\Core\Database\Updater;
-
 
 use Laminas\Db\Adapter\Adapter;
 use Laminas\Db\Sql\Ddl\DropTable;
@@ -198,7 +196,8 @@ class SpecialUpdater extends AbstractUpdater
      * @param bool $active
      * @return int|string
      */
-    protected function role(string $code, string $name, bool $active) {
+    protected function role(string $code, string $name, bool $active)
+    {
         $roleFinder = new RoleBeanFinder($this->adapter);
         $roleFinder->setUserRole_Code($code);
         if ($roleFinder->count() === 0) {
@@ -224,7 +223,8 @@ class SpecialUpdater extends AbstractUpdater
      * @return string
      * @throws \Niceshops\Bean\Type\Base\BeanException
      */
-    protected function rolePermissions(string $roleCode, array $permissions) {
+    protected function rolePermissions(string $roleCode, array $permissions)
+    {
         $roleFinder = new RoleBeanFinder($this->adapter);
         $roleFinder->setUserRole_Code($roleCode);
         if ($roleFinder->count() == 1) {

@@ -1,8 +1,6 @@
 <?php
 
-
 namespace Pars\Core\Emitter;
-
 
 use Laminas\ConfigAggregator\ConfigAggregator;
 use Psr\Container\ContainerInterface;
@@ -20,5 +18,4 @@ class EmitterFactory
         }
         return $stack;
     }
-
 }

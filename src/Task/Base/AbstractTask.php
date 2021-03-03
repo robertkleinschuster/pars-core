@@ -1,6 +1,5 @@
 <?php
 
-
 namespace Pars\Core\Task\Base;
 
 use Laminas\Db\Adapter\Adapter;
@@ -224,5 +223,4 @@ abstract class AbstractTask implements AdapterAwareInterface
     }
 
     abstract public function execute(): void;
-
 }
