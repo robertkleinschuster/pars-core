@@ -73,6 +73,20 @@ class DatabaseBeanLoader extends AbstractBeanLoader implements AdapterAwareInter
         $this->order_Map = [];
     }
 
+    /**
+     * @return $this
+     */
+    public function reset(): self
+    {
+        $this->where_Map = [];
+        $this->exclude_Map = [];
+        $this->like_Map = [];
+        $this->order_Map = [];
+        $this->limit = null;
+        $this->offset = null;
+        $this->result = null;
+        return $this;
+    }
 
     /**
      * @return int
