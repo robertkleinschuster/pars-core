@@ -64,7 +64,7 @@ class AuthenticationMiddleware implements MiddlewareInterface
             ->setController($config['authentication']['redirect']['controller'])
             ->setAction($config['authentication']['redirect']['action'])
             ->getPath();
-
+        $redirectOrig = $redirect;
         $whitelist = [];
         $whitelist[] = $this->normalizePath($redirect);
         foreach ($config['authentication']['whitelist'] as $item) {
@@ -103,8 +103,8 @@ class AuthenticationMiddleware implements MiddlewareInterface
         }
 
         if (
-               (in_array($current, $whitelist)  && $current !== $this->normalizePath($redirect) ) // e.g. setup
-            || ($request->getMethod() === 'GET' && $current === $this->normalizePath($redirect)) // login screen
+               (in_array($current, $whitelist)  && $current !== $this->normalizePath($redirectOrig) ) // e.g. setup
+            || ($request->getMethod() === 'GET' && $current === $this->normalizePath($redirectOrig)) // login screen
         ) {
             return $handler->handle($request);
         }
