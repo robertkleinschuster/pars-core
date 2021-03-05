@@ -37,7 +37,6 @@ class SchemaUpdater extends AbstractUpdater
     public function updateTablePerson_DropConstraints()
     {
         $table = $this->getTableStatement('Person', true);
-        $this->dropConstraintFromTable($table, new PrimaryKey('Person_ID'));
         $this->dropConstraintFromTable($table, new ForeignKey(null, 'File_ID', 'File', 'File_ID'));
         $this->dropColumnFromTable($table, new Integer('File_ID', true));
         $this->dropDefaultConstraintsFromTable($table);
@@ -69,7 +68,6 @@ class SchemaUpdater extends AbstractUpdater
     public function updateTableConfig_DropConstraints()
     {
         $table = $this->getTableStatement('Config', true);
-        $this->dropConstraintFromTable($table, new PrimaryKey('Config_Code'));
         $this->dropDefaultConstraintsFromTable($table);
         return $this->query($table);
     }
@@ -97,7 +95,6 @@ class SchemaUpdater extends AbstractUpdater
     public function updateTableFileType_DropConstraints()
     {
         $table = $this->getTableStatement('FileType', true);
-        $this->dropConstraintFromTable($table, new PrimaryKey('FileType_Code'));
         $this->dropConstraintFromTable($table, new UniqueKey('FileType_Mime'));
         $this->dropDefaultConstraintsFromTable($table);
         return $this->query($table);
@@ -126,7 +123,6 @@ class SchemaUpdater extends AbstractUpdater
     public function updateTableFileDirectory_DropConstraints()
     {
         $table = $this->getTableStatement('FileDirectory', true);
-        $this->dropConstraintFromTable($table, new PrimaryKey('FileDirectory_ID'));
         $this->dropConstraintFromTable($table, new UniqueKey('FileDirectory_Code'));
         $this->dropDefaultConstraintsFromTable($table);
         return $this->query($table);
@@ -156,7 +152,6 @@ class SchemaUpdater extends AbstractUpdater
     public function updateTableFile_DropConstraints()
     {
         $table = $this->getTableStatement('File', true);
-        $this->dropConstraintFromTable($table, new PrimaryKey('File_ID'));
         $this->dropConstraintFromTable($table, new ForeignKey(null, 'FileType_Code', 'FileType', 'FileType_Code'));
         $this->dropConstraintFromTable($table, new ForeignKey(null, 'FileDirectory_ID', 'FileDirectory', 'FileDirectory_ID', 'CASCADE'));
         $this->dropConstraintFromTable($table, new UniqueKey(['File_Code', 'FileDirectory_ID']));
@@ -190,7 +185,6 @@ class SchemaUpdater extends AbstractUpdater
     public function updateTableLocale_DropConstraints()
     {
         $table = $this->getTableStatement('Locale', true);
-        $this->dropConstraintFromTable($table, new PrimaryKey('Locale_Code'));
         $this->dropConstraintFromTable($table, new UniqueKey('Locale_UrlCode'));
         $this->dropDefaultConstraintsFromTable($table);
         return $this->query($table);
@@ -217,7 +211,6 @@ class SchemaUpdater extends AbstractUpdater
     public function updateTableUserState_DropConstraints()
     {
         $table = $this->getTableStatement('UserState', true);
-        $this->dropConstraintFromTable($table, new PrimaryKey('UserState_Code'));
         $this->dropDefaultConstraintsFromTable($table);
         return $this->query($table);
     }
@@ -247,7 +240,6 @@ class SchemaUpdater extends AbstractUpdater
     public function updateTableUser_DropConstraints()
     {
         $table = $this->getTableStatement('User', true);
-        $this->dropConstraintFromTable($table, new PrimaryKey('Person_ID'));
         $this->dropConstraintFromTable($table, new ForeignKey(null, 'Person_ID', 'Person', 'Person_ID', 'CASCADE'));
         $this->dropConstraintFromTable($table, new ForeignKey(null, 'UserState_Code', 'UserState', 'UserState_Code'));
         $this->dropConstraintFromTable($table, new UniqueKey('User_Username'));
@@ -285,7 +277,6 @@ class SchemaUpdater extends AbstractUpdater
     public function updateTableUserRole_DropContraints()
     {
         $table = $this->getTableStatement('UserRole', true);
-        $this->dropConstraintFromTable($table, new PrimaryKey('UserRole_ID'));
         $this->dropConstraintFromTable($table, new Index('UserRole_Code'));
         $this->dropConstraintFromTable($table, new UniqueKey('UserRole_Code'));
         $this->dropDefaultConstraintsFromTable($table);
@@ -314,7 +305,6 @@ class SchemaUpdater extends AbstractUpdater
     public function updateTableUser_UserRole_DropConstraints()
     {
         $table = $this->getTableStatement('User_UserRole', true);
-        $this->dropConstraintFromTable($table, new PrimaryKey(['Person_ID', 'UserRole_ID']));
         $this->dropConstraintFromTable($table, new ForeignKey(null, 'Person_ID', 'User', 'Person_ID', 'CASCADE'));
         $this->dropConstraintFromTable($table, new ForeignKey(null, 'UserRole_ID', 'UserRole', 'UserRole_ID', 'CASCADE'));
         $this->dropDefaultConstraintsFromTable($table);
@@ -343,7 +333,6 @@ class SchemaUpdater extends AbstractUpdater
     public function updateTableUserPermission_DropConstraints()
     {
         $table = $this->getTableStatement('UserPermission', true);
-        $this->dropConstraintFromTable($table, new PrimaryKey('UserPermission_Code'));
         $this->dropDefaultConstraintsFromTable($table);
         return $this->query($table);
     }
@@ -369,7 +358,6 @@ class SchemaUpdater extends AbstractUpdater
     public function updateTableUserRole_UserPermission_DropConstraints()
     {
         $table = $this->getTableStatement('UserRole_UserPermission', true);
-        $this->dropConstraintFromTable($table, new PrimaryKey(['UserRole_ID', 'UserPermission_Code']));
         $this->dropConstraintFromTable($table, new ForeignKey(null, 'UserRole_ID', 'UserRole', 'UserRole_ID', 'CASCADE'));
         $this->dropConstraintFromTable($table, new ForeignKey(null, 'UserPermission_Code', 'UserPermission', 'UserPermission_Code', 'CASCADE'));
         $this->dropDefaultConstraintsFromTable($table);
@@ -402,7 +390,6 @@ class SchemaUpdater extends AbstractUpdater
     public function updateTableTranslation_DropConstraints()
     {
         $table = $this->getTableStatement('Translation', true);
-        $this->dropConstraintFromTable($table, new PrimaryKey('Translation_ID'));
         $this->dropConstraintFromTable($table, new UniqueKey(['Translation_Code', 'Locale_Code', 'Translation_Namespace']));
         $this->dropConstraintFromTable($table, new ForeignKey(null, 'Locale_Code', 'Locale', 'Locale_Code'));
         $this->dropDefaultConstraintsFromTable($table);
@@ -433,7 +420,6 @@ class SchemaUpdater extends AbstractUpdater
     public function updateTableArticle_DropConstraints()
     {
         $table = $this->getTableStatement('Article', true);
-        $this->dropConstraintFromTable($table, new PrimaryKey('Article_ID'));
         $this->dropConstraintFromTable($table, new UniqueKey('Article_Code'));
         $this->dropDefaultConstraintsFromTable($table);
         return $this->query($table);
@@ -464,7 +450,6 @@ class SchemaUpdater extends AbstractUpdater
     public function updateTableArticleData_DropConstraints()
     {
         $table = $this->getTableStatement('ArticleData', true);
-        $this->dropConstraintFromTable($table, new PrimaryKey('ArticleData_ID'));
         $this->dropConstraintFromTable($table, new ForeignKey(null, 'Article_ID', 'Article', 'Article_ID', 'CASCADE'));
         $this->dropDefaultConstraintsFromTable($table);
         return $this->query($table);
@@ -504,7 +489,6 @@ class SchemaUpdater extends AbstractUpdater
     public function updateTableArticleTranslation_DropConstraints()
     {
         $table = $this->getTableStatement('ArticleTranslation', true);
-        $this->dropConstraintFromTable($table, new PrimaryKey(['Article_ID', 'Locale_Code']));
         $this->dropConstraintFromTable($table, new ForeignKey(null, 'Article_ID', 'Article', 'Article_ID', 'CASCADE'));
         $this->dropConstraintFromTable($table, new ForeignKey(null, 'Locale_Code', 'Locale', 'Locale_Code'));
         $this->dropConstraintFromTable($table, new ForeignKey(null, 'File_ID', 'File', 'File_ID'));
@@ -537,7 +521,6 @@ class SchemaUpdater extends AbstractUpdater
     public function updateTableCmsMenuState_DropConstraints()
     {
         $table = $this->getTableStatement('CmsMenuState', true);
-        $this->dropConstraintFromTable($table, new PrimaryKey('CmsMenuState_Code'));
         $this->dropDefaultConstraintsFromTable($table);
         return $this->query($table);
     }
@@ -563,7 +546,6 @@ class SchemaUpdater extends AbstractUpdater
     public function updateTableCmsMenuType_DropConstraints()
     {
         $table = $this->getTableStatement('CmsMenuType', true);
-        $this->dropConstraintFromTable($table, new PrimaryKey('CmsMenuType_Code'));
         $this->dropDefaultConstraintsFromTable($table);
         return $this->query($table);
     }
@@ -588,7 +570,6 @@ class SchemaUpdater extends AbstractUpdater
     public function updateTableCmsPageState_DropConstraints()
     {
         $table = $this->getTableStatement('CmsPageState', true);
-        $this->dropConstraintFromTable($table, new PrimaryKey('CmsPageState_Code'));
         $this->dropDefaultConstraintsFromTable($table);
         return $this->query($table);
     }
@@ -614,7 +595,6 @@ class SchemaUpdater extends AbstractUpdater
     public function updateTableCmsPageType_DropConstraints()
     {
         $table = $this->getTableStatement('CmsPageType', true);
-        $this->dropConstraintFromTable($table, new PrimaryKey('CmsPageType_Code'));
         $this->dropDefaultConstraintsFromTable($table);
         return $this->query($table);
     }
@@ -640,7 +620,6 @@ class SchemaUpdater extends AbstractUpdater
     public function updateTableCmsPageLayout_DropConstraints()
     {
         $table = $this->getTableStatement('CmsPageLayout', true);
-        $this->dropConstraintFromTable($table, new PrimaryKey('CmsPageLayout_Code'));
         $this->dropDefaultConstraintsFromTable($table);
         return $this->query($table);
     }
@@ -665,7 +644,6 @@ class SchemaUpdater extends AbstractUpdater
     public function updateTableCmsBlockState_DropConstraints()
     {
         $table = $this->getTableStatement('CmsBlockState', true);
-        $this->dropConstraintFromTable($table, new PrimaryKey('CmsBlockState_Code'));
         $this->dropDefaultConstraintsFromTable($table);
         return $this->query($table);
     }
@@ -692,7 +670,6 @@ class SchemaUpdater extends AbstractUpdater
     public function updateTableCmsBlockType_DropConstraints()
     {
         $table = $this->getTableStatement('CmsBlockType', true);
-        $this->dropConstraintFromTable($table, new PrimaryKey('CmsBlockType_Code'));
         $this->dropDefaultConstraintsFromTable($table);
         return $this->query($table);
     }
@@ -717,7 +694,6 @@ class SchemaUpdater extends AbstractUpdater
     public function updateTableCmsPostState_DropConstraints()
     {
         $table = $this->getTableStatement('CmsPostState', true);
-        $this->dropConstraintFromTable($table, new PrimaryKey('CmsPostState_Code'));
         $this->dropDefaultConstraintsFromTable($table);
         return $this->query($table);
     }
@@ -743,7 +719,6 @@ class SchemaUpdater extends AbstractUpdater
     public function updateTableCmsPostType_DropConstraints()
     {
         $table = $this->getTableStatement('CmsPostType', true);
-        $this->dropConstraintFromTable($table, new PrimaryKey('CmsPostType_Code'));
         $this->dropDefaultConstraintsFromTable($table);
         return $this->query($table);
     }
@@ -773,7 +748,6 @@ class SchemaUpdater extends AbstractUpdater
     public function updateTableCmsPage_DropConstraints()
     {
         $table = $this->getTableStatement('CmsPage', true);
-        $this->dropConstraintFromTable($table, new PrimaryKey('CmsPage_ID'));
         $this->dropConstraintFromTable($table, new ForeignKey(null, 'CmsPageState_Code', 'CmsPageState', 'CmsPageState_Code'));
         $this->dropConstraintFromTable($table, new ForeignKey(null, 'CmsPageType_Code', 'CmsPageType', 'CmsPageType_Code'));
         $this->dropConstraintFromTable($table, new ForeignKey(null, 'CmsPageLayout_Code', 'CmsPageLayout', 'CmsPageLayout_Code'));
@@ -813,7 +787,6 @@ class SchemaUpdater extends AbstractUpdater
     public function updateTableCmsBlock_DropConstraints()
     {
         $table = $this->getTableStatement('CmsBlock', true);
-        $this->dropConstraintFromTable($table, new PrimaryKey('CmsBlock_ID'));
         $this->dropConstraintFromTable($table, new ForeignKey(null, 'CmsBlockState_Code', 'CmsBlockState', 'CmsBlockState_Code'));
         $this->dropConstraintFromTable($table, new ForeignKey(null, 'CmsBlockType_Code', 'CmsBlockType', 'CmsBlockType_Code'));
         $this->dropConstraintFromTable($table, new ForeignKey(null, 'Article_ID', 'Article', 'Article_ID'));
@@ -845,7 +818,6 @@ class SchemaUpdater extends AbstractUpdater
     public function updateTableCmsPage_CmsBlock_DropConstraints()
     {
         $table = $this->getTableStatement('CmsPage_CmsBlock', true);
-        $this->dropConstraintFromTable($table, new PrimaryKey(['CmsPage_ID', 'CmsBlock_ID']));
         $this->dropConstraintFromTable($table, new ForeignKey(null, 'CmsPage_ID', 'CmsPage', 'CmsPage_ID', 'CASCADE'));
         $this->dropConstraintFromTable($table, new ForeignKey(null, 'CmsBlock_ID', 'CmsBlock', 'CmsBlock_ID', 'CASCADE'));
         $this->dropDefaultConstraintsFromTable($table);
@@ -881,7 +853,6 @@ class SchemaUpdater extends AbstractUpdater
         $table = $this->getTableStatement('CmsPost', true);
         $this->dropConstraintFromTable($table, new ForeignKey(null, 'CmsPostState_Code', 'CmsPostState', 'CmsPostState_Code'));
         $this->dropConstraintFromTable($table, new ForeignKey(null, 'CmsPostType_Code', 'CmsPostType', 'CmsPostType_Code'));
-        $this->dropConstraintFromTable($table, new PrimaryKey('CmsPost_ID'));
         $this->dropConstraintFromTable($table, new ForeignKey(null, 'Article_ID', 'Article', 'Article_ID', 'CASCADE'));
         $this->dropConstraintFromTable($table, new ForeignKey(null, 'CmsPage_ID', 'CmsPage', 'CmsPage_ID', 'CASCADE'));
         $this->dropDefaultConstraintsFromTable($table);
@@ -921,7 +892,6 @@ class SchemaUpdater extends AbstractUpdater
         $table = $this->getTableStatement('CmsMenu', true);
         $this->dropConstraintFromTable($table, new ForeignKey(null, 'CmsMenuState_Code', 'CmsMenuState', 'CmsMenuState_Code'));
         $this->dropConstraintFromTable($table, new ForeignKey(null, 'CmsMenuType_Code', 'CmsMenuType', 'CmsMenuType_Code'));
-        $this->dropConstraintFromTable($table, new PrimaryKey('CmsMenu_ID'));
         $this->dropConstraintFromTable($table, new ForeignKey(null, 'CmsPage_ID', 'CmsPage', 'CmsPage_ID', 'CASCADE'));
         $this->dropConstraintFromTable($table, new ForeignKey(null, 'CmsPage_ID_Parent', 'CmsPage', 'CmsPage_ID', 'CASCADE'));
         $this->dropConstraintFromTable($table, new ForeignKey(null, 'CmsMenu_ID_Parent', 'CmsMenu', 'CmsMenu_ID', 'CASCADE'));
@@ -954,7 +924,6 @@ class SchemaUpdater extends AbstractUpdater
     public function updateTableImportType_DropConstraints()
     {
         $table = $this->getTableStatement('ImportType', true);
-        $this->dropConstraintFromTable($table, new PrimaryKey('ImportType_Code'));
         $this->dropDefaultConstraintsFromTable($table);
         return $this->query($table);
     }
@@ -986,7 +955,6 @@ class SchemaUpdater extends AbstractUpdater
     public function updateTableImport_DropConstraints()
     {
         $table = $this->getTableStatement('Import', true);
-        $this->dropConstraintFromTable($table, new PrimaryKey('Import_ID'));
         $this->dropConstraintFromTable($table, new ForeignKey(null, 'ImportType_Code', 'ImportType', 'ImportType_Code'));
         $this->dropConstraintFromTable($table, new ForeignKey(null, 'Article_ID', 'Article', 'Article_ID'));
         $this->dropDefaultConstraintsFromTable($table);
@@ -998,6 +966,35 @@ class SchemaUpdater extends AbstractUpdater
         $table = $this->getTableStatement('Import', true);
         $this->addConstraintToTable($table, new ForeignKey(null, 'ImportType_Code', 'ImportType', 'ImportType_Code'));
         $this->addConstraintToTable($table, new ForeignKey(null, 'Article_ID', 'Article', 'Article_ID'));
+        $this->addDefaultConstraintsToTable($table);
+        return $this->query($table);
+    }
+
+    public function updateTableApiKey()
+    {
+        $table = $this->getTableStatement('ApiKey');
+        $this->addColumnToTable($table, new Integer('ApiKey_ID'))->setOption('AUTO_INCREMENT', true);
+        $this->addColumnToTable($table, new Varchar('ApiKey_Name', 255, true));
+        $this->addColumnToTable($table, new Varchar('ApiKey_Key', 255, true));
+        $this->addColumnToTable($table, new Varchar('ApiKey_Host', 255, true));
+        $this->addColumnToTable($table, new Boolean('ApiKey_Active', false, 0));
+        $this->addConstraintToTable($table, new PrimaryKey('ApiKey_ID'));
+        $this->addDefaultColumnsToTable($table);
+        return $this->query($table);
+    }
+
+    public function updateTableApiKey_DropConstraints()
+    {
+        $table = $this->getTableStatement('ApiKey', true);
+        $this->dropConstraintFromTable($table, new Index('ApiKey_Host'));
+        $this->dropDefaultConstraintsFromTable($table);
+        return $this->query($table);
+    }
+
+    public function updateTableApiKey_AddConstraints()
+    {
+        $table = $this->getTableStatement('ApiKey', true);
+        $this->addConstraintToTable($table, new Index('ApiKey_Host'));
         $this->addDefaultConstraintsToTable($table);
         return $this->query($table);
     }

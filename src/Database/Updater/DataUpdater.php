@@ -205,6 +205,12 @@ class DataUpdater extends AbstractUpdater
             'Config_Value' => 'privacy@' . ltrim($_SERVER['HTTP_HOST'] ?? '', 'admin.'),
             'Config_Locked' => 0,
         ];
+        $data_Map[] = [
+            'Config_Code' => 'frontend.pars-api-key',
+            'Config_Value' => 'de_AT',
+            'Config_Options' => json_encode($this->getKeyList('ApiKey', 'ApiKey_Key')),
+            'Config_Locked' => 0
+        ];
         return $this->saveDataMap('Config', 'Config_Code', $data_Map, true, ['Config_Description', 'Config_Options']);
     }
 
@@ -969,6 +975,23 @@ class DataUpdater extends AbstractUpdater
         ];
         $data_Map[] = [
             'UserPermission_Code' => 'import.edit',
+            'UserPermission_Active' => true,
+        ];
+
+        $data_Map[] = [
+            'UserPermission_Code' => 'apikey',
+            'UserPermission_Active' => true,
+        ];
+        $data_Map[] = [
+            'UserPermission_Code' => 'apikey.delete',
+            'UserPermission_Active' => true,
+        ];
+        $data_Map[] = [
+            'UserPermission_Code' => 'apikey.create',
+            'UserPermission_Active' => true,
+        ];
+        $data_Map[] = [
+            'UserPermission_Code' => 'apikey.edit',
             'UserPermission_Active' => true,
         ];
 
