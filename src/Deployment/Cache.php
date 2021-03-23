@@ -26,6 +26,7 @@ class Cache implements AdapterAwareInterface, TranslatorAwareInterface, OptionAw
     public const OPTION_CLEAR_ASSETS = 'clear_assets';
     public const OPTION_CLEAR_CACHE_POOL = 'clear_cache_pool';
     public const OPTION_CLEAR_IMAGES = 'clear_images';
+    public const OPTION_CLEAR_TRANSLATIONS = 'clear_translations';
 
     use OptionAwareTrait;
     use AdapterAwareTrait;
@@ -49,6 +50,7 @@ class Cache implements AdapterAwareInterface, TranslatorAwareInterface, OptionAw
         $this->addOption(self::OPTION_CLEAR_CACHE_POOL);
         $this->addOption(self::OPTION_RESET_OPCACHE);
         $this->addOption(self::OPTION_CLEAR_IMAGES);
+        $this->addOption(self::OPTION_CLEAR_TRANSLATIONS);
     }
 
 
@@ -76,7 +78,9 @@ class Cache implements AdapterAwareInterface, TranslatorAwareInterface, OptionAw
         if ($this->hasOption(self::OPTION_CLEAR_IMAGES)) {
             $this->clearImages();
         }
-        $this->clearTranslations();
+        if ($this->hasOption(self::OPTION_CLEAR_TRANSLATIONS)) {
+            $this->clearTranslations();
+        }
     }
 
     protected function clearConfig()
