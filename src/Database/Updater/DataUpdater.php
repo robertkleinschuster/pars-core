@@ -201,12 +201,6 @@ class DataUpdater extends AbstractUpdater
             'Config_Description' => 'Google Maps API-Key'
         ];
         $data_Map[] = [
-            'Config_Code' => 'update.test',
-            'Config_Value' => 'test',
-            'Config_Locked' => 0,
-            'Config_Description' => 'Update Test'
-        ];
-        $data_Map[] = [
             'Config_Code' => 'frontend.data-privacy-email',
             'Config_Value' => 'privacy@' . ltrim($_SERVER['HTTP_HOST'] ?? '', 'admin.'),
             'Config_Locked' => 0,
