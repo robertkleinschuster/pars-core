@@ -51,6 +51,7 @@ class Cache implements AdapterAwareInterface, TranslatorAwareInterface, OptionAw
         $this->addOption(self::OPTION_RESET_OPCACHE);
         $this->addOption(self::OPTION_CLEAR_IMAGES);
         $this->addOption(self::OPTION_CLEAR_TRANSLATIONS);
+        $this->addOption(self::OPTION_CLEAR_CONFIG);
     }
 
 

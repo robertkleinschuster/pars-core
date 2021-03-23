@@ -16,6 +16,8 @@
     "php": "^7.4",
     "ext-intl": "*",
     "ext-json": "*",
+    "ext-dom": "*",
+    "ext-gd": "*",
     "composer/composer": "^2.0",
     "laminas/laminas-stdlib": "^3.2.1",
     "laminas/laminas-diactoros": "^2.3.0",
@@ -30,7 +32,6 @@
     "laminas/laminas-config-aggregator": "^1.2",
     "laminas/laminas-serializer": "^2.9",
     "laminas/laminas-zendframework-bridge": "^1.0",
-    "laminas/laminas-component-installer": "^2.1.2",
     "mezzio/mezzio": "^3.2.1",
     "mezzio/mezzio-fastroute": "^3.0.3",
     "mezzio/mezzio-platesrenderer": "^2.2",
@@ -41,8 +42,8 @@
     "mezzio/mezzio-session-cache": "^1.4",
     "mezzio/mezzio-csrf": "^1.0",
     "mezzio/mezzio-flash": "^1.0",
-    "pars/pars-helpers": "^1.0.x-dev",
-    "pars/pars-models": "^1.0.x-dev",
+    "pars/pars-helpers": "dev-master",
+    "pars/pars-models": "dev-master",
     "league/flysystem": "^1.1",
     "league/glide": "^1.6",
     "league/oauth2-client": "^2.6",
@@ -63,7 +64,8 @@
     "phpspec/prophecy": "^1.10.3",
     "phpspec/prophecy-phpunit": "^2.0",
     "roave/security-advisories": "dev-master",
-    "filp/whoops": "^2.7.1"
+    "filp/whoops": "^2.7.1",
+    "wikimedia/composer-merge-plugin": "^2.0"
   },
   "autoload": {
     "psr-4": {
@@ -79,17 +81,46 @@
     "branch-alias": {
       "dev-master": "1.0.x-dev"
     },
-    "laminas": {
-      "module": "Pars\\Core"
+    "merge-plugin": {
+      "include": [
+        "vendor/pars/pars-core/composer.json__"
+      ],
+      "require": [
+      ],
+      "recurse": true,
+      "replace": false,
+      "ignore-duplicates": false,
+      "merge-dev": true,
+      "merge-extra": false,
+      "merge-extra-deep": false,
+      "merge-scripts": true
     }
   },
   "config": {
-    "sort-packages": true
+    "sort-packages": true,
+    "optimize-autoloader": true,
+    "classmap-authoritative": true
   },
   "scripts": {
+    "serve": "php -S 0.0.0.0:8080 -t public/",
     "cs-check": "phpcs",
     "cs-fix": "phpcbf",
     "test": "phpunit --colors=always",
-    "test-coverage": "phpunit --colors=always --coverage-clover clover.xml"
+    "test-coverage": "phpunit --colors=always --coverage-clover clover.xml",
+    "post-update-cmd": [
+      "Pars\\Core\\Deployment\\UpdateHandler::postUpdate"
+    ],
+    "post-install-cmd": [
+      "Pars\\Core\\Deployment\\UpdateHandler::postInstall"
+    ],
+    "post-package-install": [
+      "Pars\\Core\\Deployment\\UpdateHandler::postPackageInstall"
+    ],
+    "post-package-update": [
+      "Pars\\Core\\Deployment\\UpdateHandler::postPackageUpdate"
+    ],
+    "post-autoload-dump": [
+      "Pars\\Core\\Deployment\\UpdateHandler::postAutoloadDump"
+    ]
   }
 }
