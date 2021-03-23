@@ -76,6 +76,7 @@ class ImageMiddleware implements MiddlewareInterface
                  * @var $response ResponseInterface
                  */
                 $response = $server->getImageResponse($path, $_GET);
+                $response = $response->withAddedHeader('pragma', 'public');
                 return $response;
             } catch (\Throwable $exception) {
                 $this->placeholder($_GET['w'], $_GET['h'], 'aaaaaa', 'ffffff', $e->getMessage());
