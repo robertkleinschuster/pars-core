@@ -74,6 +74,17 @@ class DatabaseBeanLoader extends AbstractBeanLoader implements AdapterAwareInter
     }
 
     /**
+     * @param string $table
+     */
+    public function addDefaultFields(string $table)
+    {
+        $this->addField('Person_ID_Create')->setTable($table);
+        $this->addField('Person_ID_Edit')->setTable($table);
+        $this->addField('Timestamp_Create')->setTable($table);
+        $this->addField('Timestamp_Edit')->setTable($table);
+    }
+
+    /**
      * @return $this
      */
     public function reset(): self

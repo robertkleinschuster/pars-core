@@ -2,12 +2,14 @@
 
 namespace Pars\Core\Bundles;
 
+use Laminas\Db\Adapter\AdapterInterface;
 use League\Flysystem\Adapter\Local;
 use League\Flysystem\Filesystem;
 use MatthiasMullie\Minify;
-use Niceshops\Core\Exception\CoreException;
 use Padaliyajay\PHPAutoprefixer\Autoprefixer;
+use Pars\Core\Config\ParsConfig;
 use Pars\Helper\Filesystem\FilesystemHelper;
+use Psr\Container\ContainerInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
@@ -38,12 +40,18 @@ class BundlesMiddleware implements MiddlewareInterface
     protected array $config;
 
     /**
-     * BundlesMiddleware constructor.
-     * @param array $config
+     * @var ContainerInterface
      */
-    public function __construct(array $config)
+    protected ContainerInterface $container;
+
+    /**
+     * BundlesMiddleware constructor.
+     * @param ContainerInterface $container
+     */
+    public function __construct(ContainerInterface $container)
     {
-        $this->config = $config;
+        $this->config = $container->get('config')['bundles'];
+        $this->container = $container;
     }
 
     /**
@@ -108,7 +116,14 @@ class BundlesMiddleware implements MiddlewareInterface
                             $minify->minify($documentRootPath . DIRECTORY_SEPARATOR . $bundle['output']);
                         }
                         if ($bundle['type'] == 'scss' && isset($bundle['entrypoint']) && isset($bundle['import'])) {
+                            $vars = [];
+                            if (isset($bundle['config']) && $this->container->has(AdapterInterface::class)) {
+                                $adapter = $this->container->get(AdapterInterface::class);
+                                $config = new ParsConfig($adapter, $bundle['config']);
+                                $vars = $config->toArray();
+                            }
                             $scss = new Compiler();
+                            $scss->setVariables($vars);
                             $scss->setImportPaths($bundle['import']);
                             $scss->setOutputStyle(OutputStyle::COMPRESSED);
                             $css = $scss->compile('@import "' . $bundle['entrypoint'] . '";');

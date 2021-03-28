@@ -51,6 +51,33 @@ class SchemaUpdater extends AbstractUpdater
         return $this->query($table);
     }
 
+    public function updateTableConfigType()
+    {
+        $table = $this->getTableStatement('ConfigType');
+        $this->addColumnToTable($table, new Varchar('ConfigType_Code', 255));
+        $this->addColumnToTable($table, new Varchar('ConfigType_Code_Parent', 255, true));
+        $this->addColumnToTable($table, new Boolean('ConfigType_Active', false, 0));
+        $this->addConstraintToTable($table, new PrimaryKey('ConfigType_Code'));
+        $this->addDefaultColumnsToTable($table);
+        return $this->query($table);
+    }
+
+    public function updateTableConfigType_DropConstraints()
+    {
+        $table = $this->getTableStatement('ConfigType');
+        $this->dropConstraintFromTable($table, new ForeignKey(null, 'ConfigType_Code_Parent', 'ConfigType', 'ConfigType_Code'));
+        $this->dropDefaultConstraintsFromTable($table);
+        return $this->query($table);
+    }
+
+    public function updateTableConfigType_AddConstraints()
+    {
+        $table = $this->getTableStatement('ConfigType');
+        $this->addConstraintToTable($table, new ForeignKey(null, 'ConfigType_Code_Parent', 'ConfigType', 'ConfigType_Code'));
+        $this->addDefaultConstraintsToTable($table);
+        return $this->query($table);
+    }
+
     public function updateTableConfig()
     {
         $table = $this->getTableStatement('Config');
@@ -60,7 +87,8 @@ class SchemaUpdater extends AbstractUpdater
         $this->addColumnToTable($table, new Text('Config_Options', 65535, true));
         $this->addColumnToTable($table, new Boolean('Config_Locked', true, 0));
         $this->addColumnToTable($table, new Text('Config_Data', 65535, true));
-        $this->addConstraintToTable($table, new PrimaryKey('Config_Code'));
+        $this->addColumnToTable($table, new Varchar('ConfigType_Code', 255));
+        $this->addConstraintToTable($table, new PrimaryKey(['Config_Code', 'ConfigType_Code']));
         $this->addDefaultColumnsToTable($table);
         return $this->query($table);
     }
@@ -68,6 +96,7 @@ class SchemaUpdater extends AbstractUpdater
     public function updateTableConfig_DropConstraints()
     {
         $table = $this->getTableStatement('Config', true);
+        $this->dropConstraintFromTable($table, new ForeignKey(null, 'ConfigType_Code', 'ConfigType', 'ConfigType_Code'));
         $this->dropDefaultConstraintsFromTable($table);
         return $this->query($table);
     }
@@ -75,6 +104,7 @@ class SchemaUpdater extends AbstractUpdater
     public function updateTableConfig_AddConstraints()
     {
         $table = $this->getTableStatement('Config', true);
+        $this->addConstraintToTable($table, new ForeignKey(null, 'ConfigType_Code', 'ConfigType', 'ConfigType_Code'));
         $this->addDefaultConstraintsToTable($table);
         return $this->query($table);
     }

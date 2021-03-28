@@ -4,12 +4,40 @@ namespace Pars\Core\Database\Updater;
 
 use Pars\Model\File\FileBeanFinder;
 
+/**
+ * Class DataUpdater
+ * @package Pars\Core\Database\Updater
+ */
 class DataUpdater extends AbstractUpdater
 {
 
     public function getCode(): string
     {
         return 'data';
+    }
+
+    public function updateDataConfigType()
+    {
+        $data_Map = [];
+        $data_Map[] = [
+            'ConfigType_Code' => 'base',
+            'ConfigType_Active' => 1,
+        ];
+        $data_Map[] = [
+            'ConfigType_Code' => 'frontend',
+            'ConfigType_Code_Parent' => 'base',
+            'ConfigType_Active' => 1,
+        ];
+        $data_Map[] = [
+            'ConfigType_Code' => 'admin',
+            'ConfigType_Code_Parent' => 'base',
+            'ConfigType_Active' => 1,
+        ];
+        $data_Map[] = [
+            'ConfigType_Code' => 'style',
+            'ConfigType_Active' => 1,
+        ];
+        return $this->saveDataMap('ConfigType', 'ConfigType_Code', $data_Map);
     }
 
 
@@ -30,188 +58,279 @@ class DataUpdater extends AbstractUpdater
         $i = 1;
         $data_Map = [];
         $data_Map[] = [
+            'Config_Code' => 'card-color',
+            'Config_Value' => '#212529',
+            'Config_Locked' => 0,
+            'ConfigType_Code' => 'style',
+        ];
+        $data_Map[] = [
+            'Config_Code' => 'html-color',
+            'Config_Value' => '#FFFFFF',
+            'Config_Locked' => 0,
+            'ConfigType_Code' => 'style',
+        ];
+        $data_Map[] = [
+            'Config_Code' => 'html-bg',
+            'Config_Value' => 'transparent',
+            'Config_Locked' => 0,
+            'ConfigType_Code' => 'style',
+        ];
+        $data_Map[] = [
+            'Config_Code' => 'body-color',
+            'Config_Value' => '#FFFFFF',
+            'Config_Locked' => 0,
+            'ConfigType_Code' => 'style',
+        ];
+        $data_Map[] = [
+            'Config_Code' => 'body-bg',
+            'Config_Value' => '#212529',
+            'Config_Locked' => 0,
+            'ConfigType_Code' => 'style',
+        ];
+        $data_Map[] = [
+            'Config_Code' => 'font-size-base',
+            'Config_Value' => '1rem',
+            'Config_Locked' => 0,
+            'ConfigType_Code' => 'style',
+        ];
+        $data_Map[] = [
+            'Config_Code' => 'hr-border-color',
+            'Config_Value' => '#A7A7A7',
+            'Config_Locked' => 0,
+            'ConfigType_Code' => 'style',
+        ];
+        $data_Map[] = [
+            'Config_Code' => 'primary',
+            'Config_Value' => '#FFFFFF',
+            'Config_Locked' => 0,
+            'ConfigType_Code' => 'style',
+        ];
+        $data_Map[] = [
             'Config_Code' => 'asset.domain',
             'Config_Value' => isset($_SERVER['HTTP_HOST']) ? 'https://' . $_SERVER['HTTP_HOST'] . '/img' : '',
-            'Config_Locked' => 0
+            'Config_Locked' => 0,
+            'ConfigType_Code' => 'base',
         ];
         $data_Map[] = [
             'Config_Code' => 'asset.key',
             'Config_Value' => $imageSignature,
-            'Config_Locked' => 1
+            'Config_Locked' => 1,
+            'ConfigType_Code' => 'base',
         ];
         $data_Map[] = [
             'Config_Code' => 'locale.default',
             'Config_Value' => 'de_AT',
             'Config_Options' => json_encode($this->getKeyList('Locale', 'Locale_Code')),
-            'Config_Locked' => 0
+            'Config_Locked' => 0,
+            'ConfigType_Code' => 'base',
         ];
         $data_Map[] = [
             'Config_Code' => 'admin.timezone',
             'Config_Value' => 'UTC',
-            'Config_Locked' => 0
+            'Config_Locked' => 0,
+            'ConfigType_Code' => 'admin',
         ];
-
         $data_Map[] = [
             'Config_Code' => 'admin.title',
             'Config_Value' => 'PARS Admin',
-            'Config_Locked' => 0
+            'Config_Locked' => 0,
+            'ConfigType_Code' => 'admin',
         ];
         $data_Map[] = [
             'Config_Code' => 'admin.author',
             'Config_Value' => '',
-            'Config_Locked' => 0
+            'Config_Locked' => 0,
+            'ConfigType_Code' => 'admin',
         ];
         $data_Map[] = [
             'Config_Code' => 'admin.favicon',
             'Config_Value' => '/favicon.ico',
-            'Config_Locked' => 0
+            'Config_Locked' => 0,
+            'ConfigType_Code' => 'admin',
         ];
         $data_Map[] = [
             'Config_Code' => 'admin.description',
             'Config_Value' => 'PARS Admin',
-            'Config_Locked' => 0
+            'Config_Locked' => 0,
+            'ConfigType_Code' => 'admin',
         ];
         $data_Map[] = [
             'Config_Code' => 'admin.charset',
             'Config_Value' => 'utf-8',
-            'Config_Locked' => 0
+            'Config_Locked' => 0,
+            'ConfigType_Code' => 'admin',
         ];
         $data_Map[] = [
             'Config_Code' => 'admin.pagination.limit',
             'Config_Value' => '20',
-            'Config_Locked' => 0
+            'Config_Locked' => 0,
+            'ConfigType_Code' => 'admin',
         ];
         $data_Map[] = [
             'Config_Code' => 'mail.smtp',
             'Config_Value' => 'false',
             'Config_Description' => 'true, false',
             'Config_Options' => json_encode(['true', 'false']),
-            'Config_Locked' => 0
+            'Config_Locked' => 0,
+            'ConfigType_Code' => 'base',
         ];
         $data_Map[] = [
             'Config_Code' => 'mail.smtp.name',
             'Config_Value' => '',
-            'Config_Locked' => 0
+            'Config_Locked' => 0,
+            'ConfigType_Code' => 'base',
         ];
         $data_Map[] = [
             'Config_Code' => 'mail.smtp.host',
             'Config_Value' => '127.0.0.1',
             'Config_Description' => '127.0.0.1',
-            'Config_Locked' => 0
+            'Config_Locked' => 0,
+            'ConfigType_Code' => 'base',
         ];
         $data_Map[] = [
             'Config_Code' => 'mail.smtp.port',
             'Config_Value' => '25',
             'Config_Description' => '25, 587',
-            'Config_Locked' => 0
+            'Config_Locked' => 0,
+            'ConfigType_Code' => 'base',
         ];
         $data_Map[] = [
             'Config_Code' => 'mail.smtp.authentication',
             'Config_Value' => '',
             'Config_Description' => 'plain, login',
             'Config_Options' => json_encode(['plain', 'login']),
-            'Config_Locked' => 0
+            'Config_Locked' => 0,
+            'ConfigType_Code' => 'base',
         ];
         $data_Map[] = [
             'Config_Code' => 'mail.smtp.authentication.username',
             'Config_Value' => '',
-            'Config_Locked' => 0
+            'Config_Locked' => 0,
+            'ConfigType_Code' => 'base',
         ];
         $data_Map[] = [
             'Config_Code' => 'mail.smtp.authentication.password',
             'Config_Value' => '',
-            'Config_Locked' => 0
+            'Config_Locked' => 0,
+            'ConfigType_Code' => 'base',
         ];
         $data_Map[] = [
             'Config_Code' => 'mail.smtp.authentication.ssl',
             'Config_Value' => 'tls',
             'Config_Description' => 'tls, ssl',
             'Config_Options' => json_encode(['tls', 'ssl']),
-            'Config_Locked' => 0
+            'Config_Locked' => 0,
+            'ConfigType_Code' => 'base',
         ];
         $data_Map[] = [
             'Config_Code' => 'frontend.brand',
             'Config_Value' => '{frontend.brand}',
-            'Config_Locked' => 0
+            'Config_Locked' => 0,
+            'ConfigType_Code' => 'frontend',
         ];
         $data_Map[] = [
             'Config_Code' => 'frontend.domain',
             'Config_Value' => isset($_SERVER['HTTP_HOST']) ? 'https://' . ltrim($_SERVER['HTTP_HOST'] ?? '', 'admin.') : '',
-            'Config_Locked' => 0
+            'Config_Locked' => 0,
+            'ConfigType_Code' => 'frontend',
         ];
         $data_Map[] = [
             'Config_Code' => 'frontend.update',
             'Config_Value' => 'true',
-            'Config_Locked' => 1
+            'Config_Locked' => 1,
+            'ConfigType_Code' => 'frontend',
         ];
         $favicon = [
             'Config_Code' => 'frontend.favicon',
             'Config_Value' => '',
             'Config_Locked' => 0,
-            'Config_Options' => count($imageOptions) ? $imageOptions : ''
+            'Config_Options' => count($imageOptions) ? $imageOptions : '',
+            'ConfigType_Code' => 'frontend',
         ];
         $data_Map[] = $favicon;
         $logo = [
             'Config_Code' => 'frontend.logo',
             'Config_Value' => '',
             'Config_Locked' => 0,
-            'Config_Options' => count($imageOptions) ? $imageOptions : ''
+            'Config_Options' => count($imageOptions) ? $imageOptions : '',
+            'ConfigType_Code' => 'frontend',
         ];
         $data_Map[] = $logo;
         $data_Map[] = [
             'Config_Code' => 'frontend.color',
             'Config_Value' => '#FFFFFF',
-            'Config_Locked' => 0
+            'Config_Locked' => 0,
+            'ConfigType_Code' => 'frontend',
         ];
         $data_Map[] = [
             'Config_Code' => 'frontend.cache',
             'Config_Value' => '86400',
-            'Config_Locked' => 0
+            'Config_Locked' => 0,
+            'ConfigType_Code' => 'frontend',
         ];
         $data_Map[] = [
             'Config_Code' => 'frontend.charset',
             'Config_Value' => 'utf-8',
-            'Config_Locked' => 0
+            'Config_Locked' => 0,
+            'ConfigType_Code' => 'frontend',
         ];
         $data_Map[] = [
             'Config_Code' => 'frontend.author',
             'Config_Value' => '',
-            'Config_Locked' => 0
+            'Config_Locked' => 0,
+            'ConfigType_Code' => 'frontend',
         ];
         $data_Map[] = [
             'Config_Code' => 'frontend.keywords',
             'Config_Value' => '',
-            'Config_Locked' => 0
+            'Config_Locked' => 0,
+            'ConfigType_Code' => 'frontend',
         ];
         $data_Map[] = [
             'Config_Code' => 'frontend.timezone',
             'Config_Value' => 'UTC',
-            'Config_Locked' => 0
+            'Config_Locked' => 0,
+            'ConfigType_Code' => 'frontend',
         ];
         $data_Map[] = [
             'Config_Code' => 'frontend.google-key',
             'Config_Value' => '',
             'Config_Locked' => 0,
-            'Config_Description' => 'Google Site Verification'
+            'Config_Description' => 'Google Site Verification',
+            'ConfigType_Code' => 'frontend',
         ];
         $data_Map[] = [
             'Config_Code' => 'frontend.google-maps-key',
             'Config_Value' => '',
             'Config_Locked' => 0,
-            'Config_Description' => 'Google Maps API-Key'
+            'Config_Description' => 'Google Maps API-Key',
+            'ConfigType_Code' => 'frontend',
         ];
         $data_Map[] = [
             'Config_Code' => 'frontend.data-privacy-email',
             'Config_Value' => 'privacy@' . ltrim($_SERVER['HTTP_HOST'] ?? '', 'admin.'),
             'Config_Locked' => 0,
+            'ConfigType_Code' => 'frontend',
         ];
         $data_Map[] = [
             'Config_Code' => 'frontend.pars-api-key',
             'Config_Value' => 'de_AT',
             'Config_Options' => json_encode($this->getKeyList('ApiKey', 'ApiKey_Key')),
-            'Config_Locked' => 0
+            'Config_Locked' => 0,
+            'ConfigType_Code' => 'frontend',
         ];
-        return $this->saveDataMap('Config', 'Config_Code', $data_Map, true, ['Config_Description', 'Config_Options']);
+        return $this->saveDataMap(
+            'Config',
+            ['Config_Code', 'ConfigType_Code'],
+            $data_Map,
+            true,
+            [
+                'Config_Description',
+                'Config_Options',
+                'ConfigType_Code',
+                'Config_Locked'
+            ]
+        );
     }
 
 

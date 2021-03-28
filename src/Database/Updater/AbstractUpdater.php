@@ -198,27 +198,46 @@ abstract class AbstractUpdater implements ValidationHelperAwareInterface, Adapte
      * @param string $column
      * @return array
      */
-    protected function getKeyList(string $table, string $column)
+    protected function getKeyList(string $table, $column)
     {
         $sql = new Sql($this->adapter);
         $select = $sql->select($table);
-        $select->columns([$column]);
-        $result = $this->adapter->query(
+        $col = $column;
+        if (!is_array($column)) {
+            $column = [$column];
+        }
+        $select->columns($column);
+        $dbresult = $this->adapter->query(
             $sql->buildSqlString($select, $this->adapter),
             Adapter::QUERY_MODE_EXECUTE
         );
-        return array_column($result->toArray(), $column);
+        $result = [];
+        if (is_array($col)) {
+            $dbdata = $dbresult->toArray();
+            foreach ($col as $item) {
+                $result[$item] = array_column($dbdata, $item);
+            }
+        } else {
+            $result = array_column($dbresult->toArray(), $col);
+        }
+        return $result;
     }
 
     /**
      * @param string $table
-     * @param string $keyColumn
+     * @param string|array $keyColumn
      * @param array $data_Map
      * @param bool $noUpdate
      * @param array $forceUpdateColumns
      * @return array
      */
-    protected function saveDataMap(string $table, string $keyColumn, array $data_Map, bool $noUpdate = false, array $forceUpdateColumns = [])
+    protected function saveDataMap(
+        string $table,
+        $keyColumn,
+        array $data_Map,
+        bool $noUpdate = false,
+        array $forceUpdateColumns = []
+    )
     {
         $existingKey_List = $this->getKeyList($table, $keyColumn);
         $result = [];
@@ -229,17 +248,31 @@ abstract class AbstractUpdater implements ValidationHelperAwareInterface, Adapte
                 }
             }
             $sql = new Sql($this->adapter);
-            if (in_array($item[$keyColumn], $existingKey_List)) {
+            if ($this->isUpdate($item, $keyColumn, $existingKey_List)) {
                 if (!$noUpdate) {
                     $update = $sql->update($table);
-                    $update->where([$keyColumn => $item[$keyColumn]]);
-                    unset($item[$keyColumn]);
+                    if (is_array($keyColumn)) {
+                        foreach ($keyColumn as $column) {
+                            $update->where([$column => $item[$column]]);
+                            unset($item[$column]);
+                        }
+                    } else {
+                        $update->where([$keyColumn => $item[$keyColumn]]);
+                        unset($item[$keyColumn]);
+                    }
                     $update->set($item);
                     $result[] = $this->query($update);
                 } elseif (count(array_intersect(array_keys($item), $forceUpdateColumns))) {
                     $update = $sql->update($table);
-                    $update->where([$keyColumn => $item[$keyColumn]]);
-                    unset($item[$keyColumn]);
+                    if (is_array($keyColumn)) {
+                        foreach ($keyColumn as $column) {
+                            $update->where([$column => $item[$column]]);
+                            unset($item[$column]);
+                        }
+                    } else {
+                        $update->where([$keyColumn => $item[$keyColumn]]);
+                        unset($item[$keyColumn]);
+                    }
                     $data = [];
                     foreach ($forceUpdateColumns as $forceUpdateColumn) {
                         if (isset($item[$forceUpdateColumn])) {
@@ -256,15 +289,69 @@ abstract class AbstractUpdater implements ValidationHelperAwareInterface, Adapte
                 $result[] = $this->query($insert);
             }
         }
-        $newKey_List = array_column($data_Map, $keyColumn);
-        foreach ($existingKey_List as $id) {
-            if (!in_array($id, $newKey_List)) {
-                $delete = $sql->delete($table);
-                $delete->where([$keyColumn => $id]);
-                $result[] = $this->query($delete);
+        if (is_array($keyColumn)) {
+            $key_List = [];
+            foreach ($existingKey_List as $existingKey => $existingKeys) {
+                foreach ($existingKeys as $key => $existingValue) {
+                    foreach ($keyColumn as $column) {
+                        $key_List[$key][$existingKey] = $existingValue;
+                    }
+                }
+            }
+            $data_Map_Del = [];
+            foreach ($data_Map as $k => $item) {
+                foreach ($keyColumn as $column) {
+                    $data_Map_Del[$k][$column] = $item[$column];
+                }
+            }
+
+            foreach ($key_List as $item) {
+                if (!in_array($item, $data_Map_Del)) {
+                    $delete = $sql->delete($table);
+                    $delete->where($item);
+                    $result[] = $this->query($delete);
+                }
+            }
+        } else {
+            foreach ($existingKey_List as $id) {
+                $newKey_List = array_column($data_Map, $keyColumn);
+                if (!in_array($id, $newKey_List)) {
+                    $delete = $sql->delete($table);
+                    $delete->where([$keyColumn => $id]);
+                    $result[] = $this->query($delete);
+                }
+
             }
         }
         return $result;
+    }
+
+    /**
+     * @param $item
+     * @param $keyColumn
+     * @param $existingKey_List
+     * @return bool
+     */
+    protected function isUpdate($item, $keyColumn, $existingKey_List): bool
+    {
+        if (is_array($keyColumn)) {
+            foreach ($item as $key => $value) {
+                if (!in_array($key, $keyColumn)) {
+                    unset($item[$key]);
+                }
+            }
+            $key_List = [];
+            foreach ($existingKey_List as $existingKey => $existingKeys) {
+                foreach ($existingKeys as $key => $existingValue) {
+                    foreach ($keyColumn as $column) {
+                        $key_List[$key][$existingKey] = $existingValue;
+                    }
+                }
+            }
+            return in_array($item, $key_List);
+        } else {
+            return in_array($item[$keyColumn], $existingKey_List);
+        }
     }
 
     /**

@@ -3,6 +3,7 @@
 namespace Pars\Core\Database\Updater;
 
 use Laminas\Db\Adapter\Adapter;
+use Laminas\Db\Sql\Ddl\Constraint\PrimaryKey;
 use Laminas\Db\Sql\Ddl\DropTable;
 use Laminas\Db\Sql\Insert;
 use Laminas\Db\Sql\Select;
@@ -347,6 +348,37 @@ class SpecialUpdater extends AbstractUpdater
             return $this->query($drop);
         }
         return '';
+    }
+
+    public function updateConfigPK_Drop()
+    {
+        $keys = $this->metadata->getConstraintKeys('PRIMARY', 'Config', $this->adapter->getCurrentSchema());
+        $key_List = [];
+        foreach ($keys as $key) {
+            $key_List[] = $key->getColumnName();
+        }
+        if (!in_array('ConfigType_Code', $key_List)) {
+            $table = $this->getTableStatement('Config');
+            $table->dropConstraint('PRIMARY');
+            return $this->query($table);
+        }
+        return false;
+    }
+
+    public function updateConfigPK_Add()
+    {
+        $keys = $this->metadata->getConstraintKeys('PRIMARY', 'Config', $this->adapter->getCurrentSchema());
+        $key_List = [];
+        foreach ($keys as $key) {
+            $key_List[] = $key->getColumnName();
+        }
+        if (!in_array('ConfigType_Code', $key_List)) {
+            $table = $this->getTableStatement('Config');
+            $constraint = new PrimaryKey(['Config_Code', 'ConfigType_Code']);
+            $table->addConstraint($constraint);
+            return $this->query($table);
+        }
+        return false;
     }
 
   /*  public function updateBenchmarkBackend()

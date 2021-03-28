@@ -63,8 +63,14 @@ trait DatabaseInfoTrait
      */
     public function addField(string $field): DatabaseColumnDefinition
     {
+        $exp = explode('.', $field);
         $columnDefinition = new DatabaseColumnDefinition();
-        $columnDefinition->setField($field);
+        if (count($exp) === 2) {
+            $columnDefinition->setTable($exp[0]);
+            $columnDefinition->setField($exp[1]);
+        } else {
+            $columnDefinition->setField($field);
+        }
         $this->dbColumnDefinition_Map[$field] = $columnDefinition;
         return $columnDefinition;
     }

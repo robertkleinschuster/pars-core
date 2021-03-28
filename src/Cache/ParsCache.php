@@ -4,6 +4,7 @@ namespace Pars\Core\Cache;
 
 use Cache\Adapter\Common\AbstractCachePool;
 use Cache\Adapter\Common\PhpCacheItem;
+use Cocur\Slugify\Slugify;
 use Laminas\ConfigAggregator\ArrayProvider;
 use Laminas\ConfigAggregator\ConfigAggregator;
 
@@ -24,6 +25,8 @@ class ParsCache extends AbstractCachePool
      */
     public function __construct(string $file, $basePath = self::DEFAULT_BASE_PATH)
     {
+        $slug = new Slugify();
+        $file = $slug->slugify($file);
         if (!is_dir($basePath)) {
             mkdir($basePath);
         }
@@ -48,7 +51,7 @@ class ParsCache extends AbstractCachePool
             return [false, null, [], null];
         }
 
-        $element                       = $this->cache[$key];
+        $element = $this->cache[$key];
         list($data, $tags, $timestamp) = $element;
 
         if (is_object($data)) {
@@ -84,7 +87,7 @@ class ParsCache extends AbstractCachePool
      */
     protected function storeItemInCache(PhpCacheItem $item, $ttl)
     {
-        $value  = $item->get();
+        $value = $item->get();
         if (is_object($value)) {
             $value = clone $value;
         }
@@ -183,5 +186,20 @@ class ParsCache extends AbstractCachePool
     {
         $this->loadFile();
         return isset($this->cache[$key]);
+    }
+
+    /**
+     * @return PhpCacheItem[]
+     * @throws \Psr\SimpleCache\InvalidArgumentException
+     */
+    public function toArray(): array
+    {
+        $this->loadFile();
+        $result = [];
+        foreach ($this->cache as $key => $value) {
+            $result[$key] = $this->get($key);
+        }
+        unset($result[ConfigAggregator::ENABLE_CACHE]);
+        return $result;
     }
 }

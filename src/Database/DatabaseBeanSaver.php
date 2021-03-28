@@ -25,6 +25,17 @@ class DatabaseBeanSaver extends AbstractBeanSaver implements AdapterAwareInterfa
     }
 
     /**
+     * @param string $table
+     */
+    public function addDefaultFields(string $table)
+    {
+        $this->addField('Person_ID_Create')->setTable($table);
+        $this->addField('Person_ID_Edit')->setTable($table);
+        $this->addField('Timestamp_Create')->setTable($table);
+        $this->addField('Timestamp_Edit')->setTable($table);
+    }
+
+    /**
      * @param BeanInterface $bean
      * @return bool
      * @throws \Exception
