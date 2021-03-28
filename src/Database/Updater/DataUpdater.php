@@ -64,6 +64,12 @@ class DataUpdater extends AbstractUpdater
             'ConfigType_Code' => 'style',
         ];
         $data_Map[] = [
+            'Config_Code' => 'card-cap-color',
+            'Config_Value' => '#212529',
+            'Config_Locked' => 0,
+            'ConfigType_Code' => 'style',
+        ];
+        $data_Map[] = [
             'Config_Code' => 'html-color',
             'Config_Value' => '#FFFFFF',
             'Config_Locked' => 0,
