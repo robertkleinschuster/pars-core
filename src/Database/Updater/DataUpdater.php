@@ -739,6 +739,11 @@ class DataUpdater extends AbstractUpdater
             'CmsBlockType_Template' => 'cmsblock::default',
             'CmsBlockType_Active' => 1,
         ];
+        $data_Map[] = [
+            'CmsBlockType_Code' => 'tiles',
+            'CmsBlockType_Template' => 'cmsblock::tiles',
+            'CmsBlockType_Active' => 1,
+        ];
         return $this->saveDataMap('CmsBlockType', 'CmsBlockType_Code', $data_Map);
     }
 

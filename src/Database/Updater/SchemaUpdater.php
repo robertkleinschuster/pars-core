@@ -805,6 +805,8 @@ class SchemaUpdater extends AbstractUpdater
         $table = $this->getTableStatement('CmsBlock');
         $this->addColumnToTable($table, new Integer('CmsBlock_ID'))
             ->setOption('AUTO_INCREMENT', true);
+        $this->addColumnToTable($table, new Integer('CmsBlock_ID_Parent', true));
+        $this->addColumnToTable($table, new Integer('CmsBlock_Order', true));
         $this->addColumnToTable($table, new Integer('Article_ID'));
         $this->addColumnToTable($table, new Varchar('CmsBlockState_Code', 255));
         $this->addColumnToTable($table, new Varchar('CmsBlockType_Code', 255));
@@ -820,6 +822,7 @@ class SchemaUpdater extends AbstractUpdater
         $this->dropConstraintFromTable($table, new ForeignKey(null, 'CmsBlockState_Code', 'CmsBlockState', 'CmsBlockState_Code'));
         $this->dropConstraintFromTable($table, new ForeignKey(null, 'CmsBlockType_Code', 'CmsBlockType', 'CmsBlockType_Code'));
         $this->dropConstraintFromTable($table, new ForeignKey(null, 'Article_ID', 'Article', 'Article_ID'));
+        $this->dropConstraintFromTable($table, new ForeignKey(null, 'CmsBlock_ID_Parent', 'CmsBlock', 'CmsBlock_ID'));
         $this->dropDefaultConstraintsFromTable($table);
         return $this->query($table);
     }
@@ -830,6 +833,7 @@ class SchemaUpdater extends AbstractUpdater
         $this->addConstraintToTable($table, new ForeignKey(null, 'CmsBlockState_Code', 'CmsBlockState', 'CmsBlockState_Code'));
         $this->addConstraintToTable($table, new ForeignKey(null, 'CmsBlockType_Code', 'CmsBlockType', 'CmsBlockType_Code'));
         $this->addConstraintToTable($table, new ForeignKey(null, 'Article_ID', 'Article', 'Article_ID'));
+        $this->addConstraintToTable($table, new ForeignKey(null, 'CmsBlock_ID_Parent', 'CmsBlock', 'CmsBlock_ID'));
         $this->addDefaultConstraintsToTable($table);
         return $this->query($table);
     }
