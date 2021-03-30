@@ -238,7 +238,7 @@ class DataUpdater extends AbstractUpdater
             'Config_Code' => 'frontend.domain',
             'Config_Value' => isset($_SERVER['HTTP_HOST']) ? 'https://' . ltrim($_SERVER['HTTP_HOST'] ?? '', 'admin.') : '',
             'Config_Locked' => 0,
-            'ConfigType_Code' => 'frontend',
+            'ConfigType_Code' => 'base',
         ];
         $data_Map[] = [
             'Config_Code' => 'frontend.update',
