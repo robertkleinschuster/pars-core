@@ -126,6 +126,7 @@ class BundlesMiddleware implements MiddlewareInterface
                             $scss->setVariables($vars);
                             $scss->setImportPaths($bundle['import']);
                             $scss->setOutputStyle(OutputStyle::COMPRESSED);
+                            $scss->setSourceMap(Compiler::SOURCE_MAP_INLINE);
                             $css = $scss->compile('@import "' . $bundle['entrypoint'] . '";');
                             $autoprefixer = new Autoprefixer($css);
                             $css = $autoprefixer->compile(false);
