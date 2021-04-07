@@ -60,14 +60,14 @@ class UpdateHandler
         $cache->setTranslator($translator);
         $cache->clear();
         $dataUpdate = new \Pars\Core\Database\Updater\SchemaUpdater($adapter);
+        self::log($container, 'Pars Schema Update');
         $result = $dataUpdate->executeSilent();
-        self::log($container, json_encode($result, JSON_PRETTY_PRINT));
         $dataUpdate = new \Pars\Core\Database\Updater\DataUpdater($adapter);
+        self::log($container, 'Pars Data Update');
         $result = $dataUpdate->executeSilent();
-        self::log($container, json_encode($result, JSON_PRETTY_PRINT));
         $dataUpdate = new \Pars\Core\Database\Updater\SpecialUpdater($adapter);
+        self::log($container, 'Pars Special Update');
         $result = $dataUpdate->executeSilent();
-        self::log($container, json_encode($result, JSON_PRETTY_PRINT));
     }
 
     public static function log(ContainerInterface $container, $msg) {
