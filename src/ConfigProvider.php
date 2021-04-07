@@ -21,6 +21,7 @@ use Pars\Core\Image\ImageMiddleware;
 use Pars\Core\Image\ImageMiddlewareFactory;
 use Pars\Core\Localization\LocalizationMiddleware;
 use Pars\Core\Localization\LocalizationMiddlewareFactory;
+use Pars\Core\Logging\ErrorResolverListenerDelegatorFactory;
 use Pars\Core\Logging\LoggingErrorListenerDelegatorFactory;
 use Pars\Core\Logging\LoggingMiddleware;
 use Pars\Core\Logging\LoggingMiddlewareFactory;
@@ -77,6 +78,7 @@ class ConfigProvider
             'delegators' => [
                 ErrorHandler::class => [
                     LoggingErrorListenerDelegatorFactory::class,
+                    ErrorResolverListenerDelegatorFactory::class
                 ],
             ],
         ];
