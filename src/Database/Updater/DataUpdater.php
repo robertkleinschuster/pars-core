@@ -115,6 +115,14 @@ class DataUpdater extends AbstractUpdater
             'Config_Code' => 'asset.domain',
             'Config_Value' => isset($_SERVER['HTTP_HOST']) ? 'https://' . $_SERVER['HTTP_HOST'] . '/img' : '',
             'Config_Locked' => 0,
+            'Config_Description' => 'https://admin.example.com/img',
+            'ConfigType_Code' => 'base',
+        ];
+        $data_Map[] = [
+            'Config_Code' => 'domains',
+            'Config_Value' => '',
+            'Config_Locked' => 0,
+            'Config_Description' => 'example.com, example.de, example.it',
             'ConfigType_Code' => 'base',
         ];
         $data_Map[] = [
@@ -238,6 +246,7 @@ class DataUpdater extends AbstractUpdater
             'Config_Code' => 'frontend.domain',
             'Config_Value' => isset($_SERVER['HTTP_HOST']) ? 'https://' . ltrim($_SERVER['HTTP_HOST'] ?? '', 'admin.') : '',
             'Config_Locked' => 0,
+            'Config_Description' => 'https://example.com',
             'ConfigType_Code' => 'base',
         ];
         $data_Map[] = [
