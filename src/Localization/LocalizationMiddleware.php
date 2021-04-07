@@ -39,15 +39,25 @@ class LocalizationMiddleware implements MiddlewareInterface
 
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
+        $useDomain = $this->config['domain'] ?? false;
+        $domain = null;
+        if ($useDomain) {
+            $domain = $request->getUri()->getHost();
+        }
         $routeLocaleCode = Locale::acceptFromHttp($request->getAttribute('locale', null));
         $routeLanguageCode = Locale::getPrimaryLanguage($routeLocaleCode);
         if ($routeLocaleCode) {
-            $locale = $this->localization->findLocale($routeLocaleCode, $routeLanguageCode, $this->config['fallback']);
+            $locale = $this->localization->findLocale(
+                $routeLocaleCode,
+                $routeLanguageCode,
+                $this->config['fallback'],
+                $domain
+            );
             if ($routeLocaleCode != $locale->getLocale_Code()) {
                 if ($this->config['redirect'] === true) {
                     if ($this->urlHelper->getRouteResult()->isSuccess()) {
                         return new RedirectResponse(
-                            rtrim($this->urlHelper->generate('cms', ['locale' => $locale->getUrl_Code()]), "/")
+                            rtrim($this->urlHelper->generate(null, ['locale' => $locale->getUrl_Code()]), "/")
                         );
                     }
                 }
@@ -69,7 +79,8 @@ class LocalizationMiddleware implements MiddlewareInterface
                 $locale = $this->localization->findLocale(
                     $headerLocaleCode,
                     $headerLanguageCode,
-                    $this->config['fallback']
+                    $this->config['fallback'],
+                    $domain
                 );
             }
             if ($this->config['redirect'] === true) {

@@ -204,6 +204,7 @@ class SchemaUpdater extends AbstractUpdater
         $table = $this->getTableStatement('Locale');
         $this->addColumnToTable($table, new Varchar('Locale_Code', 255));
         $this->addColumnToTable($table, new Varchar('Locale_UrlCode', 255));
+        $this->addColumnToTable($table, new Varchar('Locale_Domain', 255, true));
         $this->addColumnToTable($table, new Varchar('Locale_Name', 255));
         $this->addColumnToTable($table, new Boolean('Locale_Active', false, 0));
         $this->addColumnToTable($table, new Integer('Locale_Order', false, 0));
@@ -216,6 +217,9 @@ class SchemaUpdater extends AbstractUpdater
     {
         $table = $this->getTableStatement('Locale', true);
         $this->dropConstraintFromTable($table, new UniqueKey('Locale_UrlCode'));
+        $this->dropConstraintFromTable($table, new Index('Locale_UrlCode'));
+        $this->dropConstraintFromTable($table, new Index('Locale_Domain'));
+        $this->dropConstraintFromTable($table, new Index('Locale_Active'));
         $this->dropDefaultConstraintsFromTable($table);
         return $this->query($table);
     }
@@ -224,6 +228,9 @@ class SchemaUpdater extends AbstractUpdater
     {
         $table = $this->getTableStatement('Locale', true);
         $this->addConstraintToTable($table, new UniqueKey('Locale_UrlCode'));
+        $this->addConstraintToTable($table, new Index('Locale_UrlCode'));
+        $this->addConstraintToTable($table, new Index('Locale_Domain'));
+        $this->addConstraintToTable($table, new Index('Locale_Active'));
         $this->addDefaultConstraintsToTable($table);
         return $this->query($table);
     }
@@ -523,6 +530,7 @@ class SchemaUpdater extends AbstractUpdater
         $this->dropConstraintFromTable($table, new ForeignKey(null, 'Locale_Code', 'Locale', 'Locale_Code'));
         $this->dropConstraintFromTable($table, new ForeignKey(null, 'File_ID', 'File', 'File_ID'));
         $this->dropConstraintFromTable($table, new UniqueKey(['Locale_Code', 'ArticleTranslation_Code']));
+        $this->dropConstraintFromTable($table, new Index('ArticleTranslation_Host'));
         $this->dropDefaultConstraintsFromTable($table);
         return $this->query($table);
     }
@@ -534,6 +542,7 @@ class SchemaUpdater extends AbstractUpdater
         $this->addConstraintToTable($table, new ForeignKey(null, 'Locale_Code', 'Locale', 'Locale_Code'));
         $this->addConstraintToTable($table, new ForeignKey(null, 'File_ID', 'File', 'File_ID'));
         $this->addConstraintToTable($table, new UniqueKey(['Locale_Code', 'ArticleTranslation_Code']));
+        $this->addConstraintToTable($table, new Index('ArticleTranslation_Host'));
         $this->addDefaultConstraintsToTable($table);
         return $this->query($table);
     }

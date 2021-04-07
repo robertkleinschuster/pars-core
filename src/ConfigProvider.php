@@ -46,7 +46,12 @@ class ConfigProvider
             'image' => [
                 'source' => '/u',
                 'cache' => '/c',
-            ]
+            ],
+            'localization' => [
+                'redirect' => false,
+                'domain' => false,
+                'fallback' => 'de_AT'
+            ],
         ];
     }
 
