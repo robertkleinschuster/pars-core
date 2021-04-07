@@ -52,25 +52,37 @@ class UpdateHandler
      */
     public static function handleAppUpdate(ContainerInterface $container)
     {
-        self::log($container, 'Pars Update');
-        $adapter = $container->get(\Laminas\Db\Adapter\AdapterInterface::class);
-        $translator = $container->get(\Laminas\I18n\Translator\TranslatorInterface::class);
-        self::log($container, 'Pars Clear Cache');
-        $cache = new \Pars\Core\Deployment\Cache($container->get('config'), $adapter);
-        $cache->setTranslator($translator);
-        $cache->clear();
-        $dataUpdate = new \Pars\Core\Database\Updater\SchemaUpdater($adapter);
-        self::log($container, 'Pars Schema Update');
-        $result = $dataUpdate->executeSilent();
-        $dataUpdate = new \Pars\Core\Database\Updater\DataUpdater($adapter);
-        self::log($container, 'Pars Data Update');
-        $result = $dataUpdate->executeSilent();
-        $dataUpdate = new \Pars\Core\Database\Updater\SpecialUpdater($adapter);
-        self::log($container, 'Pars Special Update');
-        $result = $dataUpdate->executeSilent();
+        try {
+            self::log($container, 'Pars Update');
+            $adapter = $container->get(\Laminas\Db\Adapter\AdapterInterface::class);
+            $translator = $container->get(\Laminas\I18n\Translator\TranslatorInterface::class);
+            self::log($container, 'Pars Clear Cache');
+            $cache = new \Pars\Core\Deployment\Cache($container->get('config'), $adapter);
+            $cache->setTranslator($translator);
+            $cache->clear();
+            $dataUpdate = new \Pars\Core\Database\Updater\SchemaUpdater($adapter);
+            self::log($container, 'Pars Schema Update');
+            $result = $dataUpdate->executeSilent();
+            $dataUpdate = new \Pars\Core\Database\Updater\DataUpdater($adapter);
+            self::log($container, 'Pars Data Update');
+            $result = $dataUpdate->executeSilent();
+            $dataUpdate = new \Pars\Core\Database\Updater\SpecialUpdater($adapter);
+            self::log($container, 'Pars Special Update');
+            $result = $dataUpdate->executeSilent();
+        } catch (\Throwable $exception) {
+            self::error($container, $exception->getMessage());
+        }
     }
 
     public static function log(ContainerInterface $container, $msg) {
+        $logger = $container->get('Logger');
+        if ($logger instanceof LoggerInterface) {
+            $logger->info($msg);
+        }
+    }
+
+
+    public static function error(ContainerInterface $container, $msg) {
         $logger = $container->get('Logger');
         if ($logger instanceof LoggerInterface) {
             $logger->info($msg);
