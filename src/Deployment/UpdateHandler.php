@@ -7,6 +7,7 @@ use Composer\DependencyResolver\Operation\UpdateOperation;
 use Composer\Installer\PackageEvent;
 use Composer\Script\Event;
 use Psr\Container\ContainerInterface;
+use Psr\Log\LoggerInterface;
 
 /**
  * Class UpdateHandler
@@ -51,17 +52,29 @@ class UpdateHandler
      */
     public static function handleAppUpdate(ContainerInterface $container)
     {
+        self::log($container, 'Pars Update');
         $adapter = $container->get(\Laminas\Db\Adapter\AdapterInterface::class);
         $translator = $container->get(\Laminas\I18n\Translator\TranslatorInterface::class);
+        self::log($container, 'Pars Clear Cache');
         $cache = new \Pars\Core\Deployment\Cache($container->get('config'), $adapter);
         $cache->setTranslator($translator);
         $cache->clear();
         $dataUpdate = new \Pars\Core\Database\Updater\SchemaUpdater($adapter);
-        $dataUpdate->executeSilent();
+        $result = $dataUpdate->executeSilent();
+        self::log($container, json_encode($result, JSON_PRETTY_PRINT));
         $dataUpdate = new \Pars\Core\Database\Updater\DataUpdater($adapter);
-        $dataUpdate->executeSilent();
+        $result = $dataUpdate->executeSilent();
+        self::log($container, json_encode($result, JSON_PRETTY_PRINT));
         $dataUpdate = new \Pars\Core\Database\Updater\SpecialUpdater($adapter);
-        $dataUpdate->executeSilent();
+        $result = $dataUpdate->executeSilent();
+        self::log($container, json_encode($result, JSON_PRETTY_PRINT));
+    }
+
+    public static function log(ContainerInterface $container, $msg) {
+        $logger = $container->get('Logger');
+        if ($logger instanceof LoggerInterface) {
+            $logger->info($msg);
+        }
     }
 
     /**
