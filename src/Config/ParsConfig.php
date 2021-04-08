@@ -84,7 +84,7 @@ class ParsConfig
 
     /**
      * @return array
-     * @throws \Niceshops\Bean\Type\Base\BeanException
+     * @throws \Pars\Bean\Type\Base\BeanException
      */
     protected function loadConfig(): array
     {

@@ -2,9 +2,9 @@
 
 namespace Pars\Core\Task\Order;
 
-use Niceshops\Bean\Finder\BeanFinderInterface;
-use Niceshops\Bean\Processor\BeanProcessorInterface;
-use Niceshops\Bean\Type\Base\BeanListAwareInterface;
+use Pars\Bean\Finder\BeanFinderInterface;
+use Pars\Bean\Processor\BeanProcessorInterface;
+use Pars\Bean\Type\Base\BeanListAwareInterface;
 use Pars\Core\Task\Base\AbstractTask;
 use Pars\Model\Cms\PageBlock\CmsPageBlockBeanFinder;
 use Pars\Model\Cms\PageBlock\CmsPageBlockBeanProcessor;

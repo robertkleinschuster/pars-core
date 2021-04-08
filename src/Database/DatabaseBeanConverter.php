@@ -2,10 +2,10 @@
 
 namespace Pars\Core\Database;
 
-use Niceshops\Bean\Converter\AbstractBeanConverter;
-use Niceshops\Bean\Type\Base\AbstractBaseBean;
-use Niceshops\Bean\Type\Base\BeanException;
-use Niceshops\Bean\Type\Base\BeanInterface;
+use Pars\Bean\Converter\AbstractBeanConverter;
+use Pars\Bean\Type\Base\AbstractBaseBean;
+use Pars\Bean\Type\Base\BeanException;
+use Pars\Bean\Type\Base\BeanInterface;
 
 class DatabaseBeanConverter extends AbstractBeanConverter
 {

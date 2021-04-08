@@ -222,7 +222,7 @@ class SpecialUpdater extends AbstractUpdater
      * @param string $roleCode
      * @param array $permissions
      * @return string
-     * @throws \Niceshops\Bean\Type\Base\BeanException
+     * @throws \Pars\Bean\Type\Base\BeanException
      */
     protected function rolePermissions(string $roleCode, array $permissions)
     {

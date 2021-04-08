@@ -7,8 +7,8 @@ use Laminas\Db\Adapter\AdapterAwareInterface;
 use Laminas\Db\Adapter\AdapterAwareTrait;
 use Laminas\Db\Sql\Expression;
 use Laminas\Db\Sql\Sql;
-use Niceshops\Bean\Saver\AbstractBeanSaver;
-use Niceshops\Bean\Type\Base\BeanInterface;
+use Pars\Bean\Saver\AbstractBeanSaver;
+use Pars\Bean\Type\Base\BeanInterface;
 
 class DatabaseBeanSaver extends AbstractBeanSaver implements AdapterAwareInterface
 {
