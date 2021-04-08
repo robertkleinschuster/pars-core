@@ -21,29 +21,38 @@ class UpdateHandler
     protected static array $changedPackages = [];
 
     /**
+     *
+     */
+    public static function onUpdate()
+    {
+        /**
+         * @var ContainerInterface $container
+         */
+        $container = require 'config/container.php';
+        $config = $container->get('config');
+        if (isset($config['master-app']) && $config['master-app']) {
+            $glob = glob('src/*/config/container.php');
+            $root = getcwd();
+            foreach ($glob as $containerFile) {
+                if (is_dir(dirname($containerFile, 2))) {
+                    chdir(dirname($containerFile, 2));
+                    self::handleAppUpdate(require 'config/container.php');
+                    chdir($root);
+                }
+            }
+        } else {
+            self::handleAppUpdate($container);
+        }
+    }
+
+    /**
      * @param array $changedPackages
      */
     public static function updateApps(array $changedPackages)
     {
         if (count($changedPackages)) {
-            /**
-             * @var ContainerInterface $container
-             */
-            $container = require 'config/container.php';
-            $config = $container->get('config');
-            if (isset($config['master-app']) && $config['master-app']) {
-                $glob = glob('src/*/config/container.php');
-                $root = getcwd();
-                foreach ($glob as $containerFile) {
-                    if (is_dir(dirname($containerFile, 2))) {
-                        chdir(dirname($containerFile, 2));
-                        self::handleAppUpdate(require 'config/container.php');
-                        chdir($root);
-                    }
-                }
-            } else {
-                self::handleAppUpdate($container);
-            }
+            file_put_contents('pars-update', 'true');
+            self::onUpdate();
         }
     }
 

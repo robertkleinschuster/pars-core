@@ -107,6 +107,7 @@
     "cs-fix": "phpcbf",
     "test": "phpunit --colors=always",
     "test-coverage": "phpunit --colors=always --coverage-clover clover.xml",
+    "pars-update": "Pars\\Core\\Deployment\\UpdateHandler::onUpdate",
     "post-update-cmd": [
       "Pars\\Core\\Deployment\\UpdateHandler::postUpdate"
     ],
