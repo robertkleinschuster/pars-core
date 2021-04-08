@@ -71,7 +71,7 @@ class DataUpdater extends AbstractUpdater
         ];
         $data_Map[] = [
             'Config_Code' => 'html-color',
-            'Config_Value' => '#FFFFFF',
+            'Config_Value' => '#ced4da',
             'Config_Locked' => 0,
             'ConfigType_Code' => 'style',
         ];
@@ -83,7 +83,38 @@ class DataUpdater extends AbstractUpdater
         ];
         $data_Map[] = [
             'Config_Code' => 'body-color',
-            'Config_Value' => '#FFFFFF',
+            'Config_Value' => '#ced4da',
+            'Config_Locked' => 0,
+            'ConfigType_Code' => 'style',
+        ];
+
+        $data_Map[] = [
+            'Config_Code' => 'headings-color',
+            'Config_Value' => '#f8f9fa',
+            'Config_Locked' => 0,
+            'ConfigType_Code' => 'style',
+        ];
+        $data_Map[] = [
+            'Config_Code' => 'display1-color',
+            'Config_Value' => '#f8f9fa',
+            'Config_Locked' => 0,
+            'ConfigType_Code' => 'style',
+        ];
+        $data_Map[] = [
+            'Config_Code' => 'display2-color',
+            'Config_Value' => '#f8f9fa',
+            'Config_Locked' => 0,
+            'ConfigType_Code' => 'style',
+        ];
+        $data_Map[] = [
+            'Config_Code' => 'display3-color',
+            'Config_Value' => '#f8f9fa',
+            'Config_Locked' => 0,
+            'ConfigType_Code' => 'style',
+        ];
+        $data_Map[] = [
+            'Config_Code' => 'display4-color',
+            'Config_Value' => '#f8f9fa',
             'Config_Locked' => 0,
             'ConfigType_Code' => 'style',
         ];
@@ -107,7 +138,7 @@ class DataUpdater extends AbstractUpdater
         ];
         $data_Map[] = [
             'Config_Code' => 'primary',
-            'Config_Value' => '#FFFFFF',
+            'Config_Value' => '#ced4da',
             'Config_Locked' => 0,
             'ConfigType_Code' => 'style',
         ];
