@@ -79,9 +79,7 @@
     }
   },
   "extra": {
-    "branch-alias": {
-      "dev-master": "1.0.x-dev"
-    },
+
     "merge-plugin": {
       "include": [
         "vendor/pars/pars-core/composer.json"
