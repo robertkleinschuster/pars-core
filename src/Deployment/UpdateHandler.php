@@ -52,7 +52,7 @@ class UpdateHandler
     {
         if (count($changedPackages)) {
             file_put_contents('pars-update', 'true');
-            self::onUpdate();
+            #self::onUpdate();
         }
     }
 
