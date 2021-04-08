@@ -1,7 +1,7 @@
 # pars-core
 
-[![Build Status](https://travis-ci.com/robertkleinschuster/pars-core.svg?branch=master)](https://travis-ci.com/robertkleinschuster/pars-core)
-[![Coverage Status](https://coveralls.io/repos/github/robertkleinschuster/pars-core/badge.svg?branch=master)](https://coveralls.io/github/robertkleinschuster/pars-core?branch=master)
+[![Build Status](https://travis-ci.com/pars-framework/pars-core.svg?branch=master)](https://travis-ci.com/pars-framework/pars-core)
+[![Coverage Status](https://coveralls.io/repos/github/pars-framework/pars-core/badge.svg?branch=master)](https://coveralls.io/github/pars-framework/pars-core?branch=master)
 
 This library provides core functionality for pars.
 
