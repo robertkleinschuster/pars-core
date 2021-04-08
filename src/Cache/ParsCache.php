@@ -28,7 +28,11 @@ class ParsCache extends AbstractCachePool
         $slug = new Slugify();
         $file = $slug->slugify($file);
         if (!is_dir($basePath)) {
-            mkdir($basePath);
+            try {
+                mkdir($basePath);
+            } catch (\Throwable $exception) {
+
+            }
         }
         $this->file = $basePath . $file . '.php';
     }
