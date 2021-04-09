@@ -53,6 +53,7 @@ class ConfigProvider
                 'domain' => false,
                 'fallback' => 'de_AT'
             ],
+            'db' => []
         ];
     }
 
