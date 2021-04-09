@@ -88,10 +88,19 @@ class ParsConfig
      */
     protected function loadConfig(): array
     {
-        $list = $this->finder->getBeanListDecorator();
-        $types = (new ConfigTypeBeanFinder($this->adapter))
-            ->getBeanList()
-            ->column('ConfigType_Code_Parent', 'ConfigType_Code');
+        try {
+            $list = $this->finder->getBeanList(true);
+        } catch (\Throwable $t) {
+            $list = $this->finder->getBeanFactory()->getEmptyBeanList();
+        }
+
+        try {
+            $types = (new ConfigTypeBeanFinder($this->adapter))
+                ->getBeanList()
+                ->column('ConfigType_Code_Parent', 'ConfigType_Code');
+        } catch (\Throwable $t) {
+            $types = [];
+        }
 
         $data = [];
         $keys = [];
