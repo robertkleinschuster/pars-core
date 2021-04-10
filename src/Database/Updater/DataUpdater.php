@@ -183,7 +183,7 @@ class DataUpdater extends AbstractUpdater
         ];
         $data_Map[] = [
             'Config_Code' => 'admin.author',
-            'Config_Value' => '',
+            'Config_Value' => 'PARS',
             'Config_Locked' => 0,
             'ConfigType_Code' => 'admin',
         ];

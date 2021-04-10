@@ -7,6 +7,8 @@ use Cache\Adapter\Common\PhpCacheItem;
 use Cocur\Slugify\Slugify;
 use Laminas\ConfigAggregator\ArrayProvider;
 use Laminas\ConfigAggregator\ConfigAggregator;
+use Pars\Bean\Finder\BeanFinderInterface;
+use Pars\Bean\Type\Base\BeanInterface;
 
 class ParsCache extends AbstractCachePool
 {
@@ -157,8 +159,44 @@ class ParsCache extends AbstractCachePool
         $item = $this->getItem($key);
         $item->set($value);
         $item->expiresAfter($ttl);
+        $this->saveDeferred($item);
+        return $this;
+    }
 
-        return $this->saveDeferred($item);
+    /**
+     * @param $key
+     * @param BeanInterface $bean
+     * @return $this
+     * @throws \Psr\SimpleCache\InvalidArgumentException
+     */
+    public function setBean($key, BeanInterface $bean)
+    {
+        $this->set($key, $bean);
+        return $this;
+    }
+
+    /**
+     * @param $key
+     * @param BeanInterface $beanList
+     * @return $this
+     * @throws \Psr\SimpleCache\InvalidArgumentException
+     */
+    public function setBeanList($key, BeanInterface $beanList)
+    {
+        $this->set($key, $beanList->toArray());
+        return $this;
+    }
+
+    /**
+     * @param $key
+     * @param BeanFinderInterface $finder
+     * @return $this
+     * @throws \Psr\SimpleCache\InvalidArgumentException
+     */
+    public function setBeanFinderResult($key, BeanFinderInterface $finder)
+    {
+        $this->set($key, $finder->getBeanList()->toArray());
+        return $this;
     }
 
     private function saveToFile()

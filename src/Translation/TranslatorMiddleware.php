@@ -5,6 +5,7 @@ namespace Pars\Core\Translation;
 use Laminas\Db\Adapter\Adapter;
 use Laminas\I18n\Translator\Loader\RemoteLoaderInterface;
 use Laminas\I18n\Translator\Translator;
+use Pars\Core\Config\ParsConfig;
 use Pars\Core\Database\DatabaseMiddleware;
 use Pars\Core\Localization\LocaleInterface;
 use Pars\Core\Logging\LoggingMiddleware;
@@ -51,8 +52,8 @@ class TranslatorMiddleware implements MiddlewareInterface
         }
         if ($adapter instanceof Adapter) {
             try {
-                $fallback = (new ConfigBeanFinder($adapter))->setConfig_Code('locale.default')->getBean()->get('Config_Value');
-                $this->translator->setFallbackLocale($fallback);
+                $config = new ParsConfig($adapter);
+                $this->translator->setFallbackLocale($config->get('locale.default'));
             } catch (\Throwable $exeption) {
             }
         }

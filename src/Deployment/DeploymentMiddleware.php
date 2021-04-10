@@ -7,6 +7,7 @@ use Laminas\Db\Adapter\AdapterInterface;
 use Laminas\Diactoros\Response\RedirectResponse;
 use Laminas\I18n\Translator\Translator;
 use Laminas\I18n\Translator\TranslatorInterface;
+use Pars\Core\Config\ParsConfig;
 use Pars\Model\Config\ConfigBeanFinder;
 use Psr\Container\ContainerInterface;
 use Psr\Http\Message\ResponseInterface;
@@ -35,7 +36,8 @@ class DeploymentMiddleware implements MiddlewareInterface
     {
         $key = 'pars';
         try {
-            $key = (new ConfigBeanFinder($this->adapter))->setConfig_Code('asset.key')->getBean()->get('Config_Value');
+            $config = new ParsConfig($this->adapter);
+            $key = $config->get('asset.key');
         } catch (\Throwable $exception) {
         }
         if (isset($request->getQueryParams()['clearcache']) && $request->getQueryParams()['clearcache'] == $key) {

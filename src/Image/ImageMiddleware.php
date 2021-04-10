@@ -4,6 +4,7 @@ namespace Pars\Core\Image;
 
 use Laminas\Db\Adapter\AdapterInterface;
 use Pars\Core\Cache\ParsCache;
+use Pars\Core\Config\ParsConfig;
 use Pars\Model\Config\ConfigBeanFinder;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -54,9 +55,8 @@ class ImageMiddleware implements MiddlewareInterface
                 }
                 if (empty($key) && $this->dbAdapter instanceof AdapterInterface) {
                     try {
-                        $finder = new ConfigBeanFinder($this->dbAdapter);
-                        $finder->setConfig_Code('asset.key');
-                        $key = $finder->getBean()->Config_Value;
+                        $config = new ParsConfig($this->dbAdapter);
+                        $key = $config->get('asset.key');
                         $cache->set('key', $key);
                         file_put_contents('data/image_signature', $key);
                     } catch (\Throwable $exception) {
