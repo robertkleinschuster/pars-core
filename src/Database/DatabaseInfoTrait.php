@@ -70,6 +70,7 @@ trait DatabaseInfoTrait
         if (count($exp) === 2) {
             $columnDefinition->setTable($exp[0]);
             $columnDefinition->setField($exp[1]);
+            $field = $columnDefinition->getField();
         } else {
             $columnDefinition->setField($field);
         }
@@ -158,7 +159,7 @@ trait DatabaseInfoTrait
     {
         $table_List = [];
         foreach ($this->dbColumnDefinition_Map as $item) {
-            if (!in_array($item->getTable(), $table_List)) {
+            if ($item->hasTable() && !in_array($item->getTable(), $table_List)) {
                 $table_List[] = $item->getTable();
             }
         }
@@ -170,7 +171,7 @@ trait DatabaseInfoTrait
      * @return string
      * @throws \Exception
      */
-    private function getTable(string $field): string
+    private function getTable(string $field): ?string
     {
         return $this->getDefinition($field)->getTable();
     }

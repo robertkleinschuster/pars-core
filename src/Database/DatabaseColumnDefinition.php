@@ -66,9 +66,17 @@ class DatabaseColumnDefinition implements \ArrayAccess
     /**
      * @return string
      */
-    public function getTable(): string
+    public function getTable(): ?string
     {
         return $this->table;
+    }
+
+    /**
+     * @return bool
+     */
+    public function hasTable(): bool
+    {
+        return isset($this->table);
     }
 
     /**
