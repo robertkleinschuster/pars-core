@@ -17,6 +17,8 @@ trait DatabaseInfoTrait
     private array $dbTableJoinDefinition_Map = [];
 
     /**
+     * @deprecated
+     * @see DatabaseInfoTrait::addField
      *
      * @param string $field
      * @param string|null $column
