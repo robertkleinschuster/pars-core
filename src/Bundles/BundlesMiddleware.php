@@ -9,7 +9,6 @@ use MatthiasMullie\Minify;
 use Padaliyajay\PHPAutoprefixer\Autoprefixer;
 use Pars\Core\Config\ParsConfig;
 use Pars\Helper\Filesystem\FilesystemHelper;
-use Pars\Mvc\Handler\MvcHandler;
 use Psr\Container\ContainerInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -139,7 +138,7 @@ class BundlesMiddleware implements MiddlewareInterface
         }
         return $handler->handle($request
             ->withAttribute(BundlesMiddleware::class, $this->config)
-            ->withAttribute(MvcHandler::STATIC_FILES_ATTRIBUTE, $this->config['list'])
+            ->withAttribute('static_files', $this->config['list'])
         );
     }
 
