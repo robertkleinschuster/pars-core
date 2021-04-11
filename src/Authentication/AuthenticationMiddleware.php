@@ -60,19 +60,32 @@ class AuthenticationMiddleware implements MiddlewareInterface
         $flash = $request->getAttribute(FlashMessageMiddleware::FLASH_ATTRIBUTE);
         $config = $this->container->get('config');
 
-        $redirect = $this->pathHelper
-            ->setController($config['authentication']['redirect']['controller'])
-            ->setAction($config['authentication']['redirect']['action'])
-            ->getPath();
+        try {
+            $redirect = $this->pathHelper
+                ->setController($config['authentication']['redirect']['controller'])
+                ->setAction($config['authentication']['redirect']['action'])
+                ->getPath();
+        } catch (\Exception $exception) {
+            $redirect = $config['authentication']['redirect']['path'] ?? '';
+        }
+
         $redirectOrig = $redirect;
         $whitelist = [];
         $whitelist[] = $this->normalizePath($redirect);
         foreach ($config['authentication']['whitelist'] as $item) {
-            $path = $this->pathHelper->setController($item['controller'])->setAction($item['action'])->getPath();
+            try {
+                $path = $this->pathHelper->setController($item['controller'])->setAction($item['action'])->getPath();
+            } catch (\Exception $exception) {
+                $path = $item['path'] ?? '';
+            }
             $whitelist[] = $this->normalizePath($path);
         }
 
-        $currentPath = $this->pathHelper->getUrlHelper()->generate();
+        try {
+            $currentPath = $this->pathHelper->getUrlHelper()->generate();
+        } catch (\Exception $exception) {
+            $currentPath = $request->getUri()->getPath();
+        }
         $current = $this->normalizePath($currentPath);
         $session = $request->getAttribute(SessionMiddleware::SESSION_ATTRIBUTE);
         $log = $request->getAttribute(LoggingMiddleware::LOGGER_ATTRIBUTE);
