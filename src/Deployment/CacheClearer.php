@@ -64,8 +64,9 @@ class CacheClearer implements AdapterAwareInterface, OptionAwareInterface
     {
         register_shutdown_function(function () use ($config) {
             $error = error_get_last();
-            if (isset($error['type']) && in_array($error['type'], [E_ERROR])) {
-               self::clearConfigCache($config);
+            if (isset($error['type']) && $error['type'] == E_ERROR) {
+                syslog(LOG_EMERG, 'Clear config cache: ' . implode($error));
+                self::clearConfigCache($config);
             }
         });
     }
@@ -75,6 +76,9 @@ class CacheClearer implements AdapterAwareInterface, OptionAwareInterface
      */
     public static function clearConfigCache(array $config)
     {
+        if (function_exists('opcache_reset')) {
+            opcache_reset();
+        }
         if (isset($config['config_cache_path']) && file_exists($config['config_cache_path'])) {
             unlink($config['config_cache_path']);
         }
@@ -83,9 +87,6 @@ class CacheClearer implements AdapterAwareInterface, OptionAwareInterface
         }
         if (file_exists($_SERVER['DOCUMENT_ROOT'] . '/../data/cache/config/config.php')) {
             unlink($_SERVER['DOCUMENT_ROOT'] . '/../data/cache/config/config.php');
-        }
-        if (function_exists('opcache_reset')) {
-            opcache_reset();
         }
     }
 
