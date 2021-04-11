@@ -64,7 +64,7 @@ class CacheClearer implements AdapterAwareInterface, OptionAwareInterface
     {
         register_shutdown_function(function () use ($config) {
             $error = error_get_last();
-            if (isset($error['type']) && in_array($error['type'], [E_ERROR, E_USER_ERROR])) {
+            if (isset($error['type']) && in_array($error['type'], [E_ERROR])) {
                self::clearConfigCache($config);
             }
         });
