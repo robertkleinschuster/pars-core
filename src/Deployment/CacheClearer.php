@@ -64,18 +64,26 @@ class CacheClearer implements AdapterAwareInterface, OptionAwareInterface
     {
         register_shutdown_function(function () use ($config) {
             $error = error_get_last();
-            if (isset($error['type']) && $error['type'] === E_ERROR) {
-                if (isset($config['config_cache_path']) && file_exists($config['config_cache_path'])) {
-                    unlink($config['config_cache_path']);
-                }
-                if (file_exists('data/cache/config/config.php')) {
-                    unlink('data/cache/config/config.php');
-                }
-                if (file_exists($_SERVER['DOCUMENT_ROOT'] . '/../data/cache/config/config.php')) {
-                    unlink($_SERVER['DOCUMENT_ROOT'] . '/../data/cache/config/config.php');
-                }
+            if (isset($error['type']) && in_array($error['type'], [E_ERROR, E_RECOVERABLE_ERROR, E_USER_ERROR])) {
+               self::executeConfigCacheFunction($config);
             }
         });
+    }
+
+    /**
+     * @param array $config
+     */
+    public static function executeConfigCacheFunction(array $config)
+    {
+        if (isset($config['config_cache_path']) && file_exists($config['config_cache_path'])) {
+            unlink($config['config_cache_path']);
+        }
+        if (file_exists('data/cache/config/config.php')) {
+            unlink('data/cache/config/config.php');
+        }
+        if (file_exists($_SERVER['DOCUMENT_ROOT'] . '/../data/cache/config/config.php')) {
+            unlink($_SERVER['DOCUMENT_ROOT'] . '/../data/cache/config/config.php');
+        }
     }
 
     /**
