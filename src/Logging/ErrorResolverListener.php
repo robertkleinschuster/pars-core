@@ -24,7 +24,7 @@ class ErrorResolverListener
 
     public function __invoke(Throwable $error, ServerRequestInterface $request, ResponseInterface $response)
     {
-        CacheClearer::executeConfigCacheFunction($this->container->get('config'));
+        CacheClearer::clearConfigCache($this->container->get('config'));
         UpdateHandler::handleAppUpdate($this->container);
     }
 }

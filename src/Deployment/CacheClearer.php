@@ -60,12 +60,12 @@ class CacheClearer implements AdapterAwareInterface, OptionAwareInterface
     /**
      * @param array $config
      */
-    public static function registerConfigCacheFunction(array $config)
+    public static function registerShutdownErrorFunction(array $config)
     {
         register_shutdown_function(function () use ($config) {
             $error = error_get_last();
             if (isset($error['type']) && in_array($error['type'], [E_ERROR, E_USER_ERROR])) {
-               self::executeConfigCacheFunction($config);
+               self::clearConfigCache($config);
             }
         });
     }
@@ -73,7 +73,7 @@ class CacheClearer implements AdapterAwareInterface, OptionAwareInterface
     /**
      * @param array $config
      */
-    public static function executeConfigCacheFunction(array $config)
+    public static function clearConfigCache(array $config)
     {
         if (isset($config['config_cache_path']) && file_exists($config['config_cache_path'])) {
             unlink($config['config_cache_path']);
