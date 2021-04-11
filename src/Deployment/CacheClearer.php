@@ -84,6 +84,9 @@ class CacheClearer implements AdapterAwareInterface, OptionAwareInterface
         if (file_exists($_SERVER['DOCUMENT_ROOT'] . '/../data/cache/config/config.php')) {
             unlink($_SERVER['DOCUMENT_ROOT'] . '/../data/cache/config/config.php');
         }
+        if (function_exists('opcache_reset')) {
+            opcache_reset();
+        }
     }
 
     /**
