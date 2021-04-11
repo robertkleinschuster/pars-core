@@ -10,7 +10,7 @@ abstract class AbstractApplicationContainerFactory
     public function __invoke()
     {
         $config = $this->getApplicationConfig();
-        CacheClearer::registerShutdownErrorFunction($config);
+        #CacheClearer::registerShutdownErrorFunction($config);
         $dependencies = $config['dependencies'];
         $dependencies['services']['config'] = $config;
         return $this->createApplicationContainer($dependencies);
