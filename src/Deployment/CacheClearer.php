@@ -58,6 +58,27 @@ class CacheClearer implements AdapterAwareInterface, OptionAwareInterface
     }
 
     /**
+     * @param array $config
+     */
+    public static function registerConfigCacheFunction(array $config)
+    {
+        register_shutdown_function(function () use ($config) {
+            $error = error_get_last();
+            if (isset($error['type']) && $error['type'] === E_ERROR) {
+                if (isset($config['config_cache_path']) && file_exists($config['config_cache_path'])) {
+                    unlink($config['config_cache_path']);
+                }
+                if (file_exists('data/cache/config/config.php')) {
+                    unlink('data/cache/config/config.php');
+                }
+                if (file_exists($_SERVER['DOCUMENT_ROOT'] . '/../data/cache/config/config.php')) {
+                    unlink($_SERVER['DOCUMENT_ROOT'] . '/../data/cache/config/config.php');
+                }
+            }
+        });
+    }
+
+    /**
      * @return ParsConfig
      */
     public function getConfig(): ParsConfig
