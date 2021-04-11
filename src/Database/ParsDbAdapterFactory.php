@@ -1,15 +1,17 @@
 <?php
 
-namespace Pars\Core\Image;
+
+namespace Pars\Core\Database;
+
 
 use Laminas\Db\Adapter\AdapterInterface;
-use Pars\Core\Config\ParsConfig;
 use Psr\Container\ContainerInterface;
 
-class ImageMiddlewareFactory
+class ParsDbAdapterFactory
 {
     public function __invoke(ContainerInterface $container)
     {
-        return new ImageMiddleware($container->get(ParsConfig::class));
+        return new ParsDbAdapter($container->get(AdapterInterface::class));
     }
+
 }

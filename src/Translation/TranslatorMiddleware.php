@@ -2,16 +2,10 @@
 
 namespace Pars\Core\Translation;
 
-use Laminas\Db\Adapter\Adapter;
 use Laminas\I18n\Translator\Loader\RemoteLoaderInterface;
-use Laminas\I18n\Translator\Translator;
 use Pars\Core\Config\ParsConfig;
-use Pars\Core\Database\DatabaseMiddleware;
 use Pars\Core\Localization\LocaleInterface;
 use Pars\Core\Logging\LoggingMiddleware;
-use Pars\Model\Config\ConfigBeanFinder;
-use Pars\Model\Translation\TranslationLoader\TranslationBeanFinder;
-use Pars\Model\Translation\TranslationLoader\TranslationBeanProcessor;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
@@ -27,75 +21,66 @@ class TranslatorMiddleware implements MiddlewareInterface
     public const TRANSLATOR_ATTRIBUTE = 'translater';
 
     /**
-     * @var Translator
+     * @var ParsTranslator
      */
-    private Translator $translator;
+    private ParsTranslator $translator;
+
+    private ParsConfig $config;
 
     /**
      * TranslationMiddleware constructor.
-     * @param Translator $translator
-     * @param array $config
+     * @param ParsTranslator $translator
      */
-    public function __construct(Translator $translator)
+    public function __construct(ParsTranslator $translator, ParsConfig $config)
     {
         $this->translator = $translator;
+        $this->config = $config;
     }
 
-
+    /**
+     * @param ServerRequestInterface $request
+     * @param RequestHandlerInterface $handler
+     * @return ResponseInterface
+     * @throws \Psr\SimpleCache\InvalidArgumentException
+     */
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
         $locale = $request->getAttribute(LocaleInterface::class);
-        $adapter = $request->getAttribute(DatabaseMiddleware::ADAPTER_ATTRIBUTE);
         $logger = $request->getAttribute(LoggingMiddleware::LOGGER_ATTRIBUTE);
         if ($locale instanceof LocaleInterface) {
-            $this->translator->setLocale($locale->getLocale_Code());
+            $this->translator->setLocale($locale);
         }
-        if ($adapter instanceof Adapter) {
-            try {
-                $config = new ParsConfig($adapter);
-                $this->translator->setFallbackLocale($config->get('locale.default'));
-            } catch (\Throwable $exeption) {
-            }
-        }
-        if ($logger instanceof LoggerInterface) {
-            $this->translator->enableEventManager();
-            if ($this->translator->isEventManagerEnabled()) {
-                $this->translator->getEventManager()->attach(
-                    \Laminas\I18n\Translator\Translator::EVENT_MISSING_TRANSLATION,
-                    static function (\Laminas\EventManager\EventInterface $event) use ($logger, $adapter) {
-                        $logger->warning('Missing translation', $event->getParams());
-                        $data = $event->getParams();
-                        if (null !== $adapter) {
-                            $translationFinder = new TranslationBeanFinder($adapter);
-                            $translationFinder->setLocale_Code($data['locale']);
-                            $translationFinder->setTranslation_Code($data['message']);
-                            $translationFinder->setTranslation_Namespace($data['text_domain']);
-                            if ($translationFinder->count() == 0) {
-                                $bean = $translationFinder->getBeanFactory()->getEmptyBean([]);
-                                $bean->set('Translation_Code', $data['message']);
-                                $bean->set('Locale_Code', $data['locale']);
-                                $bean->set('Translation_Namespace', $data['text_domain']);
-                                $bean->set('Translation_Text', $data['message']);
-                                $beanList = $translationFinder->getBeanFactory()->getEmptyBeanList();
-                                $beanList->push($bean);
-                                $translationProcessor = new TranslationBeanProcessor($adapter);
-                                $translationProcessor->setBeanList($beanList);
-                                $translationProcessor->save();
-                            }
-                        }
+        $this->translator->getTranslator()->setFallbackLocale($this->config->get('locale.default'));
+        $this->translator->getTranslator()->enableEventManager();
+        if ($this->translator->getTranslator()->isEventManagerEnabled()) {
+            $this->translator->getTranslator()->getEventManager()->attach(
+                \Laminas\I18n\Translator\Translator::EVENT_MISSING_TRANSLATION,
+                function (\Laminas\EventManager\EventInterface $event) use ($logger) {
+                    $data = $event->getParams();
+                    if ($logger instanceof LoggerInterface) {
+                        $logger->warning('Missing translation', $data);
                     }
-                );
-                $this->translator->getEventManager()->attach(
-                    \Laminas\I18n\Translator\Translator::EVENT_NO_MESSAGES_LOADED,
-                    static function (\Laminas\EventManager\EventInterface $event) use ($logger) {
+                    $this->translator->saveMissingTranslation($data['locale'], $data['message'], $data['text_domain']);
+                }
+            );
+            $this->translator->getTranslator()->getEventManager()->attach(
+                \Laminas\I18n\Translator\Translator::EVENT_NO_MESSAGES_LOADED,
+                function (\Laminas\EventManager\EventInterface $event) use ($logger) {
+                    if ($logger instanceof LoggerInterface) {
                         $logger->error('No messages loaded', $event->getParams());
                     }
-                );
-            }
+                }
+            );
         }
-        $this->translator->getPluginManager()->setFactory(RemoteLoaderInterface::class, function ($container) {
-            return $container->get(RemoteLoaderInterface::class);
-        });
-        return $handler->handle($request->withAttribute(self::TRANSLATOR_ATTRIBUTE, $this->translator));
+
+        $this->translator->getTranslator()
+            ->getPluginManager()
+            ->setFactory(RemoteLoaderInterface::class, function ($container) {
+                return $container->get(RemoteLoaderInterface::class);
+            });
+        return $handler->handle($request
+            ->withAttribute(self::TRANSLATOR_ATTRIBUTE, $this->translator->getTranslator())
+            ->withAttribute(ParsTranslator::class, $this->translator)
+        );
     }
 }

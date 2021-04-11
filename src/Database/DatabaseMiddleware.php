@@ -20,15 +20,15 @@ class DatabaseMiddleware implements MiddlewareInterface
     public const ADAPTER_ATTRIBUTE = 'db_adapter';
 
     /**
-     * @var AdapterInterface
+     * @var ParsDbAdapter
      */
     private $adapter;
 
     /**
      * DatabaseMiddleware constructor.
-     * @param AdapterInterface $adapter
+     * @param ParsDbAdapter $adapter
      */
-    public function __construct(AdapterInterface $adapter)
+    public function __construct(ParsDbAdapter $adapter)
     {
         $this->adapter = $adapter;
     }
@@ -36,6 +36,9 @@ class DatabaseMiddleware implements MiddlewareInterface
 
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
-        return $handler->handle($request->withAttribute(self::ADAPTER_ATTRIBUTE, $this->adapter));
+        return $handler->handle($request
+            ->withAttribute(self::ADAPTER_ATTRIBUTE, $this->adapter->getDbAdapter())
+            ->withAttribute(ParsDbAdapter::class, $this->adapter)
+        );
     }
 }

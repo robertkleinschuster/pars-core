@@ -9,6 +9,7 @@ use MatthiasMullie\Minify;
 use Padaliyajay\PHPAutoprefixer\Autoprefixer;
 use Pars\Core\Config\ParsConfig;
 use Pars\Helper\Filesystem\FilesystemHelper;
+use Pars\Mvc\Handler\MvcHandler;
 use Psr\Container\ContainerInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -118,8 +119,8 @@ class BundlesMiddleware implements MiddlewareInterface
                         if ($bundle['type'] == 'scss' && isset($bundle['entrypoint']) && isset($bundle['import'])) {
                             $vars = [];
                             if (isset($bundle['config']) && $this->container->has(AdapterInterface::class)) {
-                                $adapter = $this->container->get(AdapterInterface::class);
-                                $config = new ParsConfig($adapter, $bundle['config']);
+                                $config = $this->container->get(ParsConfig::class);
+                                $config->setType($bundle['config']);
                                 $vars = $config->toArray();
                             }
                             $scss = new Compiler();
@@ -136,7 +137,10 @@ class BundlesMiddleware implements MiddlewareInterface
                 }
             }
         }
-        return $handler->handle($request->withAttribute(BundlesMiddleware::class, $this->config));
+        return $handler->handle($request
+            ->withAttribute(BundlesMiddleware::class, $this->config)
+            ->withAttribute(MvcHandler::STATIC_FILES_ATTRIBUTE, $this->config['list'])
+        );
     }
 
     protected function injectHash(string $filename, string $hash): string

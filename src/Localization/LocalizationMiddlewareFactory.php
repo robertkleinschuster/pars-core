@@ -3,6 +3,7 @@
 namespace Pars\Core\Localization;
 
 use Mezzio\Helper\UrlHelper;
+use Pars\Core\Config\ParsConfig;
 use Psr\Container\ContainerInterface;
 
 /**
@@ -15,8 +16,8 @@ class LocalizationMiddlewareFactory
     {
         return new LocalizationMiddleware(
             $container->get(UrlHelper::class),
-            $container->get('config')['localization'],
-            $container->get(LocaleFinderInterface::class)
+            $container->get(ParsConfig::class),
+            $container->get(LocaleFinderInterface::class),
         );
     }
 }

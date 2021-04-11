@@ -2,10 +2,8 @@
 
 namespace Pars\Core\Image;
 
-use Laminas\Db\Adapter\AdapterInterface;
 use Pars\Core\Cache\ParsCache;
 use Pars\Core\Config\ParsConfig;
-use Pars\Model\Config\ConfigBeanFinder;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
@@ -15,23 +13,22 @@ class ImageMiddleware implements MiddlewareInterface
 {
     public const SERVER_ATTRIBUTE = 'image_server';
 
-    protected array $config;
-    protected $dbAdapter = null;
+    protected ParsConfig $config;
 
     /**
      * ImageMiddleware constructor.
-     * @param array $config
+     * @param ParsConfig $config
      */
-    public function __construct(array $config, $dbAdapter)
+    public function __construct(ParsConfig $config)
     {
         $this->config = $config;
-        $this->dbAdapter = $dbAdapter;
     }
 
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
-        $source = $this->config['source'] ?? '/i';
-        $cacheDir = $this->config['cache'] ?? '/c';
+        $imageConfig = $this->config->getFromAppConfig('image');
+        $source = $imageConfig['source'] ?? '/i';
+        $cacheDir = $imageConfig['cache'] ?? '/c';
         $server = \League\Glide\ServerFactory::create([
             'cache_with_file_extensions' => true,
             'source' => $_SERVER['DOCUMENT_ROOT'] . $source,
@@ -53,10 +50,9 @@ class ImageMiddleware implements MiddlewareInterface
                     $key = file_get_contents('data/image_signature');
                     $cache->set('key', $key);
                 }
-                if (empty($key) && $this->dbAdapter instanceof AdapterInterface) {
+                if (empty($key)) {
                     try {
-                        $config = new ParsConfig($this->dbAdapter);
-                        $key = $config->get('asset.key');
+                        $key = $this->config->get('asset.key');
                         $cache->set('key', $key);
                         file_put_contents('data/image_signature', $key);
                     } catch (\Throwable $exception) {

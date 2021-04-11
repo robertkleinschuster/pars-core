@@ -8,6 +8,12 @@ interface LocaleFinderInterface
         ?string $localeCode,
         ?string $language,
         $default,
-        ?string $domain = null
+        ?string $domain = null,
+        ?string $configDefault = null
     ): LocaleInterface;
+
+    /**
+     * @return array
+     */
+    public function getActiveLocaleCodeList(): array;
 }

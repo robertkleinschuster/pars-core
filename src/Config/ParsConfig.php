@@ -2,22 +2,20 @@
 
 namespace Pars\Core\Config;
 
-use Laminas\Db\Adapter\AdapterInterface;
 use Pars\Core\Cache\ParsCache;
-use Pars\Model\Config\ConfigBeanFinder;
-use Pars\Model\Config\Type\ConfigTypeBeanFinder;
+use Pars\Pattern\Exception\CoreException;
 
 class ParsConfig
 {
     /**
-     * @var AdapterInterface
-     */
-    protected AdapterInterface $adapter;
-
-    /**
      * @var array
      */
     protected array $config = [];
+
+    /**
+     * @var ParsApplicationConfig|array
+     */
+    protected ParsApplicationConfig $applicationConfig;
 
     /**
      * @var ParsCache
@@ -25,26 +23,34 @@ class ParsConfig
     protected ParsCache $cache;
 
     /**
-     * @var ConfigBeanFinder
+     * @var ConfigFinderInterface
      */
-    protected ConfigBeanFinder $finder;
+    protected ConfigFinderInterface $finder;
 
     /**
      * @var string
      */
-    protected string $type;
+    protected ?string $type = null;
 
     /**
      * ParsConfig constructor.
-     * @param AdapterInterface $adapter
+     * @param ConfigFinderInterface $finder
+     * @param ParsApplicationConfig $applicationConfig
+     */
+    public function __construct(ConfigFinderInterface $finder, ParsApplicationConfig $applicationConfig)
+    {
+        $this->finder = $finder;
+        $this->applicationConfig = $applicationConfig;
+    }
+
+    /**
      * @param string $type
      */
-    public function __construct(AdapterInterface $adapter, string $type = 'base')
+    public function setType(string $type): self
     {
-        $this->adapter = $adapter;
-        $this->cache = new ParsCache("pars-config-{$type}");
-        $this->finder = new ConfigBeanFinder($adapter);
         $this->type = $type;
+        $this->cache = new ParsCache("pars-config-{$type}");
+        return $this;
     }
 
     /**
@@ -52,8 +58,16 @@ class ParsConfig
      * @return mixed|void|null
      * @throws \Psr\SimpleCache\InvalidArgumentException
      */
-    public function get(string $key)
+    public function get(string $key, string $type = null)
     {
+        $restoreType = null;
+        if ($type) {
+            $restoreType = $this->type;
+            $this->setType($type);
+        }
+        if ($this->type === null) {
+            throw new CoreException('No type set for config.');
+        }
         if (isset($this->config[$key])) {
             return $this->config[$key];
         }
@@ -63,7 +77,27 @@ class ParsConfig
         }
         $this->config = $this->loadConfig();
         $this->cache->setMultiple($this->config);
+        if ($restoreType) {
+            $this->setType($restoreType);
+        }
         return $this->config[$key] ?? null;
+    }
+
+    /**
+     * @param string $key
+     * @return mixed
+     */
+    public function getFromAppConfig(string $key)
+    {
+        return $this->getApplicationConfig()->get($key);
+    }
+
+    /**
+     * @return ParsApplicationConfig
+     */
+    public function getApplicationConfig(): ParsApplicationConfig
+    {
+        return $this->applicationConfig;
     }
 
     /**
@@ -89,15 +123,13 @@ class ParsConfig
     protected function loadConfig(): array
     {
         try {
-            $list = $this->finder->getBeanList(true);
+            $list = $this->finder->getConfigBeanList();
         } catch (\Throwable $t) {
             $list = $this->finder->getBeanFactory()->getEmptyBeanList();
         }
 
         try {
-            $types = (new ConfigTypeBeanFinder($this->adapter))
-                ->getBeanList()
-                ->column('ConfigType_Code_Parent', 'ConfigType_Code');
+            $types = $this->finder->getConfigTypeBeanList()->column('ConfigType_Code_Parent', 'ConfigType_Code');
         } catch (\Throwable $t) {
             $types = [];
         }

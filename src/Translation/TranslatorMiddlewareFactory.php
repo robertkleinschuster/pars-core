@@ -3,6 +3,7 @@
 namespace Pars\Core\Translation;
 
 use Laminas\I18n\Translator\TranslatorInterface;
+use Pars\Core\Config\ParsConfig;
 use Psr\Container\ContainerInterface;
 
 /**
@@ -13,6 +14,6 @@ class TranslatorMiddlewareFactory
 {
     public function __invoke(ContainerInterface $container)
     {
-        return new TranslatorMiddleware($container->get(TranslatorInterface::class));
+        return new TranslatorMiddleware($container->get(ParsTranslator::class), $container->get(ParsConfig::class));
     }
 }

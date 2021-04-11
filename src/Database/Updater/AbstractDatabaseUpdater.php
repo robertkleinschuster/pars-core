@@ -18,7 +18,7 @@ use Laminas\Db\Sql\Sql;
 use Pars\Helper\Validation\ValidationHelperAwareInterface;
 use Pars\Helper\Validation\ValidationHelperAwareTrait;
 
-abstract class AbstractUpdater implements ValidationHelperAwareInterface, AdapterAwareInterface
+abstract class AbstractDatabaseUpdater implements ValidationHelperAwareInterface, AdapterAwareInterface
 {
     use ValidationHelperAwareTrait;
     use AdapterAwareTrait;

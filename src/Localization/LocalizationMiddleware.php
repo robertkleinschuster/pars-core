@@ -6,6 +6,7 @@ use Laminas\Diactoros\Response\RedirectResponse;
 use Locale;
 use Mezzio\Authentication\UserInterface;
 use Mezzio\Helper\UrlHelper;
+use Pars\Core\Config\ParsConfig;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
@@ -22,39 +23,47 @@ class LocalizationMiddleware implements MiddlewareInterface
      * @var UrlHelper
      */
     private UrlHelper $urlHelper;
-    private array $config;
     private LocaleFinderInterface $localization;
+    private ParsConfig $config;
 
 
     /**
      * LocalizationMiddleware constructor.
      * @param UrlHelper $urlHelper
      */
-    public function __construct(UrlHelper $urlHelper, array $config, LocaleFinderInterface $localization)
-    {
+    public function __construct(
+        UrlHelper $urlHelper,
+        ParsConfig $parsConfig,
+        LocaleFinderInterface $localization
+    ) {
         $this->urlHelper = $urlHelper;
-        $this->config = $config;
         $this->localization = $localization;
+        $this->config = $parsConfig;
     }
 
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
-        $useDomain = $this->config['domain'] ?? false;
+        $localizationConfig = $this->config->getApplicationConfig()->get('localization');
+        $useDomain = $localizationConfig['domain'] ?? false;
+        $fallback = $localizationConfig['fallback'];
+        $redirect = $localizationConfig['redirect'];
         $domain = null;
         if ($useDomain) {
             $domain = $request->getUri()->getHost();
         }
         $routeLocaleCode = Locale::acceptFromHttp($request->getAttribute('locale', null));
         $routeLanguageCode = Locale::getPrimaryLanguage($routeLocaleCode);
+        $configDefault = $this->config->get('locale.default');
         if ($routeLocaleCode) {
             $locale = $this->localization->findLocale(
                 $routeLocaleCode,
                 $routeLanguageCode,
-                $this->config['fallback'],
-                $domain
+                $fallback,
+                $domain,
+                $configDefault
             );
             if ($routeLocaleCode != $locale->getLocale_Code()) {
-                if ($this->config['redirect'] === true) {
+                if ($redirect === true) {
                     if ($this->urlHelper->getRouteResult()->isSuccess()) {
                         return new RedirectResponse(
                             rtrim($this->urlHelper->generate(null, ['locale' => $locale->getUrl_Code()]), "/")
@@ -71,7 +80,9 @@ class LocalizationMiddleware implements MiddlewareInterface
                 $locale = $this->localization->findLocale(
                     $params['editlocale'],
                     Locale::getPrimaryLanguage($params['editlocale']),
-                    $this->config['fallback']
+                    $fallback,
+                    null,
+                    $configDefault
                 );
             } elseif ($user instanceof LocaleAwareInterface && $user->hasLocale()) {
                 $locale = $user->getLocale();
@@ -79,11 +90,12 @@ class LocalizationMiddleware implements MiddlewareInterface
                 $locale = $this->localization->findLocale(
                     $headerLocaleCode,
                     $headerLanguageCode,
-                    $this->config['fallback'],
-                    $domain
+                    $fallback,
+                    $domain,
+                    $configDefault
                 );
             }
-            if ($this->config['redirect'] === true) {
+            if ($redirect === true) {
                 $this->urlHelper->setBasePath($locale->getUrl_Code());
                 if ($this->urlHelper->getRouteResult()->isSuccess()) {
                     return new RedirectResponse(rtrim($this->urlHelper->generate(), '/'));

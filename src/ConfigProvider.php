@@ -13,12 +13,27 @@ use Pars\Core\Authentication\AuthenticationMiddleware;
 use Pars\Core\Authentication\AuthenticationMiddlewareFactory;
 use Pars\Core\Bundles\BundlesMiddleware;
 use Pars\Core\Bundles\BundlesMiddlewareFactory;
+use Pars\Core\Config\ParsApplicationConfig;
+use Pars\Core\Config\ParsApplicationConfigFactory;
+use Pars\Core\Config\ParsConfig;
+use Pars\Core\Config\ParsConfigFactory;
+use Pars\Core\Config\ParsConfigMiddleware;
+use Pars\Core\Config\ParsConfigMiddlewareFactory;
 use Pars\Core\Database\DatabaseMiddleware;
 use Pars\Core\Database\DatabaseMiddlewareFactory;
+use Pars\Core\Database\ParsDbAdapter;
+use Pars\Core\Database\ParsDbAdapterFactory;
+use Pars\Core\Deployment\CacheClearer;
+use Pars\Core\Deployment\CacheClearerFactory;
 use Pars\Core\Deployment\DeploymentMiddleware;
 use Pars\Core\Deployment\DeploymentMiddlewareFactory;
+use Pars\Core\Deployment\ParsUpdater;
+use Pars\Core\Deployment\ParsUpdaterFactory;
+use Pars\Core\Deployment\UpdaterInterface;
 use Pars\Core\Image\ImageMiddleware;
 use Pars\Core\Image\ImageMiddlewareFactory;
+use Pars\Core\Localization\LocaleFactory;
+use Pars\Core\Localization\LocaleInterface;
 use Pars\Core\Localization\LocalizationMiddleware;
 use Pars\Core\Localization\LocalizationMiddlewareFactory;
 use Pars\Core\Logging\ErrorResolverListenerDelegatorFactory;
@@ -26,6 +41,8 @@ use Pars\Core\Logging\LoggingErrorListenerDelegatorFactory;
 use Pars\Core\Logging\LoggingMiddleware;
 use Pars\Core\Logging\LoggingMiddlewareFactory;
 use Pars\Core\Session\Cache\ParsMultiCachePoolFactory;
+use Pars\Core\Translation\ParsTranslator;
+use Pars\Core\Translation\ParsTranslatorFactory;
 use Pars\Core\Translation\TranslatorMiddleware;
 use Pars\Core\Translation\TranslatorMiddlewareFactory;
 
@@ -34,6 +51,9 @@ class ConfigProvider
     public function __invoke()
     {
         return [
+            'config' => [
+                'type' => 'base'
+            ],
             'dependencies' => $this->getDependencies(),
             'assets' => [
                 'development' => false,
@@ -53,7 +73,28 @@ class ConfigProvider
                 'domain' => false,
                 'fallback' => 'de_AT'
             ],
-            'db' => []
+            'db' => [],
+            'translator' => [
+                'namespace' => ParsTranslator::NAMESPACE_DEFAULT,
+                'locale' => ['de_AT', 'en_US'],
+                'translation_file_patterns' => [],
+                'translation_files' => [],
+                'remote_translation' => [
+                    [
+                        'type' => \Laminas\I18n\Translator\Loader\RemoteLoaderInterface::class,
+                        'text_domain' => 'default'
+                    ],
+                    [
+                        'type' => \Laminas\I18n\Translator\Loader\RemoteLoaderInterface::class,
+                        'text_domain' => 'admin'
+                    ],
+                    [
+                        'type' => \Laminas\I18n\Translator\Loader\RemoteLoaderInterface::class,
+                        'text_domain' => 'frontend'
+                    ]
+                ],
+                'event_manager_enabled' => true
+            ]
         ];
     }
 
@@ -74,7 +115,15 @@ class ConfigProvider
                 BundlesMiddleware::class => BundlesMiddlewareFactory::class,
                 DeploymentMiddleware::class => DeploymentMiddlewareFactory::class,
                 AssetsMiddleware::class => AssetsMiddlewareFactory::class,
-                ImageMiddleware::class => ImageMiddlewareFactory::class
+                ImageMiddleware::class => ImageMiddlewareFactory::class,
+                LocaleInterface::class => LocaleFactory::class,
+                ParsTranslator::class => ParsTranslatorFactory::class,
+                ParsConfig::class => ParsConfigFactory::class,
+                ParsDbAdapter::class => ParsDbAdapterFactory::class,
+                ParsApplicationConfig::class => ParsApplicationConfigFactory::class,
+                ParsConfigMiddleware::class => ParsConfigMiddlewareFactory::class,
+                CacheClearer::class => CacheClearerFactory::class,
+                UpdaterInterface::class => ParsUpdaterFactory::class,
             ],
             'delegators' => [
                 ErrorHandler::class => [

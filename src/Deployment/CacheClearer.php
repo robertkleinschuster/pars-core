@@ -5,20 +5,18 @@ namespace Pars\Core\Deployment;
 use Laminas\Db\Adapter\AdapterAwareInterface;
 use Laminas\Db\Adapter\AdapterAwareTrait;
 use Laminas\Db\Adapter\AdapterInterface;
-use Laminas\I18n\Translator\TranslatorAwareInterface;
-use Laminas\I18n\Translator\TranslatorAwareTrait;
+use Pars\Core\Config\ParsConfig;
+use Pars\Core\Translation\ParsTranslator;
 use Pars\Pattern\Option\OptionAwareInterface;
 use Pars\Pattern\Option\OptionAwareTrait;
 use Pars\Core\Cache\ParsCache;
 use Pars\Helper\Filesystem\FilesystemHelper;
-use Pars\Model\Localization\Locale\LocaleBeanFinder;
-use Pars\Model\Localization\Locale\LocaleBeanList;
 
 /**
  * Class Cache
  * @package Pars\Core\Deployment
  */
-class Cache implements AdapterAwareInterface, TranslatorAwareInterface, OptionAwareInterface
+class CacheClearer implements AdapterAwareInterface, OptionAwareInterface
 {
     public const OPTION_RESET_OPCACHE = 'reset_opcache';
     public const OPTION_CLEAR_CONFIG = 'clear_config';
@@ -30,20 +28,25 @@ class Cache implements AdapterAwareInterface, TranslatorAwareInterface, OptionAw
 
     use OptionAwareTrait;
     use AdapterAwareTrait;
-    use TranslatorAwareTrait;
 
     /**
-     * @var array
+     * @var ParsConfig
      */
-    protected array $applicationConfig;
+    protected ParsConfig $config;
+
+    /**
+     * @var ParsTranslator
+     */
+    protected ParsTranslator $translator;
 
     /**
      * Cache constructor.
-     * @param array $applicationConfig
+     * @param ParsConfig $config
      */
-    public function __construct(array $applicationConfig, AdapterInterface $adapter)
+    public function __construct(ParsConfig $config, AdapterInterface $adapter, ParsTranslator $translator)
     {
-        $this->applicationConfig = $applicationConfig;
+        $this->config = $config;
+        $this->translator = $translator;
         $this->setDbAdapter($adapter);
         $this->addOption(self::OPTION_CLEAR_ASSETS);
         $this->addOption(self::OPTION_CLEAR_BUNDLES);
@@ -52,6 +55,14 @@ class Cache implements AdapterAwareInterface, TranslatorAwareInterface, OptionAw
         $this->addOption(self::OPTION_CLEAR_IMAGES);
         $this->addOption(self::OPTION_CLEAR_TRANSLATIONS);
         $this->addOption(self::OPTION_CLEAR_CONFIG);
+    }
+
+    /**
+     * @return ParsConfig
+     */
+    public function getConfig(): ParsConfig
+    {
+        return $this->config;
     }
 
 
@@ -84,10 +95,15 @@ class Cache implements AdapterAwareInterface, TranslatorAwareInterface, OptionAw
         }
     }
 
+    protected function getAppConfig(string $key)
+    {
+        return $this->getConfig()->getFromAppConfig($key);
+    }
+
     protected function clearConfig()
     {
-        if (file_exists($this->applicationConfig['config_cache_path'])) {
-            unlink($this->applicationConfig['config_cache_path']);
+        if (file_exists($this->getAppConfig('config_cache_path'))) {
+            unlink($this->getConfig()->getFromAppConfig('config_cache_path'));
         }
     }
 
@@ -102,8 +118,9 @@ class Cache implements AdapterAwareInterface, TranslatorAwareInterface, OptionAw
 
     protected function clearSession()
     {
-        if (is_dir($this->applicationConfig['mezzio-session-cache']['filesystem_folder'])) {
-            $dir = $this->applicationConfig['mezzio-session-cache']['filesystem_folder'];
+        $sessionConfig = $this->getAppConfig('mezzio-session-cache');
+        if (is_dir($sessionConfig['filesystem_folder'])) {
+            $dir = $sessionConfig['filesystem_folder'];
             $files = array_diff(scandir($dir), ['.', '..']);
             foreach ($files as $file) {
                 $path = $dir . DIRECTORY_SEPARATOR . $file;
@@ -122,8 +139,9 @@ class Cache implements AdapterAwareInterface, TranslatorAwareInterface, OptionAw
 
     protected function clearBundles()
     {
-        if (isset($this->applicationConfig['bundles']['list'])) {
-            foreach ($this->applicationConfig['bundles']['list'] as $item) {
+        $bundlesConfig = $this->getAppConfig('bundles');
+        if (isset($bundlesConfig['list'])) {
+            foreach ($bundlesConfig['list'] as $item) {
                 if (isset($item['output'])) {
                     $filename = $item['output'];
                     $path = $_SERVER['DOCUMENT_ROOT'] . DIRECTORY_SEPARATOR . FilesystemHelper::injectHash($filename, '*');
@@ -142,8 +160,9 @@ class Cache implements AdapterAwareInterface, TranslatorAwareInterface, OptionAw
 
     protected function clearAssets()
     {
-        if (isset($this->applicationConfig['assets']['list'])) {
-            foreach ($this->applicationConfig['assets']['list'] as $item) {
+        $assetConfig = $this->getAppConfig('assets');
+        if (isset($assetConfig['list'])) {
+            foreach ($assetConfig['list'] as $item) {
                 if (isset($item['output'])) {
                     if (file_exists($_SERVER['DOCUMENT_ROOT'] . DIRECTORY_SEPARATOR . $item['output'])) {
                         unlink($_SERVER['DOCUMENT_ROOT'] . DIRECTORY_SEPARATOR . $item['output']);
@@ -156,11 +175,11 @@ class Cache implements AdapterAwareInterface, TranslatorAwareInterface, OptionAw
 
     protected function clearImages()
     {
-
-        if (isset($this->applicationConfig['image']['cache'])) {
-            if (is_dir($_SERVER['DOCUMENT_ROOT'] . DIRECTORY_SEPARATOR . $this->applicationConfig['image']['cache'])) {
+        $imageConfig = $this->getAppConfig('image');
+        if (isset($imageConfig['cache'])) {
+            if (is_dir($_SERVER['DOCUMENT_ROOT'] . DIRECTORY_SEPARATOR . $imageConfig['cache'])) {
                 FilesystemHelper::deleteDirectory(
-                    $_SERVER['DOCUMENT_ROOT'] . DIRECTORY_SEPARATOR . $this->applicationConfig['image']['cache']
+                    $_SERVER['DOCUMENT_ROOT'] . DIRECTORY_SEPARATOR . $imageConfig['cache']
                 );
             }
         }
@@ -169,47 +188,7 @@ class Cache implements AdapterAwareInterface, TranslatorAwareInterface, OptionAw
 
     protected function clearTranslations()
     {
-        if ($this->hasTranslator()) {
-            $localeList = null;
-            $localeFinder = new LocaleBeanFinder($this->adapter);
-            $localeFinder->setLocale_Active(true);
-            $localeList = $localeFinder->getBeanList();
-            $this->clearTranslationsSource('translation_file_patterns', $localeList);
-            $this->clearTranslationsSource('translation_files', $localeList);
-            $this->clearTranslationsSource('remote_translation', $localeList);
-        }
+        $this->translator->clearCache();
     }
 
-    protected function clearTranslationsTextDomain(string $textDomain, LocaleBeanList $localeList)
-    {
-        if ($localeList !== null) {
-            foreach ($localeList as $locale) {
-                $this->getTranslator()->clearCache(
-                    $textDomain,
-                    $locale->get('Locale_Code')
-                );
-            }
-        } elseif (
-            isset($this->applicationConfig['translator']['locale'])
-            && is_array($this->applicationConfig['translator']['locale'])
-        ) {
-            foreach ($this->applicationConfig['translator']['locale'] as $locale) {
-                $this->getTranslator()->clearCache($textDomain, $locale);
-            }
-        }
-    }
-
-    protected function clearTranslationsSource(string $source, LocaleBeanList $localeList)
-    {
-        if (
-            isset($this->applicationConfig['translator'][$source])
-            && is_array($this->applicationConfig['translator'][$source])
-        ) {
-            foreach ($this->applicationConfig['translator'][$source] as $translation_file_pattern) {
-                if (isset($translation_file_pattern['text_domain'])) {
-                    $this->clearTranslationsTextDomain($translation_file_pattern['text_domain'], $localeList);
-                }
-            }
-        }
-    }
 }
