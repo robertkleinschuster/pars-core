@@ -2,7 +2,6 @@
 
 namespace Pars\Core\Translation;
 
-use Laminas\I18n\Translator\TranslatorInterface;
 use Pars\Core\Config\ParsConfig;
 use Psr\Container\ContainerInterface;
 
