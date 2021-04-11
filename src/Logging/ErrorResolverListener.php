@@ -2,12 +2,9 @@
 
 namespace Pars\Core\Logging;
 
-use Pars\Core\Deployment\CacheClearer;
-use Pars\Core\Deployment\UpdateHandler;
 use Psr\Container\ContainerInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
-use Psr\Log\LoggerInterface;
 use Throwable;
 
 /**
@@ -25,7 +22,7 @@ class ErrorResolverListener
 
     public function __invoke(Throwable $error, ServerRequestInterface $request, ResponseInterface $response)
     {
-        CacheClearer::executeConfigCacheFunction($this->container->get('config'));
-        UpdateHandler::handleAppUpdate($this->container);
+        #CacheClearer::executeConfigCacheFunction($this->container->get('config'));
+        #UpdateHandler::handleAppUpdate($this->container);
     }
 }

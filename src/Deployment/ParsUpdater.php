@@ -27,6 +27,9 @@ class ParsUpdater implements UpdaterInterface
 
     public function update()
     {
+        if (function_exists('opcache_reset')) {
+            opcache_reset();
+        }
         $cache = $this->container->get(\Pars\Core\Deployment\CacheClearer::class);
         $cache->clear();
         foreach ($this->getDbUpdaterList() as $dbUpdater) {
