@@ -103,7 +103,7 @@ class ConfigProvider
                     'writers' => [
                         'syslog' => [
                             'name' => 'syslog',
-                            'priority' => 0,
+                            #'priority' => 1,
                             'options' => [
                                 'application' => 'pars-core',
                                 'facility' => LOG_LOCAL0,
