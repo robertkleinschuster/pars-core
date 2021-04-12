@@ -79,6 +79,18 @@ trait DatabaseInfoTrait
     }
 
     /**
+     * @param string $table
+     */
+    public function addDefaultFields(string $table): self
+    {
+        $this->addField('Person_ID_Create')->setTable($table);
+        $this->addField('Person_ID_Edit')->setTable($table);
+        $this->addField('Timestamp_Create')->setTable($table);
+        $this->addField('Timestamp_Edit')->setTable($table);
+        return $this;
+    }
+
+    /**
      * @return $this
      */
     public function resetDbInfo()

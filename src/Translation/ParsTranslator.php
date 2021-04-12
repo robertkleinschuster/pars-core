@@ -7,6 +7,7 @@ namespace Pars\Core\Translation;
 use Laminas\I18n\Translator\TranslatorAwareInterface;
 use Laminas\I18n\Translator\TranslatorAwareTrait;
 use Laminas\I18n\Translator\TranslatorInterface;
+use Pars\Bean\Type\Base\BeanException;
 use Pars\Core\Config\ParsConfig;
 use Pars\Core\Localization\LocaleAwareInterface;
 use Pars\Core\Localization\LocaleFinderInterface;
@@ -110,7 +111,7 @@ class ParsTranslator implements TranslatorAwareInterface, LocaleAwareInterface
      * @param string $text
      * @param array $vars
      * @return string
-     * @throws \Pars\Bean\Type\Base\BeanException
+     * @throws BeanException
      */
     protected function replacePlaceholder(string $text, array $vars = [])
     {
@@ -126,25 +127,47 @@ class ParsTranslator implements TranslatorAwareInterface, LocaleAwareInterface
     /**
      * @param string $code
      * @param array $vars
+     * @param string|null $namespace
      * @return string
+     * @throws BeanException
      */
-    public function translate(string $code, array $vars = [])
+    public function translate(string $code, array $vars = [], ?string $namespace = null): string
     {
-        return $this->replacePlaceholder($this->getTranslator()->translate($code, $this->getNamespace()), $vars);
+        $restoreNamespace = null;
+        if ($namespace) {
+            $restoreNamespace = $this->getNamespace();
+            $this->setNamespace($namespace);
+        }
+        $result = $this->replacePlaceholder($this->getTranslator()->translate($code, $this->getNamespace()), $vars);
+        if ($restoreNamespace) {
+            $this->setNamespace($restoreNamespace);
+        }
+        return $result;
     }
 
     /**
      * @param string $code
      * @param int $count
      * @param array $vars
+     * @param string|null $namespace
      * @return string
+     * @throws BeanException
      */
-    public function translatepl(string $code, int $count, array $vars = [])
+    public function translatepl(string $code, int $count, array $vars = [], ?string $namespace = null): string
     {
-        return $this->replacePlaceholder(
+        $restoreNamespace = null;
+        if ($namespace) {
+            $restoreNamespace = $this->getNamespace();
+            $this->setNamespace($namespace);
+        }
+        $result = $this->replacePlaceholder(
             $this->getTranslator()->translatePlural($code, $code, $count, $this->getNamespace()),
             $vars
         );
+        if ($restoreNamespace) {
+            $this->setNamespace($restoreNamespace);
+        }
+        return $result;
     }
 
     /**
@@ -163,7 +186,7 @@ class ParsTranslator implements TranslatorAwareInterface, LocaleAwareInterface
     public function clearCache()
     {
         try {
-            $this->clearTranslationsSource($this->localeFinder->getActiveLocaleCodeList());;
+            $this->clearTranslationsSource($this->localeFinder->findActiveLocaleCodeList());;
         } catch (\Throwable $exception) {
         }
     }

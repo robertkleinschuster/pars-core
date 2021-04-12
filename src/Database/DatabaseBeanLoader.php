@@ -15,12 +15,14 @@ use Laminas\Db\Sql\Sql;
 use Pars\Bean\Finder\BeanFinderInterface;
 use Pars\Bean\Loader\AbstractBeanLoader;
 use Pars\Bean\Type\Base\BeanInterface;
+use Pars\Pattern\Exception\CoreException;
 use Pars\Pattern\Exception\DatabaseException;
 
-class DatabaseBeanLoader extends AbstractBeanLoader implements AdapterAwareInterface
+class DatabaseBeanLoader extends AbstractBeanLoader implements AdapterAwareInterface, ParsDatabaseAdapterAwareInterface
 {
     use AdapterAwareTrait;
     use DatabaseInfoTrait;
+    use ParsDatabaseAdapterAwareTrait;
 
 
     /**
@@ -61,12 +63,18 @@ class DatabaseBeanLoader extends AbstractBeanLoader implements AdapterAwareInter
 
     /**
      * UserBeanLoader constructor.
-     * @param Adapter $adapter
-     * @param string $table
+     * @param Adapter|ParsDatabaseAdapter $adapter
      */
-    public function __construct(Adapter $adapter)
+    public function __construct($adapter)
     {
-        $this->setDbAdapter($adapter);
+        if ($adapter instanceof Adapter) {
+            $this->setDbAdapter($adapter);
+        } elseif ($adapter instanceof ParsDatabaseAdapter) {
+            $this->setDatabaseAdapter($adapter);
+            $this->setDbAdapter($adapter->getDbAdapter());
+        } else {
+            throw new CoreException('No valid database adapter given');
+        }
         $this->where_Map = [];
         $this->exclude_Map = [];
         $this->like_Map = [];

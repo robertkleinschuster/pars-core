@@ -7,11 +7,11 @@ namespace Pars\Core\Database;
 use Laminas\Db\Adapter\AdapterInterface;
 use Psr\Container\ContainerInterface;
 
-class ParsDbAdapterFactory
+class ParsDatabaseAdapterFactory
 {
     public function __invoke(ContainerInterface $container)
     {
-        return new ParsDbAdapter($container->get(AdapterInterface::class));
+        return new ParsDatabaseAdapter($container->get(AdapterInterface::class));
     }
 
 }

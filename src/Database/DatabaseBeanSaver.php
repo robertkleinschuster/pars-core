@@ -9,19 +9,27 @@ use Laminas\Db\Sql\Expression;
 use Laminas\Db\Sql\Sql;
 use Pars\Bean\Saver\AbstractBeanSaver;
 use Pars\Bean\Type\Base\BeanInterface;
+use Pars\Pattern\Exception\CoreException;
 
-class DatabaseBeanSaver extends AbstractBeanSaver implements AdapterAwareInterface
+class DatabaseBeanSaver extends AbstractBeanSaver implements AdapterAwareInterface, ParsDatabaseAdapterAwareInterface
 {
     use AdapterAwareTrait;
     use DatabaseInfoTrait;
-
+    use ParsDatabaseAdapterAwareTrait;
     /**
      * DatabaseBeanSaver constructor.
-     * @param Adapter $adapter
+     * @param Adapter|ParsDatabaseAdapter $adapter
      */
-    public function __construct(Adapter $adapter)
+    public function __construct($adapter)
     {
-        $this->setDbAdapter($adapter);
+        if ($adapter instanceof Adapter) {
+            $this->setDbAdapter($adapter);
+        } elseif ($adapter instanceof ParsDatabaseAdapter) {
+            $this->setDatabaseAdapter($adapter);
+            $this->setDbAdapter($adapter->getDbAdapter());
+        } else {
+            throw new CoreException('No valid database adapter given');
+        }
     }
 
     /**

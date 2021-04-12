@@ -8,7 +8,7 @@ use Laminas\Db\Adapter\AdapterAwareInterface;
 use Laminas\Db\Adapter\AdapterAwareTrait;
 use Laminas\Db\Adapter\AdapterInterface;
 
-class ParsDbAdapter implements AdapterAwareInterface
+class ParsDatabaseAdapter implements AdapterAwareInterface
 {
     use AdapterAwareTrait;
 

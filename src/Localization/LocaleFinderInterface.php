@@ -15,5 +15,5 @@ interface LocaleFinderInterface
     /**
      * @return array
      */
-    public function getActiveLocaleCodeList(): array;
+    public function findActiveLocaleCodeList(): array;
 }

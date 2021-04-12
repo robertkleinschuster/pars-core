@@ -21,8 +21,8 @@ use Pars\Core\Config\ParsConfigMiddleware;
 use Pars\Core\Config\ParsConfigMiddlewareFactory;
 use Pars\Core\Database\DatabaseMiddleware;
 use Pars\Core\Database\DatabaseMiddlewareFactory;
-use Pars\Core\Database\ParsDbAdapter;
-use Pars\Core\Database\ParsDbAdapterFactory;
+use Pars\Core\Database\ParsDatabaseAdapter;
+use Pars\Core\Database\ParsDatabaseAdapterFactory;
 use Pars\Core\Deployment\CacheClearer;
 use Pars\Core\Deployment\CacheClearerFactory;
 use Pars\Core\Deployment\DeploymentMiddleware;
@@ -119,7 +119,7 @@ class ConfigProvider
                 LocaleInterface::class => LocaleFactory::class,
                 ParsTranslator::class => ParsTranslatorFactory::class,
                 ParsConfig::class => ParsConfigFactory::class,
-                ParsDbAdapter::class => ParsDbAdapterFactory::class,
+                ParsDatabaseAdapter::class => ParsDatabaseAdapterFactory::class,
                 ParsApplicationConfig::class => ParsApplicationConfigFactory::class,
                 ParsConfigMiddleware::class => ParsConfigMiddlewareFactory::class,
                 CacheClearer::class => CacheClearerFactory::class,
