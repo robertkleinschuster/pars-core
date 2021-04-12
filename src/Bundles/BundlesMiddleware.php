@@ -96,11 +96,11 @@ class BundlesMiddleware implements MiddlewareInterface
                                 if ($newestTime > $outTime) {
                                     if (unlink($file) ) {
                                         if ($logger instanceof LoggerInterface) {
-                                            $logger->info('Deleted ' . $file);
+                                            $logger->notice('Deleted ' . $file);
                                         }
                                     } else {
                                         if ($logger instanceof LoggerInterface) {
-                                            $logger->info('Error deleting ' . $file);
+                                            $logger->error('Error deleting ' . $file);
                                         }
                                     }
                                 } else {
@@ -121,7 +121,7 @@ class BundlesMiddleware implements MiddlewareInterface
                             $minify->minify($documentRootPath . DIRECTORY_SEPARATOR . $bundle['output']);
                             $js = array_merge($js, $sources);
                             if ($logger instanceof LoggerInterface) {
-                                $logger->info('Wrote ' . $bundle['output']);
+                                $logger->notice('Wrote ' . $bundle['output']);
                             }
                         }
                         if ($bundle['type'] == 'css' && count($bundle['sources'])) {
@@ -129,7 +129,7 @@ class BundlesMiddleware implements MiddlewareInterface
                             $minify = new Minify\CSS($sources);
                             $minify->minify($documentRootPath . DIRECTORY_SEPARATOR . $bundle['output']);
                             if ($logger instanceof LoggerInterface) {
-                                $logger->info('Wrote ' . $bundle['output']);
+                                $logger->notice('Wrote ' . $bundle['output']);
                             }
                         }
                         if ($bundle['type'] == 'scss' && isset($bundle['entrypoint']) && isset($bundle['import'])) {
@@ -149,11 +149,11 @@ class BundlesMiddleware implements MiddlewareInterface
                             $css = $autoprefixer->compile(false);
                             if ($documentRoot->write($bundle['output'], $css) ) {
                                 if ($logger instanceof LoggerInterface) {
-                                    $logger->info('Wrote ' . $bundle['output']);
+                                    $logger->notice('Wrote ' . $bundle['output']);
                                 }
                             } else {
                                 if ($logger instanceof LoggerInterface) {
-                                    $logger->info('Error writing ' . $bundle['output']);
+                                    $logger->error('Error writing ' . $bundle['output']);
                                 }
                             }
                         }
