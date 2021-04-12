@@ -94,7 +94,48 @@ class ConfigProvider
                     ]
                 ],
                 'event_manager_enabled' => true
-            ]
+            ],
+            'psr_log' => [
+                'Logger' => [
+                    'exceptionhandler' => true,
+                    'errorhandler' => true,
+                    'fatal_error_shutdownfunction' => true,
+                    'writers' => [
+                        'syslog' => [
+                            'name' => 'syslog',
+                            'priority' => 10,
+                            'options' => [
+                                'application' => 'pars-core',
+                                'facility' => LOG_LOCAL0,
+                                'formatter' => [
+                                    'name' => \Laminas\Log\Formatter\Simple::class,
+                                    'options' => [
+                                        'format' => '%timestamp% %priorityName% (%priority%): %message% %extra%',
+                                        'dateTimeFormat' => 'c',
+                                    ],
+                                ],
+                                'filters' => [
+                                    'priority' => [
+                                        'name' => 'priority',
+                                        'options' => [
+                                            'operator' => '<=',
+                                            'priority' => \Laminas\Log\Logger::INFO,
+                                        ],
+                                    ],
+                                ],
+                            ],
+                        ],
+                    ],
+                    'processors' => [
+                        'requestid' => [
+                            'name' => \Laminas\Log\Processor\RequestId::class,
+                        ],
+                        'backtrace' => [
+                            'name' => \Laminas\Log\Processor\Backtrace::class,
+                        ],
+                    ],
+                ],
+            ],
         ];
     }
 
