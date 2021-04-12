@@ -8,12 +8,14 @@ use League\Flysystem\Filesystem;
 use MatthiasMullie\Minify;
 use Padaliyajay\PHPAutoprefixer\Autoprefixer;
 use Pars\Core\Config\ParsConfig;
+use Pars\Core\Logging\LoggingMiddleware;
 use Pars\Helper\Filesystem\FilesystemHelper;
 use Psr\Container\ContainerInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
+use Psr\Log\LoggerInterface;
 use ScssPhp\ScssPhp\Compiler;
 use ScssPhp\ScssPhp\OutputStyle;
 
@@ -65,6 +67,7 @@ class BundlesMiddleware implements MiddlewareInterface
             strtolower($request->getHeaderLine('X-Requested-With')) !== 'xmlhttprequest'
             && strtolower($request->getMethod()) === 'get'
         ) {
+            $logger = $request->getAttribute(LoggingMiddleware::LOGGER_ATTRIBUTE);
             $hash = $this->config['hash'];
             $documentRootPath = $request->getServerParams()['DOCUMENT_ROOT'];
             $documentRoot = new Filesystem(new Local($documentRootPath));
@@ -91,7 +94,15 @@ class BundlesMiddleware implements MiddlewareInterface
                                 }
 
                                 if ($newestTime > $outTime) {
-                                    unlink($file);
+                                    if (unlink($file) ) {
+                                        if ($logger instanceof LoggerInterface) {
+                                            $logger->info('Deleted ' . $file);
+                                        }
+                                    } else {
+                                        if ($logger instanceof LoggerInterface) {
+                                            $logger->info('Error deleting ' . $file);
+                                        }
+                                    }
                                 } else {
                                     $exp = explode(DIRECTORY_SEPARATOR, $file);
                                     $filename = array_pop($exp);
@@ -109,11 +120,17 @@ class BundlesMiddleware implements MiddlewareInterface
                             $minify = new Minify\JS($sources);
                             $minify->minify($documentRootPath . DIRECTORY_SEPARATOR . $bundle['output']);
                             $js = array_merge($js, $sources);
+                            if ($logger instanceof LoggerInterface) {
+                                $logger->info('Wrote ' . $bundle['output']);
+                            }
                         }
                         if ($bundle['type'] == 'css' && count($bundle['sources'])) {
                             $sources = array_diff($bundle['sources'], $css);
                             $minify = new Minify\CSS($sources);
                             $minify->minify($documentRootPath . DIRECTORY_SEPARATOR . $bundle['output']);
+                            if ($logger instanceof LoggerInterface) {
+                                $logger->info('Wrote ' . $bundle['output']);
+                            }
                         }
                         if ($bundle['type'] == 'scss' && isset($bundle['entrypoint']) && isset($bundle['import'])) {
                             $vars = [];
@@ -130,7 +147,15 @@ class BundlesMiddleware implements MiddlewareInterface
                             $css = $scss->compile('@import "' . $bundle['entrypoint'] . '";');
                             $autoprefixer = new Autoprefixer($css);
                             $css = $autoprefixer->compile(false);
-                            $documentRoot->write($bundle['output'], $css);
+                            if ($documentRoot->write($bundle['output'], $css) ) {
+                                if ($logger instanceof LoggerInterface) {
+                                    $logger->info('Wrote ' . $bundle['output']);
+                                }
+                            } else {
+                                if ($logger instanceof LoggerInterface) {
+                                    $logger->info('Error writing ' . $bundle['output']);
+                                }
+                            }
                         }
                     }
                 }

@@ -103,7 +103,7 @@ class ConfigProvider
                     'writers' => [
                         'syslog' => [
                             'name' => 'syslog',
-                            'priority' => 10,
+                            'priority' => 0,
                             'options' => [
                                 'application' => 'pars-core',
                                 'facility' => LOG_LOCAL0,
@@ -118,7 +118,7 @@ class ConfigProvider
                                     'priority' => [
                                         'name' => 'priority',
                                         'options' => [
-                                            'operator' => '<=',
+                                            'operator' => '<',
                                             'priority' => \Laminas\Log\Logger::INFO,
                                         ],
                                     ],
