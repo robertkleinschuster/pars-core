@@ -96,7 +96,7 @@ class ConfigProvider
                 'event_manager_enabled' => true
             ],
             'psr_log' => [
-                'Logger' => [
+                \Psr\Log\LoggerInterface::class => [
                     'exceptionhandler' => true,
                     'errorhandler' => true,
                     'fatal_error_shutdownfunction' => true,

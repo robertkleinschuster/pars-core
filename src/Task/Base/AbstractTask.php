@@ -2,19 +2,27 @@
 
 namespace Pars\Core\Task\Base;
 
-use Laminas\Db\Adapter\Adapter;
-use Laminas\Db\Adapter\AdapterAwareInterface;
-use Laminas\Db\Adapter\AdapterAwareTrait;
+use Pars\Core\Config\ParsConfig;
+use Pars\Core\Database\ParsDatabaseAdapter;
+use Pars\Core\Database\ParsDatabaseAdapterAwareInterface;
+use Pars\Core\Database\ParsDatabaseAdapterAwareTrait;
+use Pars\Core\Translation\ParsTranslator;
+use Pars\Core\Translation\ParsTranslatorAwareInterface;
+use Pars\Core\Translation\ParsTranslatorAwareTrait;
+use Psr\Container\ContainerInterface;
 use Psr\Log\LoggerInterface;
 
 /**
  * Class AbstractTask
  * @package Pars\Core\Task\Base
  */
-abstract class AbstractTask implements AdapterAwareInterface
+abstract class AbstractTask implements ParsDatabaseAdapterAwareInterface, ParsTranslatorAwareInterface
 {
-    use AdapterAwareTrait;
+    use ParsDatabaseAdapterAwareTrait;
+    use ParsTranslatorAwareTrait;
+    protected ContainerInterface $container;
 
+    protected ParsConfig $config;
 
     /**
      * @var int
@@ -39,7 +47,7 @@ abstract class AbstractTask implements AdapterAwareInterface
     /**
      * @var array
      */
-    protected array $config;
+    protected array $taskConfig;
 
     /**
      * @var \DateTime
@@ -52,17 +60,20 @@ abstract class AbstractTask implements AdapterAwareInterface
     protected LoggerInterface $logger;
 
     /**
-     * OrderTask constructor.
+     * AbstractTask constructor.
      * @param array $config
      * @param \DateTime $now
-     * @param LoggerInterface $logger
-     * @param Adapter $adapter
+     * @param ContainerInterface $container
      */
-    public function __construct(array $config, \DateTime $now, LoggerInterface $logger, Adapter $adapter)
+    public function __construct(array $config, \DateTime $now, ContainerInterface $container)
     {
-        $this->config = $config;
+        $this->container = $container;
+        $this->setTranslator($container->get(ParsTranslator::class));
+        $this->setDatabaseAdapter($container->get(ParsDatabaseAdapter::class));
+        $this->logger = $container->get(\Psr\Log\LoggerInterface::class);
+        $this->config = $container->get(ParsConfig::class);
+        $this->taskConfig = $config;
         $this->now = $now;
-        $this->setDbAdapter($adapter);
         if (isset($config['active'])) {
             $this->setActive($config['active']);
         }
@@ -76,6 +87,25 @@ abstract class AbstractTask implements AdapterAwareInterface
             $this->setMinute($config['minute']);
         }
     }
+
+    /**
+     * @return mixed|ParsConfig
+     */
+    public function getConfig()
+    {
+        return $this->config;
+    }
+
+    /**
+     * @return ContainerInterface
+     */
+    public function getContainer(): ContainerInterface
+    {
+        return $this->container;
+    }
+
+
+
 
     /**
      * @return int
@@ -177,19 +207,11 @@ abstract class AbstractTask implements AdapterAwareInterface
     }
 
     /**
-     * @return Adapter
-     */
-    public function getDbAdapter(): ?Adapter
-    {
-        return $this->adapter;
-    }
-
-    /**
      * @return array
      */
-    public function getConfig(): array
+    public function getTaskConfig(): array
     {
-        return $this->config;
+        return $this->taskConfig;
     }
 
     /**

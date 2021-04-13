@@ -17,6 +17,6 @@ class LoggingMiddlewareFactory
      */
     public function __invoke(ContainerInterface $container)
     {
-        return new LoggingMiddleware($container->get('Logger'));
+        return new LoggingMiddleware($container->get(\Psr\Log\LoggerInterface::class));
     }
 }

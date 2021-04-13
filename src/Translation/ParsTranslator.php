@@ -12,6 +12,7 @@ use Pars\Core\Config\ParsConfig;
 use Pars\Core\Localization\LocaleAwareInterface;
 use Pars\Core\Localization\LocaleFinderInterface;
 use Pars\Core\Localization\LocaleInterface;
+use Pars\Core\Translation\Provider\Libretranslate\LibretranslateTranslationProvider;
 use Pars\Helper\Placeholder\PlaceholderHelper;
 
 class ParsTranslator implements TranslatorAwareInterface, LocaleAwareInterface
@@ -178,9 +179,30 @@ class ParsTranslator implements TranslatorAwareInterface, LocaleAwareInterface
      */
     public function saveMissingTranslation(string $locale, string $code, string $namespace)
     {
-        $this->saver->saveMissingTranslation($locale, $code, $namespace);
+        register_shutdown_function(function () use ($locale, $code, $namespace) {
+            try {
+                $text = $code;
+                $default = $this->localeFinder->findLocale($this->config->get('locale.default'), null, null);
+                $target = $this->localeFinder->findLocale($locale, null, null);
+                if ($default->getLocale_Code() != $target->getLocale_Code()) {
+                    $sourceText = $this->getTranslator()->translate($code, $this->getNamespace(), $default->getLocale_Code());
+                    if ($default->getLocale_Language() == $target->getLocale_Language()) {
+                        $text = $sourceText;
+                    } else {
+                        $targetText = $this->autotranslate($sourceText, $default, $target);
+                        if ($sourceText !== $targetText) {
+                            $text = $targetText;
+                        } else {
+                            $text = $sourceText;
+                        }
+                    }
+                }
+                $this->saver->saveMissingTranslation($locale, $code, $namespace, $text);
+            } catch (\Throwable $exception) {
+                $this->saver->saveMissingTranslation($locale, $code, $namespace);
+            }
+           });
         return $this;
-
     }
 
     public function clearCache()
@@ -206,5 +228,18 @@ class ParsTranslator implements TranslatorAwareInterface, LocaleAwareInterface
         foreach ($this->getNamespaceList() as $namespace) {
             $this->clearTranslationsTextDomain($namespace, $localeList);
         }
+    }
+
+
+    /**
+     * @param string $text
+     * @param LocaleInterface $from
+     * @param LocaleInterface $to
+     * @return string
+     */
+    public function autotranslate(string $text, LocaleInterface $from, LocaleInterface $to): string
+    {
+        $provider = new LibretranslateTranslationProvider($this->config);
+        return $provider->translate($text, $from, $to);
     }
 }

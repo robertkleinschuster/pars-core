@@ -15,7 +15,7 @@ use Psr\Log\LoggerInterface;
 class LoggingMiddleware implements MiddlewareInterface
 {
 
-    public const LOGGER_ATTRIBUTE = 'logger';
+    public const LOGGER_ATTRIBUTE = \Psr\Log\LoggerInterface::class;
 
     private LoggerInterface $logger;
 

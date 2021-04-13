@@ -20,7 +20,7 @@ class RedisCachePoolFactory
         $client = new \Redis();
         $client->connect($host, $port);
         $cachePool = new RedisCachePool($client);
-        $cachePool->setLogger($container->get('Logger'));
+        $cachePool->setLogger($container->get(\Psr\Log\LoggerInterface::class));
         return $cachePool;
     }
 }

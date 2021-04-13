@@ -9,6 +9,7 @@ use Laminas\Stratigility\MiddlewarePipeInterface;
 use Mezzio\Application;
 use Mezzio\MiddlewareFactory;
 use Mezzio\Router\RouteCollector;
+use Pars\Model\Article\Translation\Auto\AutoTranslateTask;
 
 /**
  * Class AbstractApplicationFactory
@@ -22,6 +23,10 @@ abstract class AbstractApplicationFactory
      */
     public function __invoke(AbstractApplicationContainer $container): Application
     {
+        $task = new AutoTranslateTask($container->get('config')['task'], new \DateTime(), $container);
+        $task->execute();
+        exit;
+
         $factory = $container->get(MiddlewareFactory::class);
         $pipeline = $container->get('Mezzio\ApplicationPipeline');
         $routes = $container->get(RouteCollector::class);

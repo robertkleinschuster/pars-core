@@ -80,7 +80,7 @@ class UpdateHandler
     }
 
     public static function log(ContainerInterface $container, $msg) {
-        $logger = $container->get('Logger');
+        $logger = $container->get(\Psr\Log\LoggerInterface::class);
         if ($logger instanceof LoggerInterface) {
             $logger->info($msg);
         }
@@ -88,7 +88,7 @@ class UpdateHandler
 
 
     public static function error(ContainerInterface $container, $msg) {
-        $logger = $container->get('Logger');
+        $logger = $container->get(\Psr\Log\LoggerInterface::class);
         if ($logger instanceof LoggerInterface) {
             $logger->info($msg);
         }

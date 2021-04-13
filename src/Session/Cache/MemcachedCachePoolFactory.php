@@ -19,7 +19,7 @@ class MemcachedCachePoolFactory
         $client = new \Memcached();
         $client->addServer($host, $port);
         $cachePool = new MemcachedCachePool($client);
-        $cachePool->setLogger($container->get('Logger'));
+        $cachePool->setLogger($container->get(\Psr\Log\LoggerInterface::class));
         return $cachePool;
     }
 }
