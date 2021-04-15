@@ -115,7 +115,7 @@ class BundlesMiddleware implements MiddlewareInterface
                         }
                     }
                     if (!$documentRoot->has($bundle['output'])) {
-                        if ($bundle['type'] == 'js' && count($bundle['sources'])) {
+                        if ($bundle['type'] == 'js' || $bundle['type'] == 'js-sw' && count($bundle['sources'])) {
                             $sources = array_diff($bundle['sources'], $js);
                             $minify = new Minify\JS($sources);
                             $minify->minify($documentRootPath . DIRECTORY_SEPARATOR . $bundle['output']);
