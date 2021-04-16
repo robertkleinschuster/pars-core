@@ -75,10 +75,11 @@ class BundlesMiddleware implements MiddlewareInterface
 
         if (isset($this->config['entrypoints'] ) && is_array($this->config['entrypoints'])) {
             foreach ($this->config['entrypoints'] as $entrypoint) {
-                $staticFiles['js'] += $entryPoints->getJavaScriptFiles($entrypoint);
-                $staticFiles['css'] += $entryPoints->getCssFiles($entrypoint);
+                $staticFiles['js'] = array_merge($staticFiles['js'], $entryPoints->getJavaScriptFiles($entrypoint));
+                $staticFiles['css'] = array_merge($staticFiles['css'], $entryPoints->getCssFiles($entrypoint));
             }
         }
+
 
         if (
             strtolower($request->getHeaderLine('X-Requested-With')) !== 'xmlhttprequest'
