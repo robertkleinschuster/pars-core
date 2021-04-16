@@ -62,7 +62,8 @@ class ConfigProvider
             'bundles' => [
                 'hash' => md5(random_bytes(5)),
                 'development' => false,
-                'list' => []
+                'list' => [],
+                'entrypoints' => []
             ],
             'image' => [
                 'source' => '/u',

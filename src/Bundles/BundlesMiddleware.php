@@ -7,6 +7,7 @@ use League\Flysystem\Adapter\Local;
 use League\Flysystem\Filesystem;
 use MatthiasMullie\Minify;
 use Padaliyajay\PHPAutoprefixer\Autoprefixer;
+use Pars\Core\Cache\ParsCache;
 use Pars\Core\Config\ParsConfig;
 use Pars\Core\Logging\LoggingMiddleware;
 use Pars\Helper\Filesystem\FilesystemHelper;
@@ -18,6 +19,8 @@ use Psr\Http\Server\RequestHandlerInterface;
 use Psr\Log\LoggerInterface;
 use ScssPhp\ScssPhp\Compiler;
 use ScssPhp\ScssPhp\OutputStyle;
+use Symfony\WebpackEncoreBundle\Asset\EntrypointLookup;
+use Symfony\WebpackEncoreBundle\Asset\EntrypointLookupCollection;
 
 class BundlesMiddleware implements MiddlewareInterface
 {
@@ -63,6 +66,20 @@ class BundlesMiddleware implements MiddlewareInterface
      */
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
+        $documentRootPath = $request->getServerParams()['DOCUMENT_ROOT'];
+
+        $entryPoints = new EntrypointLookup($documentRootPath . '/build/entrypoints.json');
+        $staticFiles = [];
+        $staticFiles['js'] = [];
+        $staticFiles['css'] = [];
+
+        if (isset($this->config['entrypoints'] ) && is_array($this->config['entrypoints'])) {
+            foreach ($this->config['entrypoints'] as $entrypoint) {
+                $staticFiles['js'] += $entryPoints->getJavaScriptFiles($entrypoint);
+                $staticFiles['css'] += $entryPoints->getCssFiles($entrypoint);
+            }
+        }
+
         if (
             strtolower($request->getHeaderLine('X-Requested-With')) !== 'xmlhttprequest'
             && strtolower($request->getMethod()) === 'get'
@@ -163,7 +180,7 @@ class BundlesMiddleware implements MiddlewareInterface
         }
         return $handler->handle($request
             ->withAttribute(BundlesMiddleware::class, $this->config)
-            ->withAttribute('static_files', $this->config['list'])
+            ->withAttribute('static_files', $staticFiles)
         );
     }
 

@@ -57,7 +57,8 @@
     "scssphp/scssphp": "^1.3",
     "twbs/bootstrap": "4.6.0",
     "padaliyajay/php-autoprefixer": "^1.3",
-    "wikimedia/composer-merge-plugin": "^2.0"
+    "wikimedia/composer-merge-plugin": "^2.0",
+    "symfony/webpack-encore-bundle": "^1.11"
   },
   "require-dev": {
     "phpunit/phpunit": "^9.5",
@@ -80,7 +81,6 @@
     }
   },
   "extra": {
-
     "merge-plugin": {
       "include": [
         "vendor/pars/pars-core/composer.json"
@@ -102,17 +102,24 @@
     "classmap-authoritative": true
   },
   "scripts": {
-    "serve": "php -S 0.0.0.0:8080 -t public/",
+    "serve": [
+      "php -S 0.0.0.0:8080 -t public/ & yarn encore dev --watch"
+    ],
     "cs-check": "phpcs",
     "cs-fix": "phpcbf",
     "test": "phpunit --colors=always",
     "test-coverage": "phpunit --colors=always --coverage-clover clover.xml",
-    "pars-update": "Pars\\Core\\Deployment\\UpdateHandler::onUpdate",
+    "pars-update": [
+      "Pars\\Core\\Deployment\\UpdateHandler::onUpdate",
+      "yarn encore production"
+    ],
     "post-update-cmd": [
-      "Pars\\Core\\Deployment\\UpdateHandler::postUpdate"
+      "Pars\\Core\\Deployment\\UpdateHandler::postUpdate",
+      "yarn encore production"
     ],
     "post-install-cmd": [
-      "Pars\\Core\\Deployment\\UpdateHandler::postInstall"
+      "Pars\\Core\\Deployment\\UpdateHandler::postInstall",
+      "yarn encore production"
     ],
     "post-package-install": [
       "Pars\\Core\\Deployment\\UpdateHandler::postPackageInstall"
