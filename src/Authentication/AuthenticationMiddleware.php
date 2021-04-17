@@ -45,7 +45,7 @@ class AuthenticationMiddleware implements MiddlewareInterface
     {
         $this->container = $container;
         $this->auth = $container->get(AuthenticationInterface::class);
-        $this->pathHelper = $container->get(PathHelper::class);
+        $this->pathHelper = clone $container->get(PathHelper::class);
     }
 
     /**
