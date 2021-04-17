@@ -111,14 +111,17 @@
     "test-coverage": "phpunit --colors=always --coverage-clover clover.xml",
     "pars-update": [
       "Pars\\Core\\Deployment\\UpdateHandler::onUpdate",
+      "yarn install",
       "yarn encore production"
     ],
     "post-update-cmd": [
       "Pars\\Core\\Deployment\\UpdateHandler::postUpdate",
+      "yarn install",
       "yarn encore production"
     ],
     "post-install-cmd": [
       "Pars\\Core\\Deployment\\UpdateHandler::postInstall",
+      "yarn install",
       "yarn encore production"
     ],
     "post-package-install": [
