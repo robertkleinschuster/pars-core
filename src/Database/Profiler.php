@@ -42,4 +42,10 @@ class Profiler extends \Laminas\Db\Adapter\Profiler\Profiler
         return isset(self::$instance);
     }
 
+    public function clearProfiles()
+    {
+        $this->profiles = [];
+        $this->currentIndex = 0;
+    }
+
 }
