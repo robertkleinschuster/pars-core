@@ -48,6 +48,7 @@ use Pars\Core\Translation\TranslatorMiddlewareFactory;
 
 class ConfigProvider
 {
+
     public function __invoke()
     {
         return [
