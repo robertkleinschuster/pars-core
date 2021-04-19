@@ -23,7 +23,7 @@ class ParsApplicationConfig
      */
     public function get(string $key)
     {
-        return $this->config[$key];
+        return $this->config[$key] ?? null;
     }
 
     /**
