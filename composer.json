@@ -122,7 +122,6 @@
     "post-install-cmd": [
       "Pars\\Core\\Deployment\\UpdateHandler::postInstall",
       "yarn install",
-      "",
       "yarn encore production"
     ],
     "post-package-install": [
