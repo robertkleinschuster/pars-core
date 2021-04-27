@@ -3,7 +3,7 @@
 
 namespace Pars\Core\Application;
 
-define('PARS_VERSION', '2.0 dev');
+@define('PARS_VERSION', 'CORE');
 
 abstract class AbstractApplication extends \Mezzio\Application
 {
