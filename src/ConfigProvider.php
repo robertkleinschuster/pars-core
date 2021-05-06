@@ -117,13 +117,13 @@ class ConfigProvider
                                     ],
                                 ],
                                 'filters' => [
-                                    'priority' => [
+                                    /*'priority' => [
                                         'name' => 'priority',
                                         'options' => [
                                             'operator' => '<',
                                             'priority' => \Laminas\Log\Logger::INFO,
                                         ],
-                                    ],
+                                    ],*/
                                 ],
                             ],
                         ],

@@ -4,6 +4,10 @@
 namespace Pars\Core\Database;
 
 
+use Laminas\Db\Adapter\Driver\Pdo\Statement;
+use Pars\Bean\Finder\AbstractBeanFinder;
+use Pars\Bean\Finder\FinderBeanListDecorator;
+use Pars\Bean\Loader\AbstractBeanLoader;
 use Pars\Helper\Debug\DebugHelper;
 use Pars\Pattern\Exception\CoreException;
 
@@ -19,7 +23,7 @@ class Profiler extends \Laminas\Db\Adapter\Profiler\Profiler
     public function profilerStart($target)
     {
         $result = parent::profilerStart($target);
-        $this->profiles[$this->currentIndex]['trace'] = DebugHelper::getBacktrace(15, ['profilerStart']);
+        $this->profiles[$this->currentIndex]['trace'] = DebugHelper::getBacktrace(5, ['profilerStart'], [Statement::class, DatabaseBeanLoader::class, AbstractBeanLoader::class, FinderBeanListDecorator::class, AbstractBeanFinder::class]);
         return $result;
     }
 
