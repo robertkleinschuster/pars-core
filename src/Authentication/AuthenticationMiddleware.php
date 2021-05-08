@@ -91,10 +91,10 @@ class AuthenticationMiddleware implements MiddlewareInterface
         $log = $request->getAttribute(LoggingMiddleware::LOGGER_ATTRIBUTE);
         try {
             $user = $this->auth->authenticate($request);
-
             // Validation CSRF Token
             if ($request->getMethod() === 'POST' && $user === null) {
                 if (isset($request->getParsedBody()['login_token']) && $guard->validateToken($request->getParsedBody()['login_token'] ?? '', 'login_token')) {
+                    $session->regenerate();
                     $user = $this->auth->authenticate($request);
                     if ($user === null) {
                         $flash->flash('login_error', 'credentials');

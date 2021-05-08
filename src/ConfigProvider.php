@@ -27,7 +27,6 @@ use Pars\Core\Deployment\CacheClearer;
 use Pars\Core\Deployment\CacheClearerFactory;
 use Pars\Core\Deployment\DeploymentMiddleware;
 use Pars\Core\Deployment\DeploymentMiddlewareFactory;
-use Pars\Core\Deployment\ParsUpdater;
 use Pars\Core\Deployment\ParsUpdaterFactory;
 use Pars\Core\Deployment\UpdaterInterface;
 use Pars\Core\Image\ImageMiddleware;
@@ -41,6 +40,10 @@ use Pars\Core\Logging\LoggingErrorListenerDelegatorFactory;
 use Pars\Core\Logging\LoggingMiddleware;
 use Pars\Core\Logging\LoggingMiddlewareFactory;
 use Pars\Core\Session\Cache\ParsMultiCachePoolFactory;
+use Pars\Core\Session\ParsSessionMiddleware;
+use Pars\Core\Session\ParsSessionMiddlewareFactory;
+use Pars\Core\Session\ParsSessionPersistence;
+use Pars\Core\Session\ParsSessionPersistenceFactory;
 use Pars\Core\Translation\ParsTranslator;
 use Pars\Core\Translation\ParsTranslatorFactory;
 use Pars\Core\Translation\TranslatorMiddleware;
@@ -145,7 +148,7 @@ class ConfigProvider
     {
         return [
             'aliases' => [
-                SessionPersistenceInterface::class => CacheSessionPersistence::class,
+                SessionPersistenceInterface::class => ParsSessionPersistence::class,
                 AuthenticationInterface::class => PhpSession::class,
             ],
             'factories' => [
@@ -167,6 +170,8 @@ class ConfigProvider
                 ParsConfigMiddleware::class => ParsConfigMiddlewareFactory::class,
                 CacheClearer::class => CacheClearerFactory::class,
                 UpdaterInterface::class => ParsUpdaterFactory::class,
+                ParsSessionPersistence::class => ParsSessionPersistenceFactory::class,
+                ParsSessionMiddleware::class => ParsSessionMiddlewareFactory::class,
             ],
             'delegators' => [
                 ErrorHandler::class => [

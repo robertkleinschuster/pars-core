@@ -49,7 +49,7 @@ class ParsMultiCache extends AbstractCachePool
         }
 
         try {
-            $element                       = $this->cache[$key];
+            $element = $this->cache[$key];
             list($data, $tags, $timestamp) = $element;
         } catch (\Exception $exception) {
             return [false, null, [], null];
@@ -69,8 +69,8 @@ class ParsMultiCache extends AbstractCachePool
     protected function clearAllObjectsFromCache()
     {
         foreach ($this->cache as $key => $value) {
-            if (file_exists($this->folder . DIRECTORY_SEPARATOR  . $key . '.php')) {
-                unlink($this->folder . DIRECTORY_SEPARATOR  . $key . '.php');
+            if (file_exists($this->folder . DIRECTORY_SEPARATOR . $key . '.php')) {
+                unlink($this->folder . DIRECTORY_SEPARATOR . $key . '.php');
             }
         }
         $this->cache = [];
@@ -93,7 +93,7 @@ class ParsMultiCache extends AbstractCachePool
      */
     protected function storeItemInCache(PhpCacheItem $item, $ttl)
     {
-        $value  = $item->get();
+        $value = $item->get();
         if (is_object($value)) {
             $value = clone $value;
         }
@@ -152,8 +152,11 @@ class ParsMultiCache extends AbstractCachePool
 
     private function saveToFile(string $key)
     {
+        if (function_exists('opcache_invalidate')) {
+            opcache_invalidate($this->folder . DIRECTORY_SEPARATOR . $key . '.php', true);
+        }
         if (file_exists($this->folder . DIRECTORY_SEPARATOR . $key . '.php')) {
-            unlink($this->folder . DIRECTORY_SEPARATOR  . $key . '.php');
+            unlink($this->folder . DIRECTORY_SEPARATOR . $key . '.php');
         }
         $agg = new ConfigAggregator(
             [

@@ -201,6 +201,9 @@ class ParsCache extends AbstractCachePool
 
     private function saveToFile()
     {
+        if (function_exists('opcache_invalidate')) {
+            opcache_invalidate($this->file, true);
+        }
         if (file_exists($this->file)) {
             unlink($this->file);
         }
