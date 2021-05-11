@@ -4,13 +4,13 @@ namespace Pars\Core;
 
 use Laminas\Stratigility\Middleware\ErrorHandler;
 use Mezzio\Authentication\AuthenticationInterface;
-use Mezzio\Authentication\Session\PhpSession;
-use Mezzio\Session\Cache\CacheSessionPersistence;
 use Mezzio\Session\SessionPersistenceInterface;
 use Pars\Core\Assets\AssetsMiddleware;
 use Pars\Core\Assets\AssetsMiddlewareFactory;
 use Pars\Core\Authentication\AuthenticationMiddleware;
 use Pars\Core\Authentication\AuthenticationMiddlewareFactory;
+use Pars\Core\Authentication\SessionAuthentication;
+use Pars\Core\Authentication\SessionAuthenticationFactory;
 use Pars\Core\Bundles\BundlesMiddleware;
 use Pars\Core\Bundles\BundlesMiddlewareFactory;
 use Pars\Core\Config\ParsApplicationConfig;
@@ -149,10 +149,11 @@ class ConfigProvider
         return [
             'aliases' => [
                 SessionPersistenceInterface::class => ParsSessionPersistence::class,
-                AuthenticationInterface::class => PhpSession::class,
+                AuthenticationInterface::class => SessionAuthentication::class,
             ],
             'factories' => [
                 'SessionCache' => ParsMultiCachePoolFactory::class,
+                SessionAuthentication::class => SessionAuthenticationFactory::class,
                 AuthenticationMiddleware::class => AuthenticationMiddlewareFactory::class,
                 DatabaseMiddleware::class => DatabaseMiddlewareFactory::class,
                 TranslatorMiddleware::class => TranslatorMiddlewareFactory::class,

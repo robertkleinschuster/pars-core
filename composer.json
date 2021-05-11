@@ -13,7 +13,7 @@
     "forum": "https://discourse.parsphp.org/"
   },
   "require": {
-    "php": "^7.4",
+    "php": "^7.4 || ^8.0",
     "ext-intl": "*",
     "ext-json": "*",
     "ext-dom": "*",
@@ -25,8 +25,6 @@
     "laminas/laminas-eventmanager": "^3.3",
     "laminas/laminas-log": "^2.12",
     "laminas/laminas-db": "^2.11",
-    "laminas/laminas-hydrator": "^3.1",
-    "laminas/laminas-cache": "^2.9",
     "laminas/laminas-i18n": "^2.10",
     "laminas/laminas-mail": "^2.12",
     "laminas/laminas-config-aggregator": "^1.2",
@@ -37,7 +35,6 @@
     "mezzio/mezzio-platesrenderer": "^2.3",
     "mezzio/mezzio-helpers": "^5.6",
     "mezzio/mezzio-authentication": "^1.2",
-    "mezzio/mezzio-authentication-session": "^1.0",
     "mezzio/mezzio-session": "^1.4",
     "mezzio/mezzio-session-cache": "^1.5",
     "mezzio/mezzio-csrf": "^1.0",
