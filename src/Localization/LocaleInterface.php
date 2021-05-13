@@ -14,7 +14,13 @@ interface LocaleInterface
      */
     public function getLocale_Code(): string;
 
+    /**
+     * @return string
+     */
     public function getLocale_Language(): string;
 
+    /**
+     * @return string
+     */
     public function getLocale_Region(): string;
 }

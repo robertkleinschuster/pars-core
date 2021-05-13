@@ -19,6 +19,8 @@ use Pars\Core\Config\ParsConfig;
 use Pars\Core\Config\ParsConfigFactory;
 use Pars\Core\Config\ParsConfigMiddleware;
 use Pars\Core\Config\ParsConfigMiddlewareFactory;
+use Pars\Core\Container\ParsContainer;
+use Pars\Core\Container\ParsContainerFactory;
 use Pars\Core\Database\DatabaseMiddleware;
 use Pars\Core\Database\DatabaseMiddlewareFactory;
 use Pars\Core\Database\ParsDatabaseAdapter;
@@ -173,6 +175,7 @@ class ConfigProvider
                 UpdaterInterface::class => ParsUpdaterFactory::class,
                 ParsSessionPersistence::class => ParsSessionPersistenceFactory::class,
                 ParsSessionMiddleware::class => ParsSessionMiddlewareFactory::class,
+                ParsContainer::class => ParsContainerFactory::class,
             ],
             'delegators' => [
                 ErrorHandler::class => [

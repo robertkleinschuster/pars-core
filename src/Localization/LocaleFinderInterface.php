@@ -6,8 +6,8 @@ interface LocaleFinderInterface
 {
     public function findLocale(
         ?string $localeCode,
-        ?string $language,
-        $default,
+        ?string $language  = null,
+        ?string $default = null,
         ?string $domain = null,
         ?string $configDefault = null
     ): LocaleInterface;

@@ -18,7 +18,7 @@ use Psr\Log\LoggerInterface;
  */
 class TranslatorMiddleware implements MiddlewareInterface
 {
-    public const TRANSLATOR_ATTRIBUTE = 'translater';
+    public const TRANSLATOR_ATTRIBUTE = 'translator';
 
     /**
      * @var ParsTranslator
