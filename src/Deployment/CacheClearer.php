@@ -141,18 +141,18 @@ class CacheClearer implements AdapterAwareInterface, OptionAwareInterface
         $domains = $this->config->getDomainList();
         foreach ($domains as $domain) {
             $newUri = new Uri($domain);
-            if ($newUri->getHost() == $self->getHost() && $newUri->getPort() == $self->getPort()) {
-                continue;
-            }
-            $newUri = Uri::withQueryValue($newUri, 'clearcache', $this->getConfig()->getSecret(true));
-            $newUri = Uri::withQueryValue($newUri, 'nopropagate', true);
-            $client = new Client();
-            $this->getParsContainer()->getLogger()->info('CLEAR: ' . $newUri);
-            $response = $client->get($newUri);
-            if ($response->getStatusCode() == 200) {
-                $this->getParsContainer()->getLogger()->info('CLEAR SUCCESS: ' . $newUri);
-            } else {
-                $this->getParsContainer()->getLogger()->info('CLEAR ERROR: ' . $newUri);
+            if ($newUri->getHost() != $self->getHost()
+                || $newUri->getPort() != $self->getPort()) {
+                $newUri = Uri::withQueryValue($newUri, 'clearcache', $this->getConfig()->getSecret(true));
+                $newUri = Uri::withQueryValue($newUri, 'nopropagate', true);
+                $client = new Client();
+                $this->getParsContainer()->getLogger()->info('CLEAR: ' . $newUri);
+                $response = $client->get($newUri);
+                if ($response->getStatusCode() == 200) {
+                    $this->getParsContainer()->getLogger()->info('CLEAR SUCCESS: ' . $newUri);
+                } else {
+                    $this->getParsContainer()->getLogger()->info('CLEAR ERROR: ' . $newUri);
+                }
             }
         }
     }
