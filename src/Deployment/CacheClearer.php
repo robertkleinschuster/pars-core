@@ -16,6 +16,7 @@ use Pars\Pattern\Option\OptionAwareInterface;
 use Pars\Pattern\Option\OptionAwareTrait;
 use Pars\Core\Cache\ParsCache;
 use Pars\Helper\Filesystem\FilesystemHelper;
+use Psr\Http\Message\UriInterface;
 
 /**
  * Class Cache
@@ -134,11 +135,14 @@ class CacheClearer implements AdapterAwareInterface, OptionAwareInterface
         }
     }
 
-    public function clearRemote()
+    public function clearRemote(UriInterface $self)
     {
         $domains = $this->config->getDomainList();
         foreach ($domains as $domain) {
             $newUri = new Uri($domain);
+            if ($newUri->getHost() == $self->getHost() && $newUri->getPort() == $self->getPort()) {
+                continue;
+            }
             $newUri = Uri::withQueryValue($newUri, 'clearcache', $this->getConfig()->getSecret());
             $newUri = Uri::withQueryValue($newUri, 'nopropagate', true);
             $client = new Client();

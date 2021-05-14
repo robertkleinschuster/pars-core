@@ -48,7 +48,8 @@ class DeploymentMiddleware implements MiddlewareInterface
                     if ($nopropagate) {
                         $this->cacheClearer->clear();
                     } else {
-                        $this->cacheClearer->clearRemote();
+                        $this->cacheClearer->clearRemote($request->getUri());
+                        $this->cacheClearer->clear();
                         $this->config->generateSecret();
                     }
                     $redirectUri = Uri::withoutQueryValue($request->getUri(), 'clearcache');
