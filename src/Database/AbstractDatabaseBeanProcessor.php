@@ -6,6 +6,8 @@ use Pars\Bean\Processor\AbstractBeanProcessor;
 use Pars\Bean\Processor\TimestampMetaFieldHandler;
 use Pars\Bean\Type\Base\BeanInterface;
 use Pars\Bean\Validator\CallbackBeanValidator;
+use Pars\Core\Container\ParsContainer;
+use Pars\Core\Container\ParsContainerAwareTrait;
 use Pars\Core\Translation\ParsTranslatorAwareInterface;
 use Pars\Core\Translation\ParsTranslatorAwareTrait;
 use Pars\Helper\Validation\ValidationHelperAwareInterface;
@@ -24,10 +26,13 @@ abstract class AbstractDatabaseBeanProcessor extends AbstractBeanProcessor imple
     use ParsDatabaseAdapterAwareTrait;
     use ParsTranslatorAwareTrait;
     use ValidationHelperAwareTrait;
+    use ParsContainerAwareTrait;
 
-    public function __construct(ParsDatabaseAdapter $adapter)
+    public function __construct(ParsContainer $parsContainer)
     {
-        $this->setDatabaseAdapter($adapter);
+        $this->setParsContainer($parsContainer);
+        $this->setDatabaseAdapter($parsContainer->getDatabaseAdapter());
+        $this->setTranslator($parsContainer->getTranslator());
         $saver = new DatabaseBeanSaver($this->getDatabaseAdapter());
         parent::__construct($saver);
         $this->initSaver($saver);
@@ -60,7 +65,7 @@ abstract class AbstractDatabaseBeanProcessor extends AbstractBeanProcessor imple
         $this->addSaveValidator(
             new CallbackBeanValidator(
                 $function,
-                function (LocaleBean $bean) use ($function) {
+                function (BeanInterface $bean) use ($function) {
                     return $this->{$function}($bean);
                 }
             )

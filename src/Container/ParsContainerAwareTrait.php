@@ -24,5 +24,9 @@ trait ParsContainerAwareTrait
         $this->parsContainer = $parsContainer;
     }
 
+    public function hasParsContainer(): bool
+    {
+        return isset($this->parsContainer);
+    }
 
 }
