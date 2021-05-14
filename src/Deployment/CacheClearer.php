@@ -142,7 +142,7 @@ class CacheClearer implements AdapterAwareInterface, OptionAwareInterface
         foreach ($domains as $domain) {
             $newUri = new Uri($domain);
             if ($newUri->getHost() != $self->getHost()
-                || $newUri->getPort() != $self->getPort() || PARS_VERSION != 'DEV') {
+                || $newUri->getPort() != $self->getPort()) {
                 $newUri = Uri::withQueryValue($newUri, 'clearcache', $this->getConfig()->getSecret(true));
                 $newUri = Uri::withQueryValue($newUri, 'nopropagate', true);
                 $client = new Client();
