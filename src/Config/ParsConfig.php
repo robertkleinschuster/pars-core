@@ -83,7 +83,7 @@ class ParsConfig
         if ($restoreType) {
             $this->setType($restoreType);
         }
-        return $this->config[$key] ?? null;
+        return $this->config[$key] ?? $this->getFromAppConfig($key);
     }
 
     public function getDomainList()

@@ -2,9 +2,7 @@
 
 namespace Pars\Core\Deployment;
 
-use GuzzleHttp\Client;
 use GuzzleHttp\Psr7\Uri;
-use Laminas\Diactoros\Response;
 use Laminas\Diactoros\Response\RedirectResponse;
 use Pars\Core\Config\ParsConfig;
 use Pars\Core\Container\ParsContainer;

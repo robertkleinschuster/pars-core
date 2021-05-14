@@ -30,6 +30,8 @@ use Pars\Core\Deployment\CacheClearerFactory;
 use Pars\Core\Deployment\DeploymentMiddleware;
 use Pars\Core\Deployment\DeploymentMiddlewareFactory;
 use Pars\Core\Deployment\ParsUpdaterFactory;
+use Pars\Core\Deployment\UpdateMiddleware;
+use Pars\Core\Deployment\UpdateMiddlewareFactory;
 use Pars\Core\Deployment\UpdaterInterface;
 use Pars\Core\Image\ImageMiddleware;
 use Pars\Core\Image\ImageMiddlewareFactory;
@@ -176,6 +178,7 @@ class ConfigProvider
                 ParsSessionPersistence::class => ParsSessionPersistenceFactory::class,
                 ParsSessionMiddleware::class => ParsSessionMiddlewareFactory::class,
                 ParsContainer::class => ParsContainerFactory::class,
+                UpdateMiddleware::class => UpdateMiddlewareFactory::class
             ],
             'delegators' => [
                 ErrorHandler::class => [

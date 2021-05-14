@@ -23,7 +23,24 @@ class ParsApplicationConfig
      */
     public function get(string $key)
     {
-        return $this->config[$key] ?? null;
+        return $this->getRecursiveValue($this->config, $key);
+    }
+
+    /**
+     * @param $data
+     * @param $key_path
+     * @return mixed
+     */
+    protected function getRecursiveValue($data, $key_path)
+    {
+        if (!is_array($key_path)) {
+            $key_path = explode('.', $key_path);
+        }
+        if (count($key_path) == 0) {
+            return $data;
+        }
+        $key = array_shift($key_path);
+        return $this->getRecursiveValue($data[$key] ?? null, $key_path);
     }
 
     /**
