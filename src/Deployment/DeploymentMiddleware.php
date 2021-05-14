@@ -4,6 +4,7 @@ namespace Pars\Core\Deployment;
 
 use GuzzleHttp\Client;
 use GuzzleHttp\Psr7\Uri;
+use Laminas\Diactoros\Response;
 use Laminas\Diactoros\Response\RedirectResponse;
 use Pars\Core\Config\ParsConfig;
 use Pars\Core\Container\ParsContainer;
@@ -54,6 +55,8 @@ class DeploymentMiddleware implements MiddlewareInterface
                     }
                     $redirectUri = Uri::withoutQueryValue($request->getUri(), 'clearcache');
                     return new RedirectResponse($redirectUri);
+                } else {
+                    return new Response\EmptyResponse(403);
                 }
             } catch (Throwable $exception) {
                 $this->getParsContainer()->getLogger()->error('Clear cache error', ['exception' => $exception]);

@@ -108,6 +108,7 @@ class CacheClearer implements AdapterAwareInterface, OptionAwareInterface
 
     public function clear()
     {
+        $this->getParsContainer()->getLogger()->info('CLEAR SELF');
         if (
             function_exists('opcache_reset')
             && $this->hasOption(self::OPTION_RESET_OPCACHE)
@@ -150,6 +151,8 @@ class CacheClearer implements AdapterAwareInterface, OptionAwareInterface
             $response = $client->get($newUri);
             if ($response->getStatusCode() == 200) {
                 $this->getParsContainer()->getLogger()->info('CLEAR SUCCESS: ' . $newUri);
+            } else {
+                $this->getParsContainer()->getLogger()->info('CLEAR ERROR: ' . $newUri);
             }
         }
     }
