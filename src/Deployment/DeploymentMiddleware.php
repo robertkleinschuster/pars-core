@@ -55,8 +55,6 @@ class DeploymentMiddleware implements MiddlewareInterface
                         $this->cacheClearer->clearRemote($request->getUri());
                     }
                     return new RedirectResponse($redirectUri);
-                } else {
-                    return new EmptyResponse(403);
                 }
             } catch (Throwable $exception) {
                 $this->getParsContainer()->getLogger()->error('CLEAR ERROR', ['exception' => $exception]);

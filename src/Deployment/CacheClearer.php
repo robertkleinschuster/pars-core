@@ -145,13 +145,17 @@ class CacheClearer implements AdapterAwareInterface, OptionAwareInterface
                 || $newUri->getPort() != $self->getPort()) {
                 $newUri = Uri::withQueryValue($newUri, 'clearcache', $this->getConfig()->getSecret(true));
                 $newUri = Uri::withQueryValue($newUri, 'nopropagate', true);
-                $client = new Client();
-                $this->getParsContainer()->getLogger()->info('CLEAR: ' . $newUri);
-                $response = $client->get($newUri);
-                if ($response->getStatusCode() == 200) {
-                    $this->getParsContainer()->getLogger()->info('CLEAR SUCCESS: ' . $newUri);
-                } else {
-                    $this->getParsContainer()->getLogger()->info('CLEAR ERROR: ' . $newUri);
+                try {
+                    $client = new Client();
+                    $this->getParsContainer()->getLogger()->info('CLEAR: ' . $newUri);
+                    $response = $client->get($newUri);
+                    if ($response->getStatusCode() == 200) {
+                        $this->getParsContainer()->getLogger()->info('CLEAR SUCCESS: ' . $newUri);
+                    } else {
+                        $this->getParsContainer()->getLogger()->info('CLEAR ERROR: ' . $newUri);
+                    }
+                } catch (\Throwable $exception) {
+                    $this->getParsContainer()->getLogger()->error('CLEAR ERROR', ['exception' => $exception]);
                 }
             }
         }
