@@ -2,6 +2,8 @@
 
 namespace Pars\Core\Deployment;
 
+use GuzzleHttp\Client;
+use GuzzleHttp\Psr7\Uri;
 use Laminas\Diactoros\Response\RedirectResponse;
 use Pars\Core\Config\ParsConfig;
 use Psr\Container\ContainerInterface;
@@ -15,6 +17,7 @@ class DeploymentMiddleware implements MiddlewareInterface
 {
     protected ParsConfig $config;
     protected CacheClearer $cacheClearer;
+
     /**
      * DeploymentMiddleware constructor.
      * @param ContainerInterface $container
@@ -28,17 +31,31 @@ class DeploymentMiddleware implements MiddlewareInterface
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
         $key = 'pars';
-        try {
-            $key = $this->config->getSecret();
-        } catch (Throwable $exception) {
-        }
-        if (isset($request->getQueryParams()['clearcache']) && $request->getQueryParams()['clearcache'] == $key) {
-            $this->cacheClearer->clear();
-            $this->config->getSecret(true);
-            $query = str_replace('&clearcache=' . $key, '', $request->getUri()->getQuery());
-            $query = str_replace('?clearcache=' . $key, '', $query);
-            $query = str_replace('clearcache=' . $key, '', $query);
-            return new RedirectResponse($request->getUri()->withQuery($query));
+
+        if (isset($request->getQueryParams()['clearcache'])) {
+            try {
+                $key = $this->config->getSecret(true);
+            } catch (Throwable $exception) {
+            }
+            if ($request->getQueryParams()['clearcache'] == $key) {
+                $domains = $this->config->getDomainList();
+                foreach ($domains as $domain) {
+                    $newUri = new Uri($domain);
+                    if ($newUri->getHost() != $request->getUri()->getHost()
+                        || $newUri->getPort() != $request->getUri()->getPort()
+                    ) {
+                        $client = new Client();
+                        $client->send($request->withUri($newUri->withQuery($request->getUri()->getQuery())));
+                    }
+                }
+                $this->config->generateSecret();
+                $this->cacheClearer->clear();
+                $query = str_replace('&clearcache=' . $key, '', $request->getUri()->getQuery());
+                $query = str_replace('?clearcache=' . $key, '', $query);
+                $query = str_replace('clearcache=' . $key, '', $query);
+                return new RedirectResponse($request->getUri()->withQuery($query));
+            }
+
         }
         return $handler->handle($request);
     }

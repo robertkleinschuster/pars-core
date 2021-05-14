@@ -86,6 +86,24 @@ class ParsConfig
         return $this->config[$key] ?? null;
     }
 
+    public function getDomainList()
+    {
+        return [
+            $this->getFrontendDomain(),
+            $this->getAssetDomain()
+        ];
+    }
+
+    public function getAssetDomain()
+    {
+        return $this->get('asset.domain');
+    }
+
+    public function getFrontendDomain()
+    {
+        return $this->get('frontend.domain');
+    }
+
     /**
      * @param string $key
      * @return mixed
@@ -189,13 +207,17 @@ class ParsConfig
         return $this;
     }
 
-    public function getSecret(bool $refresh = false)
+    public function getSecret(bool $noCache = false)
     {
-        $result = $this->get('secret');
-        if ($refresh || $result === null) {
-            $this->set('secret', Uuid::v6(), 'base');
+        if ($noCache) {
+            $this->cache->delete('secret');
         }
-        return $result;
+        return $this->get('secret');
+    }
+
+    public function generateSecret()
+    {
+        $this->set('secret', Uuid::v6(), 'base');
     }
 
     public function getSalt()
