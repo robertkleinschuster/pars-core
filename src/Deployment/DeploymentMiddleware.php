@@ -3,6 +3,7 @@
 namespace Pars\Core\Deployment;
 
 use GuzzleHttp\Psr7\Uri;
+use Laminas\Diactoros\Response\EmptyResponse;
 use Laminas\Diactoros\Response\RedirectResponse;
 use Pars\Core\Config\ParsConfig;
 use Pars\Core\Container\ParsContainer;
@@ -55,7 +56,7 @@ class DeploymentMiddleware implements MiddlewareInterface
                     }
                     return new RedirectResponse($redirectUri);
                 } else {
-                    return new RedirectResponse($redirectUri, 403);
+                    return new EmptyResponse(403);
                 }
             } catch (Throwable $exception) {
                 $this->getParsContainer()->getLogger()->error('CLEAR ERROR', ['exception' => $exception]);
