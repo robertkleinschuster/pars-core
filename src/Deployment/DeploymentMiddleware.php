@@ -42,12 +42,14 @@ class DeploymentMiddleware implements MiddlewareInterface
                     $domains = $this->config->getDomainList();
                     foreach ($domains as $domain) {
                         $newUri = new Uri($domain);
+                        $newUri = $newUri->withQuery($request->getUri()->getQuery());
                         $newUri = Uri::withQueryValue($newUri, 'nopropagate', true);
                         if ($newUri->getHost() != $request->getUri()->getHost()
                             || $newUri->getPort() != $request->getUri()->getPort()
                         ) {
                             $client = new Client();
-                            $client->send($request->withUri($newUri->withQuery($request->getUri()->getQuery())));
+                            $newRequest = $request->withUri($newUri);
+                            $client->send($newRequest);
                         }
                     }
                 }
