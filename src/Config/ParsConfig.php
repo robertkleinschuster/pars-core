@@ -4,6 +4,7 @@ namespace Pars\Core\Config;
 
 use Pars\Core\Cache\ParsCache;
 use Pars\Pattern\Exception\CoreException;
+use Symfony\Component\Uid\Uuid;
 
 class ParsConfig
 {
@@ -26,6 +27,7 @@ class ParsConfig
      * @var ConfigFinderInterface
      */
     protected ConfigFinderInterface $finder;
+    protected ConfigProcessorInterface $processor;
 
     /**
      * @var string
@@ -37,9 +39,10 @@ class ParsConfig
      * @param ConfigFinderInterface $finder
      * @param ParsApplicationConfig $applicationConfig
      */
-    public function __construct(ConfigFinderInterface $finder, ParsApplicationConfig $applicationConfig)
+    public function __construct(ConfigFinderInterface $finder, ConfigProcessorInterface $processor, ParsApplicationConfig $applicationConfig)
     {
         $this->finder = $finder;
+        $this->processor = $processor;
         $this->applicationConfig = $applicationConfig;
     }
 
@@ -166,5 +169,42 @@ class ParsConfig
             }
         }
         return $merged;
+    }
+
+    /**
+     * @param string $key
+     * @param string $value
+     * @return $this
+     * @throws \Psr\SimpleCache\InvalidArgumentException
+     */
+    public function set(string $key, string $value, string $type = null)
+    {
+        try {
+            $this->cache->delete($key);
+        } catch (\Throwable $exception){}
+        if (null == $type) {
+            $type = $this->type;
+        }
+        $this->processor->saveValue($key, $value, $type);
+        return $this;
+    }
+
+    public function getSecret(bool $refresh = false)
+    {
+        $result = $this->get('secret');
+        if ($refresh || $result === null) {
+            $this->set('secret', Uuid::v6(), 'base');
+        }
+        return $result;
+    }
+
+    public function getSalt()
+    {
+        return $this->get('salt');
+    }
+
+    public function getUuid()
+    {
+        return $this->get('uuid');
     }
 }

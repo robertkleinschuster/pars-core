@@ -48,7 +48,7 @@ class ImageMiddleware implements MiddlewareInterface
         $params = $request->getQueryParams();
         $width = $params['w'] ?? 100;
         $height = $params['h'] ?? 100;
-        $key = $this->config->get('asset.key');
+        $key = $this->config->getSecret();
         try {
             SignatureFactory::create($key)->validateRequest($source . $path, $params);
         } catch (SignatureException $e) {

@@ -5,6 +5,7 @@ namespace Pars\Core\Deployment;
 use Laminas\Db\Adapter\AdapterAwareInterface;
 use Laminas\Db\Adapter\AdapterAwareTrait;
 use Laminas\Db\Adapter\AdapterInterface;
+use Pars\Core\Cache\ParsMultiCache;
 use Pars\Core\Config\ParsConfig;
 use Pars\Core\Translation\ParsTranslator;
 use Pars\Pattern\Option\OptionAwareInterface;
@@ -143,9 +144,8 @@ class CacheClearer implements AdapterAwareInterface, OptionAwareInterface
 
     protected function clearPool()
     {
-        if (is_dir(ParsCache::DEFAULT_BASE_PATH)) {
-            FilesystemHelper::deleteDirectory(ParsCache::DEFAULT_BASE_PATH);
-        }
+        ParsCache::clearAll();
+        ParsMultiCache::clearAll();
     }
 
 

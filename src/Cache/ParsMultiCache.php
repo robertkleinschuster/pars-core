@@ -9,6 +9,8 @@ use Laminas\ConfigAggregator\ConfigAggregator;
 
 class ParsMultiCache extends AbstractCachePool
 {
+    use ParsCacheTrait;
+
     /**
      * @type PhpCacheItem[]
      */
@@ -27,6 +29,7 @@ class ParsMultiCache extends AbstractCachePool
         }
         $this->folder = $basePath;
         $this->cache = [];
+        $this->savePath($basePath);
     }
 
     public function set($key, $value, $ttl = null)

@@ -9,9 +9,13 @@ use Laminas\ConfigAggregator\ArrayProvider;
 use Laminas\ConfigAggregator\ConfigAggregator;
 use Pars\Bean\Finder\BeanFinderInterface;
 use Pars\Bean\Type\Base\BeanInterface;
+use Pars\Core\Config\ParsConfig;
 
 class ParsCache extends AbstractCachePool
 {
+
+    use ParsCacheTrait;
+
     public const DEFAULT_BASE_PATH = 'data/cache/pool/';
 
     /**
@@ -37,6 +41,7 @@ class ParsCache extends AbstractCachePool
             }
         }
         $this->file = $basePath . $file . '.php';
+        $this->savePath($basePath);
     }
 
     protected function loadFile()

@@ -29,11 +29,12 @@ class DeploymentMiddleware implements MiddlewareInterface
     {
         $key = 'pars';
         try {
-            $key = $this->config->get('asset.key');
+            $key = $this->config->getSecret();
         } catch (Throwable $exception) {
         }
         if (isset($request->getQueryParams()['clearcache']) && $request->getQueryParams()['clearcache'] == $key) {
             $this->cacheClearer->clear();
+            $this->config->getSecret(true);
             $query = str_replace('&clearcache=' . $key, '', $request->getUri()->getQuery());
             $query = str_replace('?clearcache=' . $key, '', $query);
             $query = str_replace('clearcache=' . $key, '', $query);

@@ -56,7 +56,8 @@
     "twbs/bootstrap": "4.6.0",
     "padaliyajay/php-autoprefixer": "^1.3",
     "wikimedia/composer-merge-plugin": "^2.0",
-    "symfony/webpack-encore-bundle": "^1.11"
+    "symfony/webpack-encore-bundle": "^1.11",
+    "symfony/uid": "^5.2"
   },
   "require-dev": {
     "phpunit/phpunit": "^9.5",

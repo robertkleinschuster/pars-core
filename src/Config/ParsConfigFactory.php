@@ -13,6 +13,7 @@ class ParsConfigFactory
         $appConfig =  $container->get(ParsApplicationConfig::class);
         $config = new ParsConfig(
             $container->get(ConfigFinderInterface::class),
+            $container->get(ConfigProcessorInterface::class),
             $appConfig
         );
         if ($appConfig->has('config')) {
