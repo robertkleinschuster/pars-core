@@ -42,7 +42,7 @@ class ParsUpdater implements UpdaterInterface
         $module = $this->getParsContainer()->getConfig()->get('update.module');
         $enabled = $this->getParsContainer()->getConfig()->get('update.enabled');
         if ($module && $enabled) {
-            $this->getParsContainer()->getLogger()->info('UPDATE SELF');
+            $this->getParsContainer()->getLogger()->info('UPDATE SELF: ' . $module);
             $cache = $this->container->get(CacheClearer::class);
             $cache->clear();
             $this->updateVersion($module);
