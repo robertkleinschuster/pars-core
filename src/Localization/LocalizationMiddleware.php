@@ -103,6 +103,8 @@ class LocalizationMiddleware implements MiddlewareInterface
                     return new RedirectResponse(rtrim($this->urlHelper->generate(), '/'));
                 }
             }
+        } else {
+            $locale = $this->localization->findLocale($this->config->get('locale.default'));
         }
         return $handler->handle($request->withAttribute(LocaleInterface::class, $locale));
     }
