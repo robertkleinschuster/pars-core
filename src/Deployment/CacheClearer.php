@@ -9,6 +9,8 @@ use Laminas\Db\Adapter\AdapterAwareTrait;
 use Laminas\Db\Adapter\AdapterInterface;
 use Pars\Core\Cache\ParsMultiCache;
 use Pars\Core\Config\ParsConfig;
+use Pars\Core\Container\ParsContainer;
+use Pars\Core\Container\ParsContainerAwareTrait;
 use Pars\Core\Translation\ParsTranslator;
 use Pars\Pattern\Option\OptionAwareInterface;
 use Pars\Pattern\Option\OptionAwareTrait;
@@ -31,7 +33,7 @@ class CacheClearer implements AdapterAwareInterface, OptionAwareInterface
 
     use OptionAwareTrait;
     use AdapterAwareTrait;
-
+    use ParsContainerAwareTrait;
     /**
      * @var ParsConfig
      */
@@ -44,13 +46,14 @@ class CacheClearer implements AdapterAwareInterface, OptionAwareInterface
 
     /**
      * Cache constructor.
-     * @param ParsConfig $config
+     * @param ParsContainer $config
      */
-    public function __construct(ParsConfig $config, AdapterInterface $adapter, ParsTranslator $translator)
+    public function __construct(ParsContainer $parsContainer)
     {
-        $this->config = $config;
-        $this->translator = $translator;
-        $this->setDbAdapter($adapter);
+        $this->setParsContainer($parsContainer);
+        $this->config = $parsContainer->getConfig();
+        $this->translator = $parsContainer->getTranslator();
+        $this->setDbAdapter($parsContainer->getDatabaseAdapter()->getDbAdapter());
         $this->addOption(self::OPTION_CLEAR_ASSETS);
         $this->addOption(self::OPTION_CLEAR_BUNDLES);
         $this->addOption(self::OPTION_CLEAR_CACHE_POOL);
@@ -139,7 +142,11 @@ class CacheClearer implements AdapterAwareInterface, OptionAwareInterface
             $newUri = Uri::withQueryValue($newUri, 'clearcache', $this->getConfig()->getSecret());
             $newUri = Uri::withQueryValue($newUri, 'nopropagate', true);
             $client = new Client();
-            $client->get($newUri);
+            $this->getParsContainer()->getLogger()->info('CLEAR: ' . $newUri);
+            $response = $client->get($newUri);
+            if ($response->getStatusCode() == 200) {
+                $this->getParsContainer()->getLogger()->info('CLEAR SUCCESS: ' . $newUri);
+            }
         }
     }
 

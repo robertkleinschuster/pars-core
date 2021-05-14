@@ -31,28 +31,32 @@ class DeploymentMiddleware implements MiddlewareInterface
         $this->setParsContainer($container->get(ParsContainer::class));
     }
 
+    /**
+     * @param ServerRequestInterface $request
+     * @param RequestHandlerInterface $handler
+     * @return ResponseInterface
+     */
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
-        $key = 'pars';
-
-        if (isset($request->getQueryParams()['clearcache'])) {
+        $params = $request->getQueryParams();
+        $clearcache = $params['clearcache'] ?? false;
+        $nopropagate = $params['nopropagate'] ?? false;
+        if ($clearcache) {
             try {
                 $key = $this->config->getSecret();
-            } catch (Throwable $exception) {
-            }
-            if ($request->getQueryParams()['clearcache'] == $key) {
-                if (!isset($request->getQueryParams()['nopropagate'])) {
-                    $this->cacheClearer->clearRemote();
-                    $this->config->generateSecret();
-                } else {
-                    $this->cacheClearer->clear();
+                if ($clearcache == $key) {
+                    if ($nopropagate) {
+                        $this->cacheClearer->clear();
+                    } else {
+                        $this->cacheClearer->clearRemote();
+                        $this->config->generateSecret();
+                    }
+                    $redirectUri = Uri::withoutQueryValue($request->getUri(), 'clearcache');
+                    return new RedirectResponse($redirectUri);
                 }
-                $query = str_replace('&clearcache=' . $key, '', $request->getUri()->getQuery());
-                $query = str_replace('?clearcache=' . $key, '', $query);
-                $query = str_replace('clearcache=' . $key, '', $query);
-                return new RedirectResponse($request->getUri()->withQuery($query));
+            } catch (Throwable $exception) {
+                $this->getParsContainer()->getLogger()->error('Clear cache error', ['exception' => $exception]);
             }
-
         }
         return $handler->handle($request);
     }
