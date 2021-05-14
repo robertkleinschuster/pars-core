@@ -2,6 +2,12 @@
 
 namespace Pars\Core\Image;
 
+use Laminas\Diactoros\Response;
+use Laminas\Diactoros\Stream;
+use League\Glide\Responses\PsrResponseFactory;
+use League\Glide\ServerFactory;
+use League\Glide\Signatures\SignatureException;
+use League\Glide\Signatures\SignatureFactory;
 use Pars\Core\Cache\ParsCache;
 use Pars\Core\Config\ParsConfig;
 use Psr\Http\Message\ResponseInterface;
@@ -29,59 +35,35 @@ class ImageMiddleware implements MiddlewareInterface
         $imageConfig = $this->config->getFromAppConfig('image');
         $source = $imageConfig['source'] ?? '/i';
         $cacheDir = $imageConfig['cache'] ?? '/c';
-        $server = \League\Glide\ServerFactory::create([
+        $server = ServerFactory::create([
             'cache_with_file_extensions' => true,
-            'source' => $_SERVER['DOCUMENT_ROOT'] . $source,
-            'cache' => $_SERVER['DOCUMENT_ROOT'] . $cacheDir,
+            'source' => "public/$source",
+            'cache' =>  "public/$cacheDir",
             'max_image_size' => 2000 * 2000,
-            'response' => new \League\Glide\Responses\PsrResponseFactory(new \Laminas\Diactoros\Response(), function ($stream) {
-                return new \Laminas\Diactoros\Stream($stream);
+            'response' => new PsrResponseFactory(new Response(), function ($stream) {
+                return new Stream($stream);
             }),
         ]);
-        if ($request->getUri()->getPath() == '/img') {
-            if (empty($_GET['file'])) {
-                $this->placeholder($_GET['w'], $_GET['h'], 'aaaaaa', 'ffffff', 'file parameter missing');
-            }
-            $path = str_replace($source, '', $_GET['file']);
-            try {
-                $cache = new ParsCache('image');
-                $key = $cache->get('key', '');
-                if ($key == '' && file_exists('data/image_signature')) {
-                    $key = file_get_contents('data/image_signature');
-                    $cache->set('key', $key);
-                }
-                if (empty($key)) {
-                    try {
-                        $key = $this->config->get('asset.key');
-                        $cache->set('key', $key);
-                        file_put_contents('data/image_signature', $key);
-                    } catch (\Throwable $exception) {
-                        $this->placeholder($_GET['w'], $_GET['h'], 'aaaaaa', 'ffffff', $exception->getMessage());
-                    }
-                }
-                \League\Glide\Signatures\SignatureFactory::create($key)->validateRequest('/img', $_GET);
-            } catch (\League\Glide\Signatures\SignatureException $e) {
-                if (file_exists('data/image_signature')) {
-                    unlink('data/image_signature');
-                }
-                $cache->clear();
-                $this->placeholder($_GET['w'], $_GET['h'], 'aaaaaa', 'ffffff', $e->getMessage());
-            }
-            try {
-                /**
-                 * @var $response ResponseInterface
-                 */
-                $response = $server->getImageResponse($path, $_GET);
-                $response = $response->withAddedHeader('pragma', 'public');
-                return $response;
-            } catch (\Throwable $exception) {
-                $this->placeholder($_GET['w'], $_GET['h'], 'aaaaaa', 'ffffff', $e->getMessage());
-            }
+        $path = $request->getUri()->getPath();
+        $params = $request->getQueryParams();
+        $width = $params['w'] ?? 100;
+        $height = $params['h'] ?? 100;
+        $key = $this->config->get('asset.key');
+        try {
+            SignatureFactory::create($key)->validateRequest($path, $params);
+        } catch (SignatureException $e) {
+            $this->placeholder($width, $height, 'aaaaaa', 'ffffff', $e->getMessage());
+        }
+        try {
+            return $server->getImageResponse($path, $params)
+                ->withAddedHeader('pragma', 'public');
+        } catch (\Throwable $exception) {
+            $this->placeholder($width, $height, 'aaaaaa', 'ffffff', $e->getMessage());
         }
         return $handler->handle($request->withAttribute(self::SERVER_ATTRIBUTE, $server));
     }
 
-    function placeholder($width, $height, $bg_color, $txt_color, $text = null)
+    protected function placeholder($width, $height, $bg_color, $txt_color, $text = null)
     {
         if (!$text) {
             $text = "$width X $height";

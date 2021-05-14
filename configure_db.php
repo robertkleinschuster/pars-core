@@ -3,8 +3,8 @@
 header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
 header("Cache-Control: post-check=0, pre-check=0", false);
 header("Pragma: no-cache");
-$root = $_SERVER['DOCUMENT_ROOT'];
-if (!file_exists($root . '/../config/autoload/database.local.php')) {
+//$root = $_SERVER['DOCUMENT_ROOT'];
+if (!file_exists('config/autoload/database.local.php')) {
     $error = '';
     if (count($_POST)) {
         $data = $_POST;
@@ -12,7 +12,7 @@ if (!file_exists($root . '/../config/autoload/database.local.php')) {
         if (isset($result->server_info)) {
             $tpl = file_get_contents(__DIR__ . '/database.local.php.dist');
             $config = str_replace(array_keys($data), array_values($data), $tpl);
-            file_put_contents($root . '/../config/autoload/database.local.php', $config);
+            file_put_contents('config/autoload/database.local.php', $config);
         }
         if ($result === false) {
             $error = 'Error connecting to DB: ' . mysqli_connect_error();
