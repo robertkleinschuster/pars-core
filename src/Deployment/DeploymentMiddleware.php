@@ -46,6 +46,7 @@ class DeploymentMiddleware implements MiddlewareInterface
             try {
                 $key = $this->config->getSecret();
                 $keyNew = $this->config->getSecret(true);
+                $redirectUri = Uri::withoutQueryValue($request->getUri(), 'clearcache');
                 if ($clearcache == $key || $clearcache == $keyNew) {
                     if ($nopropagate) {
                         $this->cacheClearer->clear();
@@ -54,13 +55,12 @@ class DeploymentMiddleware implements MiddlewareInterface
                         $this->cacheClearer->clear();
                         $this->cacheClearer->clearRemote($request->getUri());
                     }
-                    $redirectUri = Uri::withoutQueryValue($request->getUri(), 'clearcache');
                     return new RedirectResponse($redirectUri);
                 } else {
-                    return new Response\EmptyResponse(403);
+                    return new RedirectResponse($redirectUri, 403);
                 }
             } catch (Throwable $exception) {
-                $this->getParsContainer()->getLogger()->error('Clear cache error', ['exception' => $exception]);
+                $this->getParsContainer()->getLogger()->error('CLEAR ERROR', ['exception' => $exception]);
             }
         }
         return $handler->handle($request);
