@@ -24,7 +24,8 @@ class ErrorResolverListener
 
     public function __invoke(Throwable $error, ServerRequestInterface $request, ResponseInterface $response)
     {
-        #CacheClearer::clearConfigCache([]);
-        #UpdateHandler::handleAppUpdate($this->container);
+        if (function_exists('opcache_reset')) {
+            opcache_reset();
+        }
     }
 }
