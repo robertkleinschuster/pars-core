@@ -95,7 +95,7 @@ class ParsUpdater implements UpdaterInterface
         foreach ($domains as $domain) {
             $domainUri = new Uri($domain);
             if ($domainUri->getHost() != $self->getHost()
-                || $domainUri->getPort() != $self->getPort()) {
+                || $domainUri->getPort() != $self->getPort() || PARS_VERSION != 'DEV') {
                 try {
                     $domainUri = Uri::withQueryValue($domainUri, 'update', $this->getParsContainer()->getConfig()->getSecret(true));
                     $domainUri = Uri::withQueryValue($domainUri, 'nopropagate', true);
