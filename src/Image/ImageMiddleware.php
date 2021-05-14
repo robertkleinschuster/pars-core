@@ -50,15 +50,15 @@ class ImageMiddleware implements MiddlewareInterface
         $height = $params['h'] ?? 100;
         $key = $this->config->get('asset.key');
         try {
-            SignatureFactory::create($key)->validateRequest($path, $params);
+            SignatureFactory::create($key)->validateRequest($source . $path, $params);
         } catch (SignatureException $e) {
             $this->placeholder($width, $height, 'aaaaaa', 'ffffff', $e->getMessage());
         }
         try {
-            return $server->getImageResponse($path, $params)
+            return $server->getImageResponse(urldecode($path), $params)
                 ->withAddedHeader('pragma', 'public');
         } catch (\Throwable $exception) {
-            $this->placeholder($width, $height, 'aaaaaa', 'ffffff', $e->getMessage());
+            $this->placeholder($width, $height, 'aaaaaa', 'ffffff', $exception->getMessage());
         }
         return $handler->handle($request->withAttribute(self::SERVER_ATTRIBUTE, $server));
     }
@@ -82,7 +82,7 @@ class ImageMiddleware implements MiddlewareInterface
             base_convert(substr($txt_color, 4, 2), 16, 10)
         );
         imagefill($image, 0, 0, $bg_color);
-        $fontsize = ($width > $height) ? ($height / 10) : ($width / 10);
+        $fontsize = 12;
         imagettftext($image, $fontsize, 0, 0, ($height / 2) + ($fontsize * 0.2), $txt_color, __DIR__ . DIRECTORY_SEPARATOR . 'HelveticaNeue.ttf', $text);
         header("Content-Type: image/png");
         imagepng($image);
