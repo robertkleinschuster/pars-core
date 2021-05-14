@@ -14,6 +14,6 @@ class ParsMultiCachePoolFactory
     public function __invoke(ContainerInterface $container)
     {
         $config = $container->get('config');
-        return new ParsMultiCache($config['mezzio-session-cache']['filesystem_folder']);
+        return new ParsMultiCache(ParsMultiCache::SESSION_BASE_PATH);
     }
 }

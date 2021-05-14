@@ -18,18 +18,24 @@ class ParsMultiCache extends AbstractCachePool
 
     protected string $folder;
 
+    public const DEFAULT_BASE_PATH = 'data/cache/poolmulti/';
+    public const SESSION_BASE_PATH = 'data/session/';
+
+
     /**
      * @param string $file
      * @param string $basePath
      */
-    public function __construct(string $basePath = 'data/cache/poolmulti/')
+    public function __construct(string $basePath = self::DEFAULT_BASE_PATH)
     {
         if (!is_dir($basePath)) {
             mkdir($basePath);
         }
         $this->folder = $basePath;
         $this->cache = [];
-        $this->savePath($basePath);
+        if ($basePath != self::SESSION_BASE_PATH) {
+            $this->savePath($basePath);
+        }
     }
 
     public function set($key, $value, $ttl = null)

@@ -6,6 +6,8 @@ use GuzzleHttp\Client;
 use GuzzleHttp\Psr7\Uri;
 use Laminas\Diactoros\Response\RedirectResponse;
 use Pars\Core\Config\ParsConfig;
+use Pars\Core\Container\ParsContainer;
+use Pars\Core\Container\ParsContainerAwareTrait;
 use Psr\Container\ContainerInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -17,7 +19,7 @@ class DeploymentMiddleware implements MiddlewareInterface
 {
     protected ParsConfig $config;
     protected CacheClearer $cacheClearer;
-
+    use ParsContainerAwareTrait;
     /**
      * DeploymentMiddleware constructor.
      * @param ContainerInterface $container
@@ -26,6 +28,7 @@ class DeploymentMiddleware implements MiddlewareInterface
     {
         $this->config = $container->get(ParsConfig::class);
         $this->cacheClearer = $container->get(CacheClearer::class);
+        $this->setParsContainer($container->get(ParsContainer::class));
     }
 
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
@@ -39,6 +42,7 @@ class DeploymentMiddleware implements MiddlewareInterface
             }
             if ($request->getQueryParams()['clearcache'] == $key) {
                 if (!isset($request->getQueryParams()['nopropagate'])) {
+                    $this->config->generateSecret();
                     $domains = $this->config->getDomainList();
                     foreach ($domains as $domain) {
                         $newUri = new Uri($domain);
@@ -53,7 +57,6 @@ class DeploymentMiddleware implements MiddlewareInterface
                         }
                     }
                 }
-                $this->config->generateSecret();
                 $this->cacheClearer->clear();
                 $query = str_replace('&clearcache=' . $key, '', $request->getUri()->getQuery());
                 $query = str_replace('?clearcache=' . $key, '', $query);
