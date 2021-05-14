@@ -42,22 +42,11 @@ class DeploymentMiddleware implements MiddlewareInterface
             }
             if ($request->getQueryParams()['clearcache'] == $key) {
                 if (!isset($request->getQueryParams()['nopropagate'])) {
+                    $this->cacheClearer->clearRemote();
                     $this->config->generateSecret();
-                    $domains = $this->config->getDomainList();
-                    foreach ($domains as $domain) {
-                        $newUri = new Uri($domain);
-                        $newUri = $newUri->withQuery($request->getUri()->getQuery());
-                        $newUri = Uri::withQueryValue($newUri, 'nopropagate', true);
-                        if ($newUri->getHost() != $request->getUri()->getHost()
-                            || $newUri->getPort() != $request->getUri()->getPort()
-                        ) {
-                            $client = new Client();
-                            $newRequest = $request->withUri($newUri);
-                            $client->send($newRequest);
-                        }
-                    }
+                } else {
+                    $this->cacheClearer->clear();
                 }
-                $this->cacheClearer->clear();
                 $query = str_replace('&clearcache=' . $key, '', $request->getUri()->getQuery());
                 $query = str_replace('?clearcache=' . $key, '', $query);
                 $query = str_replace('clearcache=' . $key, '', $query);

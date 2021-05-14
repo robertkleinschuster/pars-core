@@ -2,6 +2,8 @@
 
 namespace Pars\Core\Deployment;
 
+use GuzzleHttp\Client;
+use GuzzleHttp\Psr7\Uri;
 use Laminas\Db\Adapter\AdapterAwareInterface;
 use Laminas\Db\Adapter\AdapterAwareTrait;
 use Laminas\Db\Adapter\AdapterInterface;
@@ -126,6 +128,18 @@ class CacheClearer implements AdapterAwareInterface, OptionAwareInterface
         }
         if ($this->hasOption(self::OPTION_CLEAR_TRANSLATIONS)) {
             $this->clearTranslations();
+        }
+    }
+
+    public function clearRemote()
+    {
+        $domains = $this->config->getDomainList();
+        foreach ($domains as $domain) {
+            $newUri = new Uri($domain);
+            $newUri = Uri::withQueryValue($newUri, 'clearcache', $this->getConfig()->getSecret());
+            $newUri = Uri::withQueryValue($newUri, 'nopropagate', true);
+            $client = new Client();
+            $client->get($newUri);
         }
     }
 

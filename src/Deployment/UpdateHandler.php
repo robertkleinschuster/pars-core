@@ -61,7 +61,7 @@ class UpdateHandler
     public static function updateApps(array $changedPackages)
     {
         if (count($changedPackages)) {
-            file_put_contents('pars-update', 'true');
+
         }
     }
 
