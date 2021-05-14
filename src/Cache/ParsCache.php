@@ -209,6 +209,10 @@ class ParsCache extends AbstractCachePool
         if (function_exists('opcache_invalidate')) {
             opcache_invalidate($this->file, true);
         }
+        $dir = dirname($this->file);
+        if (!is_dir($dir)) {
+            mkdir($dir);
+        }
         if (file_exists($this->file)) {
             unlink($this->file);
         }

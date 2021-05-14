@@ -164,6 +164,9 @@ class ParsMultiCache extends AbstractCachePool
         if (function_exists('opcache_invalidate')) {
             opcache_invalidate($this->folder . DIRECTORY_SEPARATOR . $key . '.php', true);
         }
+        if (!is_dir($this->folder)) {
+            mkdir($this->folder);
+        }
         if (file_exists($this->folder . DIRECTORY_SEPARATOR . $key . '.php')) {
             unlink($this->folder . DIRECTORY_SEPARATOR . $key . '.php');
         }
