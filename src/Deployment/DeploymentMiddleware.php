@@ -34,18 +34,21 @@ class DeploymentMiddleware implements MiddlewareInterface
 
         if (isset($request->getQueryParams()['clearcache'])) {
             try {
-                $key = $this->config->getSecret(true);
+                $key = $this->config->getSecret();
             } catch (Throwable $exception) {
             }
             if ($request->getQueryParams()['clearcache'] == $key) {
-                $domains = $this->config->getDomainList();
-                foreach ($domains as $domain) {
-                    $newUri = new Uri($domain);
-                    if ($newUri->getHost() != $request->getUri()->getHost()
-                        || $newUri->getPort() != $request->getUri()->getPort()
-                    ) {
-                        $client = new Client();
-                        $client->send($request->withUri($newUri->withQuery($request->getUri()->getQuery())));
+                if (!isset($request->getQueryParams()['nopropagate'])) {
+                    $domains = $this->config->getDomainList();
+                    foreach ($domains as $domain) {
+                        $newUri = new Uri($domain);
+                        $newUri = Uri::withQueryValue($newUri, 'nopropagate', true);
+                        if ($newUri->getHost() != $request->getUri()->getHost()
+                            || $newUri->getPort() != $request->getUri()->getPort()
+                        ) {
+                            $client = new Client();
+                            $client->send($request->withUri($newUri->withQuery($request->getUri()->getQuery())));
+                        }
                     }
                 }
                 $this->config->generateSecret();
