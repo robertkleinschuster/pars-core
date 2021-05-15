@@ -6,6 +6,7 @@ namespace Pars\Core\Deployment;
 
 use GuzzleHttp\Psr7\Uri;
 use Laminas\Diactoros\Response\RedirectResponse;
+use Laminas\Diactoros\Response\TextResponse;
 use Pars\Core\Container\ParsContainer;
 use Pars\Core\Container\ParsContainerAwareTrait;
 use Psr\Http\Message\ResponseInterface;
@@ -17,6 +18,7 @@ class UpdateMiddleware implements MiddlewareInterface
 {
     protected ParsUpdater $updater;
     use ParsContainerAwareTrait;
+
     /**
      * UpdateMiddleware constructor.
      */
@@ -30,6 +32,7 @@ class UpdateMiddleware implements MiddlewareInterface
     {
         $params = $request->getQueryParams();
         $update = $params['update'] ?? false;
+        $version = $params['version'] ?? false;
         $nopropagate = $params['nopropagate'] ?? false;
         if ($update) {
             $key = $this->getParsContainer()->getConfig()->getSecret();
@@ -44,6 +47,13 @@ class UpdateMiddleware implements MiddlewareInterface
                     $this->updater->update();
                 }
                 return new RedirectResponse($redirectUri);
+            }
+        }
+        if ($version) {
+            $key = $this->getParsContainer()->getConfig()->getSecret();
+            $keyNew = $this->getParsContainer()->getConfig()->getSecret(true);
+            if ($version == $key || $version == $keyNew) {
+                return new TextResponse(PARS_VERSION);
             }
         }
         return $handler->handle($request);
