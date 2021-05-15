@@ -116,9 +116,9 @@ class ParsUpdater implements UpdaterInterface
             $client = new Client();
             $this->getParsContainer()->getLogger()->info('UPDATE: ' . $domainUri);
             $response = $client->get($domainUri, [
-                RequestOptions::TIMEOUT => 20,
+                RequestOptions::TIMEOUT => 120,
                 RequestOptions::CONNECT_TIMEOUT => 20,
-                RequestOptions::READ_TIMEOUT => 20,
+                RequestOptions::READ_TIMEOUT => 120,
             ]);
             if ($response->getStatusCode() == 200) {
                 $this->getParsContainer()->getLogger()->info('UPDATE SUCCESS: ' . $domainUri);

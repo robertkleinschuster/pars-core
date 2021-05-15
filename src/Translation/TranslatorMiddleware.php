@@ -72,7 +72,6 @@ class TranslatorMiddleware implements MiddlewareInterface
                 }
             );
         }
-
         $this->translator->getTranslator()
             ->getPluginManager()
             ->setFactory(RemoteLoaderInterface::class, function ($container) {

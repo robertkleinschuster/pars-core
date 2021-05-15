@@ -2,8 +2,10 @@
 
 namespace Pars\Core\Config;
 
+use Cache\Adapter\Common\Exception\CacheException;
 use Pars\Core\Cache\ParsCache;
 use Pars\Pattern\Exception\CoreException;
+use Psr\SimpleCache\InvalidArgumentException;
 use Symfony\Component\Uid\Uuid;
 
 class ParsConfig
@@ -58,32 +60,43 @@ class ParsConfig
 
     /**
      * @param string $key
+     * @param string|null $type
      * @return mixed|void|null
-     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function get(string $key, string $type = null)
     {
-        $restoreType = null;
-        if ($type) {
-            $restoreType = $this->type;
-            $this->setType($type);
+        $result = null;
+        try {
+            $restoreType = null;
+            if ($type) {
+                $restoreType = $this->type;
+                $this->setType($type);
+            }
+            if ($this->type === null) {
+                throw new CoreException('No type set for config.');
+            }
+            if (isset($this->config[$key])) {
+                $result = $this->config[$key];
+            } elseif ($this->cache->has($key) || $this->cache->get($key) !== null) {
+                $result = $this->cache->get($key);
+                $this->config[$key] = $result;
+            } else {
+                $this->config = $this->loadConfig();
+                $this->cache->setMultiple($this->config);
+                $result = $this->config[$key] ?? null;
+            }
+            if ($result == null) {
+                $result = $this->getFromAppConfig($key);
+                $this->cache->set($key, $result);
+                $this->config[$key] = $result;
+            }
+            if ($restoreType) {
+                $this->setType($restoreType);
+            }
+        } catch (\Throwable | InvalidArgumentException $exception) {
+            echo $exception->getMessage() .  ' ' . $exception->getFile().  ' ' . $exception->getLine();
         }
-        if ($this->type === null) {
-            throw new CoreException('No type set for config.');
-        }
-        if (isset($this->config[$key])) {
-            return $this->config[$key];
-        }
-        if ($this->cache->has($key)) {
-            $this->config[$key] = $this->cache->get($key);
-            return $this->config[$key];
-        }
-        $this->config = $this->loadConfig();
-        $this->cache->setMultiple($this->config);
-        if ($restoreType) {
-            $this->setType($restoreType);
-        }
-        return $this->config[$key] ?? $this->getFromAppConfig($key);
+        return $result;
     }
 
     public function getDomainList()
@@ -123,7 +136,7 @@ class ParsConfig
 
     /**
      * @return array
-     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws InvalidArgumentException
      */
     public function toArray(): array
     {
@@ -193,7 +206,7 @@ class ParsConfig
      * @param string $key
      * @param string $value
      * @return $this
-     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws InvalidArgumentException
      */
     public function set(string $key, string $value, string $type = null)
     {
