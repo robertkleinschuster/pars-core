@@ -8,8 +8,11 @@ class EmitterFactory
 {
     public function __invoke(ContainerInterface $container)
     {
+        $config = $container->get('config');
         $stack = new \Laminas\HttpHandlerRunner\Emitter\EmitterStack();
-        $stack->push(new \Laminas\HttpHandlerRunner\Emitter\SapiStreamEmitter());
+        if (isset($config['emitter']) && $config['emitter'] == 'stream') {
+            $stack->push(new \Laminas\HttpHandlerRunner\Emitter\SapiStreamEmitter());
+        }
         $stack->push(new \Laminas\HttpHandlerRunner\Emitter\SapiEmitter());
         return $stack;
     }

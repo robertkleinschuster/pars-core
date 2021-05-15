@@ -62,6 +62,7 @@ class ConfigProvider
             'config' => [
                 'type' => 'base'
             ],
+            'emitter' => 'default',
             'dependencies' => $this->getDependencies(),
             'assets' => [
                 'development' => false,
