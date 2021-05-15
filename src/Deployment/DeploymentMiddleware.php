@@ -51,8 +51,8 @@ class DeploymentMiddleware implements MiddlewareInterface
                         $this->cacheClearer->clear();
                     } else {
                         $this->config->generateSecret();
-                        $this->cacheClearer->clear();
                         $this->cacheClearer->clearRemote();
+                        $this->cacheClearer->clear();
                     }
                     return new RedirectResponse($redirectUri);
                 }
