@@ -40,8 +40,8 @@ class UpdateMiddleware implements MiddlewareInterface
                     $this->updater->update();
                 } else {
                     $this->getParsContainer()->getConfig()->generateSecret();
-                    $this->updater->update();
                     $this->updater->updateRemote();
+                    $this->updater->update();
                 }
                 return new RedirectResponse($redirectUri);
             }
