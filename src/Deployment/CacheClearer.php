@@ -4,18 +4,18 @@ namespace Pars\Core\Deployment;
 
 use GuzzleHttp\Client;
 use GuzzleHttp\Psr7\Uri;
+use GuzzleHttp\RequestOptions;
 use Laminas\Db\Adapter\AdapterAwareInterface;
 use Laminas\Db\Adapter\AdapterAwareTrait;
-use Laminas\Db\Adapter\AdapterInterface;
+use Pars\Core\Cache\ParsCache;
 use Pars\Core\Cache\ParsMultiCache;
 use Pars\Core\Config\ParsConfig;
 use Pars\Core\Container\ParsContainer;
 use Pars\Core\Container\ParsContainerAwareTrait;
 use Pars\Core\Translation\ParsTranslator;
+use Pars\Helper\Filesystem\FilesystemHelper;
 use Pars\Pattern\Option\OptionAwareInterface;
 use Pars\Pattern\Option\OptionAwareTrait;
-use Pars\Core\Cache\ParsCache;
-use Pars\Helper\Filesystem\FilesystemHelper;
 use Psr\Http\Message\UriInterface;
 
 /**
@@ -35,6 +35,7 @@ class CacheClearer implements AdapterAwareInterface, OptionAwareInterface
     use OptionAwareTrait;
     use AdapterAwareTrait;
     use ParsContainerAwareTrait;
+
     /**
      * @var ParsConfig
      */
@@ -136,28 +137,45 @@ class CacheClearer implements AdapterAwareInterface, OptionAwareInterface
         }
     }
 
-    public function clearRemote(UriInterface $self)
+    public function clearRemote()
     {
-        $domains = $this->config->getDomainList();
-        foreach ($domains as $domain) {
-            $newUri = new Uri($domain);
-            if ($newUri->getHost() != $self->getHost()
-                || $newUri->getPort() != $self->getPort()) {
-                $newUri = Uri::withQueryValue($newUri, 'clearcache', $this->getConfig()->getSecret(true));
-                $newUri = Uri::withQueryValue($newUri, 'nopropagate', true);
-                try {
-                    $client = new Client();
-                    $this->getParsContainer()->getLogger()->info('CLEAR: ' . $newUri);
-                    $response = $client->get($newUri);
-                    if ($response->getStatusCode() == 200) {
-                        $this->getParsContainer()->getLogger()->info('CLEAR SUCCESS: ' . $newUri);
-                    } else {
-                        $this->getParsContainer()->getLogger()->info('CLEAR ERROR: ' . $newUri);
-                    }
-                } catch (\Throwable $exception) {
-                    $this->getParsContainer()->getLogger()->error('CLEAR ERROR', ['exception' => $exception]);
-                }
+        $this->clearFrontend();
+        $this->clearAdmin();
+    }
+
+    protected function clearFrontend()
+    {
+        $domain = $this->config->getFrontendDomain();
+        $this->clearByDomain($domain);
+    }
+
+    protected function clearAdmin()
+    {
+        $domain = $this->config->getAssetDomain();
+        $this->clearByDomain($domain);
+    }
+
+
+    protected function clearByDomain(string $domain)
+    {
+        $domainUri = new Uri($domain);
+        $domainUri = Uri::withQueryValue($domainUri, 'clearcache', $this->getConfig()->getSecret(true));
+        $domainUri = Uri::withQueryValue($domainUri, 'nopropagate', true);
+        try {
+            $client = new Client();
+            $this->getParsContainer()->getLogger()->info('CLEAR: ' . $domainUri);
+            $response = $client->get($domainUri, [
+                RequestOptions::TIMEOUT => 20,
+                RequestOptions::CONNECT_TIMEOUT => 20,
+                RequestOptions::READ_TIMEOUT => 20,
+            ]);
+            if ($response->getStatusCode() == 200) {
+                $this->getParsContainer()->getLogger()->info('CLEAR SUCCESS: ' . $domainUri);
+            } else {
+                $this->getParsContainer()->getLogger()->info('CLEAR ERROR: ' . $domainUri);
             }
+        } catch (\Throwable $exception) {
+            $this->getParsContainer()->getLogger()->error('CLEAR ERROR', ['exception' => $exception]);
         }
     }
 

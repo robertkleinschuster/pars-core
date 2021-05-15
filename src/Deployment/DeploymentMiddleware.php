@@ -52,7 +52,7 @@ class DeploymentMiddleware implements MiddlewareInterface
                     } else {
                         $this->config->generateSecret();
                         $this->cacheClearer->clear();
-                        $this->cacheClearer->clearRemote($request->getUri());
+                        $this->cacheClearer->clearRemote();
                     }
                     return new RedirectResponse($redirectUri);
                 }

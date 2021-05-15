@@ -89,28 +89,44 @@ class ParsUpdater implements UpdaterInterface
     /**
      * @param UriInterface $self
      */
-    public function updateRemote(UriInterface $self)
+    public function updateRemote()
     {
-        $domains = $this->getParsContainer()->getConfig()->getDomainList();
-        foreach ($domains as $domain) {
-            $domainUri = new Uri($domain);
-            if ($domainUri->getHost() != $self->getHost()
-                || $domainUri->getPort() != $self->getPort()) {
-                try {
-                    $domainUri = Uri::withQueryValue($domainUri, 'update', $this->getParsContainer()->getConfig()->getSecret(true));
-                    $domainUri = Uri::withQueryValue($domainUri, 'nopropagate', true);
-                    $client = new Client();
-                    $this->getParsContainer()->getLogger()->info('UPDATE: ' . $domainUri);
-                    $response = $client->get($domainUri);
-                    if ($response->getStatusCode() == 200) {
-                        $this->getParsContainer()->getLogger()->info('UPDATE SUCCESS: ' . $domainUri);
-                    } else {
-                        $this->getParsContainer()->getLogger()->info('UPDATE ERROR: ' . $domainUri);
-                    }
-                } catch (\Throwable $exception) {
-                    $this->getParsContainer()->getLogger()->info('UPDATE ERROR: ' . $domainUri, ['exception' => $exception]);
-                }
+        $this->updateFrontend();
+        $this->updateAdmin();
+    }
+
+    protected function updateAdmin()
+    {
+        $domain = $this->getParsContainer()->getConfig()->getAssetDomain();
+        $this->updateByDomain($domain);
+    }
+
+    protected function updateFrontend()
+    {
+        $domain = $this->getParsContainer()->getConfig()->getFrontendDomain();
+        $this->updateByDomain($domain);
+    }
+
+    protected function updateByDomain(string $domain)
+    {
+        $domainUri = new Uri($domain);
+        try {
+            $domainUri = Uri::withQueryValue($domainUri, 'update', $this->getParsContainer()->getConfig()->getSecret(true));
+            $domainUri = Uri::withQueryValue($domainUri, 'nopropagate', true);
+            $client = new Client();
+            $this->getParsContainer()->getLogger()->info('UPDATE: ' . $domainUri);
+            $response = $client->get($domainUri, [
+                RequestOptions::TIMEOUT => 20,
+                RequestOptions::CONNECT_TIMEOUT => 20,
+                RequestOptions::READ_TIMEOUT => 20,
+            ]);
+            if ($response->getStatusCode() == 200) {
+                $this->getParsContainer()->getLogger()->info('UPDATE SUCCESS: ' . $domainUri);
+            } else {
+                $this->getParsContainer()->getLogger()->info('UPDATE ERROR: ' . $domainUri);
             }
+        } catch (\Throwable $exception) {
+            $this->getParsContainer()->getLogger()->info('UPDATE ERROR: ' . $domainUri, ['exception' => $exception]);
         }
     }
 
