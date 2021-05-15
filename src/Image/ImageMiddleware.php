@@ -56,7 +56,8 @@ class ImageMiddleware implements MiddlewareInterface
         }
         try {
             return $server->getImageResponse(urldecode($path), $params)
-                ->withAddedHeader('pragma', 'public');
+                ->withAddedHeader('pragma', 'public')
+                ->withAddedHeader('X-Accel-Buffering', 'no');
         } catch (\Throwable $exception) {
             $this->placeholder($width, $height, 'aaaaaa', 'ffffff', $exception->getMessage());
         }
