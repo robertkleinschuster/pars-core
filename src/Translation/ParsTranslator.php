@@ -134,6 +134,8 @@ class ParsTranslator implements TranslatorAwareInterface, LocaleAwareInterface
      */
     public function translate(string $code, array $vars = [], ?string $namespace = null): string
     {
+        $code = strtolower(trim($code));
+        $namespace = strtolower(trim($namespace));
         $restoreNamespace = null;
         if ($namespace) {
             $restoreNamespace = $this->getNamespace();
@@ -156,6 +158,8 @@ class ParsTranslator implements TranslatorAwareInterface, LocaleAwareInterface
      */
     public function translatepl(string $code, int $count, array $vars = [], ?string $namespace = null): string
     {
+        $code = strtolower(trim($code));
+        $namespace = strtolower(trim($namespace));
         $restoreNamespace = null;
         if ($namespace) {
             $restoreNamespace = $this->getNamespace();
