@@ -140,7 +140,6 @@ abstract class AbstractDatabaseUpdater implements ValidationHelperAwareInterface
 
     public function execute(array $methods): array
     {
-        $this->adapter->getDriver()->getConnection()->beginTransaction();
         $this->setMode(self::MODE_EXECUTE);
         $methodList = $this->getUpdateMethodList();
         $resultMap = [];
@@ -149,20 +148,17 @@ abstract class AbstractDatabaseUpdater implements ValidationHelperAwareInterface
                 $resultMap[$method] = $this->executeMethod($method);
             }
         }
-        $this->adapter->getDriver()->getConnection()->commit();
         return $resultMap;
     }
 
     public function executeSilent()
     {
-        $this->adapter->getDriver()->getConnection()->beginTransaction();
         $this->setMode(self::MODE_EXECUTE);
         $methodList = $this->getUpdateMethodList();
         $resultMap = [];
         foreach ($methodList as $method) {
             $resultMap[$method] = $this->executeMethod($method);
         }
-        $this->adapter->getDriver()->getConnection()->commit();
         return $resultMap;
     }
 
