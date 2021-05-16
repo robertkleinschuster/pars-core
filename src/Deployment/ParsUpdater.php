@@ -75,7 +75,7 @@ class ParsUpdater implements UpdaterInterface
         if (PARS_VERSION != 'DEV' && PARS_VERSION != 'CORE') {
             $file = 'update.zip';
             file_put_contents($file, $response->getBody());
-            $path = pathinfo(realpath($file), PATHINFO_DIRNAME);
+            $path = dirname(realpath($file));
             $zip = new \ZipArchive();
             $res = $zip->open($file);
             if ($res === TRUE) {
