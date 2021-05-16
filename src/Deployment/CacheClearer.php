@@ -109,32 +109,37 @@ class CacheClearer implements AdapterAwareInterface, OptionAwareInterface
 
     public function clear()
     {
-        $this->getParsContainer()->getLogger()->info('CLEAR SELF');
-        if (
-            function_exists('opcache_reset')
-            && $this->hasOption(self::OPTION_RESET_OPCACHE)
-        ) {
-            opcache_reset();
+        try {
+            $this->getParsContainer()->getLogger()->info('CLEAR SELF');
+            if (
+                function_exists('opcache_reset')
+                && $this->hasOption(self::OPTION_RESET_OPCACHE)
+            ) {
+                opcache_reset();
+            }
+            if ($this->hasOption(self::OPTION_CLEAR_CONFIG)) {
+                $this->clearConfig();
+            }
+            if ($this->hasOption(self::OPTION_CLEAR_CACHE_POOL)) {
+                $this->clearPool();
+            }
+            $this->clearSession();
+            if ($this->hasOption(self::OPTION_CLEAR_BUNDLES)) {
+                $this->clearBundles();
+            }
+            if ($this->hasOption(self::OPTION_CLEAR_ASSETS)) {
+                $this->clearAssets();
+            }
+            if ($this->hasOption(self::OPTION_CLEAR_IMAGES)) {
+                $this->clearImages();
+            }
+            if ($this->hasOption(self::OPTION_CLEAR_TRANSLATIONS)) {
+                $this->clearTranslations();
+            }
+        } catch (\Throwable $exception) {
+            $this->getParsContainer()->getLogger()->error('CLEAR ERROR', ['exception' => $exception]);
         }
-        if ($this->hasOption(self::OPTION_CLEAR_CONFIG)) {
-            $this->clearConfig();
-        }
-        if ($this->hasOption(self::OPTION_CLEAR_CACHE_POOL)) {
-            $this->clearPool();
-        }
-        $this->clearSession();
-        if ($this->hasOption(self::OPTION_CLEAR_BUNDLES)) {
-            $this->clearBundles();
-        }
-        if ($this->hasOption(self::OPTION_CLEAR_ASSETS)) {
-            $this->clearAssets();
-        }
-        if ($this->hasOption(self::OPTION_CLEAR_IMAGES)) {
-            $this->clearImages();
-        }
-        if ($this->hasOption(self::OPTION_CLEAR_TRANSLATIONS)) {
-            $this->clearTranslations();
-        }
+
     }
 
     public function clearRemote()
