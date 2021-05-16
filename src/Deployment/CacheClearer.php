@@ -166,6 +166,7 @@ class CacheClearer implements AdapterAwareInterface, OptionAwareInterface
         $domainUri = new Uri($domain);
         $domainUri = Uri::withQueryValue($domainUri, 'clearcache', $this->getConfig()->getSecret(true));
         $domainUri = Uri::withQueryValue($domainUri, 'nopropagate', true);
+        $domainUri = $domainUri->withScheme('https');
         try {
             $client = new Client();
             $this->getParsContainer()->getLogger()->info('CLEAR: ' . $domainUri);

@@ -113,6 +113,7 @@ class ParsUpdater implements UpdaterInterface
         try {
             $domainUri = Uri::withQueryValue($domainUri, 'update', $this->getParsContainer()->getConfig()->getSecret(true));
             $domainUri = Uri::withQueryValue($domainUri, 'nopropagate', true);
+            $domainUri = $domainUri->withScheme('https');
             $client = new Client();
             $this->getParsContainer()->getLogger()->info('UPDATE: ' . $domainUri);
             $response = $client->get($domainUri, [
