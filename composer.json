@@ -93,22 +93,13 @@
     "classmap-authoritative": true
   },
   "scripts": {
-    "serve": [
-      "php -S 0.0.0.0:8080 -t public/ & @yarn-watch"
-    ],
     "cs-check": "phpcs",
     "cs-fix": "phpcbf",
     "test": "phpunit --colors=always",
     "test-coverage": "phpunit --colors=always --coverage-clover clover.xml",
-    "post-update-cmd": [
-      "@yarn"
-    ],
-    "post-install-cmd": [
-      "@yarn"
-    ],
     "yarn": [
-      "yarn install >> /dev/null",
-      "yarn encore production >> /dev/null"
+      "yarn install",
+      "yarn encore production"
     ],
     "yarn-watch": [
       "yarn encore dev --watch"
