@@ -12,7 +12,6 @@ use Pars\Core\Translation\ParsTranslatorAwareInterface;
 use Pars\Core\Translation\ParsTranslatorAwareTrait;
 use Pars\Helper\Validation\ValidationHelperAwareInterface;
 use Pars\Helper\Validation\ValidationHelperAwareTrait;
-use Pars\Model\Localization\Locale\LocaleBean;
 
 /**
  * Class AbstractDatabaseBeanProcessor

@@ -9,7 +9,6 @@ use Laminas\Stratigility\MiddlewarePipeInterface;
 use Mezzio\Application;
 use Mezzio\MiddlewareFactory;
 use Mezzio\Router\RouteCollector;
-use Pars\Model\Article\Translation\Auto\AutoTranslateTask;
 
 /**
  * Class AbstractApplicationFactory

@@ -5,14 +5,10 @@ namespace Pars\Core;
 use Laminas\Stratigility\Middleware\ErrorHandler;
 use Mezzio\Authentication\AuthenticationInterface;
 use Mezzio\Session\SessionPersistenceInterface;
-use Pars\Core\Assets\AssetsMiddleware;
-use Pars\Core\Assets\AssetsMiddlewareFactory;
 use Pars\Core\Authentication\AuthenticationMiddleware;
 use Pars\Core\Authentication\AuthenticationMiddlewareFactory;
 use Pars\Core\Authentication\SessionAuthentication;
 use Pars\Core\Authentication\SessionAuthenticationFactory;
-use Pars\Core\Bundles\BundlesMiddleware;
-use Pars\Core\Bundles\BundlesMiddlewareFactory;
 use Pars\Core\Config\ParsApplicationConfig;
 use Pars\Core\Config\ParsApplicationConfigFactory;
 use Pars\Core\Config\ParsConfig;
@@ -164,9 +160,7 @@ class ConfigProvider
                 TranslatorMiddleware::class => TranslatorMiddlewareFactory::class,
                 LoggingMiddleware::class => LoggingMiddlewareFactory::class,
                 LocalizationMiddleware::class => LocalizationMiddlewareFactory::class,
-                BundlesMiddleware::class => BundlesMiddlewareFactory::class,
                 DeploymentMiddleware::class => DeploymentMiddlewareFactory::class,
-                AssetsMiddleware::class => AssetsMiddlewareFactory::class,
                 ImageMiddleware::class => ImageMiddlewareFactory::class,
                 LocaleInterface::class => LocaleFactory::class,
                 ParsTranslator::class => ParsTranslatorFactory::class,
