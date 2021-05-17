@@ -10,6 +10,7 @@ use Laminas\ConfigAggregator\ConfigAggregator;
 use Pars\Bean\Finder\BeanFinderInterface;
 use Pars\Bean\Type\Base\BeanInterface;
 use Pars\Core\Config\ParsConfig;
+use Pars\Helper\Filesystem\FilesystemHelper;
 
 class ParsCache extends AbstractCachePool
 {
@@ -33,14 +34,8 @@ class ParsCache extends AbstractCachePool
     {
         $slug = new Slugify();
         $file = $slug->slugify($file);
-        if (!is_dir($basePath)) {
-            try {
-                mkdir($basePath);
-            } catch (\Throwable $exception) {
-
-            }
-        }
         $this->file = $basePath . $file . '.php';
+        FilesystemHelper::getDir($this->file);
         $this->savePath($basePath);
     }
 
@@ -206,15 +201,13 @@ class ParsCache extends AbstractCachePool
 
     private function saveToFile()
     {
-        if (function_exists('opcache_invalidate')) {
-            opcache_invalidate($this->file, true);
-        }
-        $dir = dirname($this->file);
-        if (!is_dir($dir)) {
-            mkdir($dir);
-        }
-        if (file_exists($this->file)) {
-            unlink($this->file);
+        $filename = FilesystemHelper::getPath($this->file);
+
+        if (file_exists($filename)) {
+            if (function_exists('opcache_invalidate')) {
+                opcache_invalidate($filename, true);
+            }
+            unlink($filename);
         }
 
         $agg = new ConfigAggregator(
@@ -222,10 +215,10 @@ class ParsCache extends AbstractCachePool
                 new ArrayProvider([ConfigAggregator::ENABLE_CACHE => true]),
                 new ArrayProvider($this->cache),
             ],
-            $this->file
+            $filename
         );
         if (function_exists('opcache_compile_file')) {
-            opcache_compile_file($this->file);
+            opcache_compile_file($filename);
         }
     }
 

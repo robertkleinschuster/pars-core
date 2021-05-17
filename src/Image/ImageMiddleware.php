@@ -10,6 +10,7 @@ use League\Glide\Signatures\SignatureException;
 use League\Glide\Signatures\SignatureFactory;
 use Pars\Core\Cache\ParsCache;
 use Pars\Core\Config\ParsConfig;
+use Pars\Helper\Filesystem\FilesystemHelper;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
@@ -33,12 +34,14 @@ class ImageMiddleware implements MiddlewareInterface
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
         $source = $this->config->get('image.source');
+        $source = FilesystemHelper::getPath("public/$source");
         $cacheDir = $this->config->get('image.cache');
+        $cacheDir = FilesystemHelper::getPath("public/$cacheDir");
         $basePath = $this->config->get('image.path');
         $server = ServerFactory::create([
             'cache_with_file_extensions' => true,
-            'source' => "public/$source",
-            'cache' =>  "public/$cacheDir",
+            'source' => $source,
+            'cache' =>  $cacheDir,
             'max_image_size' => 2000 * 2000,
             'response' => new PsrResponseFactory(new Response(), function ($stream) {
                 return new Stream($stream);

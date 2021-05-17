@@ -6,6 +6,7 @@ use Cache\Adapter\Common\AbstractCachePool;
 use Cache\Adapter\Common\PhpCacheItem;
 use Laminas\ConfigAggregator\ArrayProvider;
 use Laminas\ConfigAggregator\ConfigAggregator;
+use Pars\Helper\Filesystem\FilesystemHelper;
 
 class ParsMultiCache extends AbstractCachePool
 {
@@ -28,9 +29,6 @@ class ParsMultiCache extends AbstractCachePool
      */
     public function __construct(string $basePath = self::DEFAULT_BASE_PATH)
     {
-        if (!is_dir($basePath)) {
-            mkdir($basePath);
-        }
         $this->folder = $basePath;
         $this->cache = [];
         if ($basePath != self::SESSION_BASE_PATH) {
@@ -78,8 +76,9 @@ class ParsMultiCache extends AbstractCachePool
     protected function clearAllObjectsFromCache()
     {
         foreach ($this->cache as $key => $value) {
-            if (file_exists($this->folder . DIRECTORY_SEPARATOR . $key . '.php')) {
-                unlink($this->folder . DIRECTORY_SEPARATOR . $key . '.php');
+            $filename = FilesystemHelper::getPath($this->folder . DIRECTORY_SEPARATOR . $key . '.php');
+            if (file_exists($filename)) {
+                unlink($filename);
             }
         }
         $this->cache = [];
@@ -161,24 +160,22 @@ class ParsMultiCache extends AbstractCachePool
 
     private function saveToFile(string $key)
     {
-        if (function_exists('opcache_invalidate')) {
-            opcache_invalidate($this->folder . DIRECTORY_SEPARATOR . $key . '.php', true);
-        }
-        if (!is_dir($this->folder)) {
-            mkdir($this->folder);
-        }
-        if (file_exists($this->folder . DIRECTORY_SEPARATOR . $key . '.php')) {
-            unlink($this->folder . DIRECTORY_SEPARATOR . $key . '.php');
+        $filename = FilesystemHelper::getPath($this->folder . DIRECTORY_SEPARATOR . $key . '.php');
+        if (file_exists($filename)) {
+            if (function_exists('opcache_invalidate')) {
+                opcache_invalidate($filename, true);
+            }
+            unlink($filename);
         }
         $agg = new ConfigAggregator(
             [
                 new ArrayProvider([ConfigAggregator::ENABLE_CACHE => true]),
                 new ArrayProvider($this->cache[$key] ?? []),
             ],
-            $this->folder . DIRECTORY_SEPARATOR . $key . '.php'
+            $filename
         );
         if (function_exists('opcache_compile_file')) {
-            opcache_compile_file($this->folder . DIRECTORY_SEPARATOR . $key . '.php');
+            opcache_compile_file($filename);
         }
     }
 
