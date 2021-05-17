@@ -42,9 +42,9 @@ class UpdateMiddleware implements MiddlewareInterface
                 if ($nopropagate) {
                     $this->updater->update();
                 } else {
+                    $this->getParsContainer()->getConfig()->generateSecret();
                     $this->updater->updateRemote();
                     $this->updater->update();
-                    $this->getParsContainer()->getConfig()->generateSecret();
                 }
                 return new RedirectResponse($redirectUri);
             }

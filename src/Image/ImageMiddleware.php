@@ -18,8 +18,6 @@ use Psr\Http\Server\RequestHandlerInterface;
 
 class ImageMiddleware implements MiddlewareInterface
 {
-    public const SERVER_ATTRIBUTE = 'image_server';
-
     protected ParsConfig $config;
 
     /**
@@ -64,7 +62,7 @@ class ImageMiddleware implements MiddlewareInterface
         } catch (\Throwable $exception) {
             $this->placeholder($width, $height, 'aaaaaa', 'ffffff', $exception->getMessage());
         }
-        return $handler->handle($request->withAttribute(self::SERVER_ATTRIBUTE, $server));
+        return $handler->handle($request);
     }
 
     protected function placeholder($width, $height, $bg_color, $txt_color, $text = null)

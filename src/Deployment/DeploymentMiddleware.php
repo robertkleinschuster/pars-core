@@ -50,9 +50,9 @@ class DeploymentMiddleware implements MiddlewareInterface
                     if ($nopropagate) {
                         $this->cacheClearer->clear();
                     } else {
+                        $this->config->generateSecret();
                         $this->cacheClearer->clearRemote();
                         $this->cacheClearer->clear();
-                        $this->config->generateSecret();
                     }
                     return new RedirectResponse($redirectUri);
                 }
