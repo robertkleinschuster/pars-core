@@ -3,6 +3,7 @@
 namespace Pars\Core\Logging;
 
 use Pars\Core\Deployment\CacheClearer;
+use Pars\Core\Deployment\ParsUpdater;
 use Pars\Core\Deployment\UpdateHandler;
 use Psr\Container\ContainerInterface;
 use Psr\Http\Message\ResponseInterface;
