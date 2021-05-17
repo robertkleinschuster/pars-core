@@ -32,9 +32,9 @@ class ImageMiddleware implements MiddlewareInterface
 
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
-        $imageConfig = $this->config->getFromAppConfig('image');
-        $source = $imageConfig['source'] ?? '/i';
-        $cacheDir = $imageConfig['cache'] ?? '/c';
+        $source = $this->config->get('image.source');
+        $cacheDir = $this->config->get('image.cache');
+        $basePath = $this->config->get('image.path');
         $server = ServerFactory::create([
             'cache_with_file_extensions' => true,
             'source' => "public/$source",
@@ -50,7 +50,7 @@ class ImageMiddleware implements MiddlewareInterface
         $height = $params['h'] ?? 100;
         $key = $this->config->getSecret();
         try {
-            SignatureFactory::create($key)->validateRequest($source . $path, $params);
+            SignatureFactory::create($key)->validateRequest($basePath . $path, $params);
         } catch (SignatureException $e) {
             $this->placeholder($width, $height, 'aaaaaa', 'ffffff', $e->getMessage());
         }
