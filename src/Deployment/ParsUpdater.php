@@ -125,6 +125,7 @@ class ParsUpdater implements UpdaterInterface
             } else {
                 $this->getParsContainer()->getLogger()->info('UPDATE ERROR: ' . $domainUri);
             }
+            sleep(5);
         } catch (\Throwable $exception) {
             $this->getParsContainer()->getLogger()->info('UPDATE ERROR: ' . $domainUri, ['exception' => $exception]);
         }
