@@ -73,6 +73,7 @@ class ConfigProvider
             'image' => [
                 'source' => '/u',
                 'cache' => '/c',
+                'path' => '/i'
             ],
             'localization' => [
                 'redirect' => false,
