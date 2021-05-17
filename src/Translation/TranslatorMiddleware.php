@@ -4,6 +4,8 @@ namespace Pars\Core\Translation;
 
 use Laminas\I18n\Translator\Loader\RemoteLoaderInterface;
 use Pars\Core\Config\ParsConfig;
+use Pars\Core\Container\ParsContainer;
+use Pars\Core\Container\ParsContainerAwareTrait;
 use Pars\Core\Localization\LocaleInterface;
 use Pars\Core\Logging\LoggingMiddleware;
 use Psr\Http\Message\ResponseInterface;
@@ -18,8 +20,8 @@ use Psr\Log\LoggerInterface;
  */
 class TranslatorMiddleware implements MiddlewareInterface
 {
-    public const TRANSLATOR_ATTRIBUTE = 'translator';
 
+    use ParsContainerAwareTrait;
     /**
      * @var ParsTranslator
      */
@@ -28,13 +30,15 @@ class TranslatorMiddleware implements MiddlewareInterface
     private ParsConfig $config;
 
     /**
-     * TranslationMiddleware constructor.
-     * @param ParsTranslator $translator
+     * TranslatorMiddleware constructor.
+     * @param ParsContainer $parsContainer
+     * @throws \Pars\Pattern\Exception\CoreException
      */
-    public function __construct(ParsTranslator $translator, ParsConfig $config)
+    public function __construct(ParsContainer $parsContainer)
     {
-        $this->translator = $translator;
-        $this->config = $config;
+        $this->translator = $parsContainer->getTranslator();
+        $this->config = $parsContainer->getConfig();
+        $this->setParsContainer($parsContainer);
     }
 
     /**
@@ -46,7 +50,7 @@ class TranslatorMiddleware implements MiddlewareInterface
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
         $locale = $request->getAttribute(LocaleInterface::class);
-        $logger = $request->getAttribute(LoggingMiddleware::LOGGER_ATTRIBUTE);
+        $logger = $this->getParsContainer()->getLogger();
         if ($locale instanceof LocaleInterface) {
             $this->translator->setLocale($locale);
         }
@@ -77,9 +81,6 @@ class TranslatorMiddleware implements MiddlewareInterface
             ->setFactory(RemoteLoaderInterface::class, function ($container) {
                 return $container->get(RemoteLoaderInterface::class);
             });
-        return $handler->handle($request
-            ->withAttribute(self::TRANSLATOR_ATTRIBUTE, $this->translator->getTranslator())
-            ->withAttribute(ParsTranslator::class, $this->translator)
-        );
+        return $handler->handle($request);
     }
 }

@@ -15,6 +15,7 @@ use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
+use Psr\Log\LoggerInterface;
 
 /**
  * Class AuthenticationMiddleware
@@ -88,7 +89,7 @@ class AuthenticationMiddleware implements MiddlewareInterface
         }
         $current = $this->normalizePath($currentPath);
         $session = $request->getAttribute(SessionMiddleware::SESSION_ATTRIBUTE);
-        $log = $request->getAttribute(LoggingMiddleware::LOGGER_ATTRIBUTE);
+        $log = $this->container->get(LoggerInterface::class);
         try {
             $user = $this->auth->authenticate($request);
             // Validation CSRF Token
