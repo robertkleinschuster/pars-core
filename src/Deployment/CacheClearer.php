@@ -136,6 +136,11 @@ class CacheClearer implements AdapterAwareInterface, OptionAwareInterface
             if ($this->hasOption(self::OPTION_CLEAR_TRANSLATIONS)) {
                 $this->clearTranslations();
             }
+            try {
+                FilesystemHelper::deleteDirectory('data/cache/twig');
+            } catch (\Throwable $exception) {
+                $this->getParsContainer()->getLogger()->error('CLEAR ERROR', ['exception' => $exception]);
+            }
         } catch (\Throwable $exception) {
             $this->getParsContainer()->getLogger()->error('CLEAR ERROR', ['exception' => $exception]);
         }
