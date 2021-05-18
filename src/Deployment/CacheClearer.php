@@ -167,9 +167,9 @@ class CacheClearer implements AdapterAwareInterface, OptionAwareInterface
             $client = new Client();
             $this->getParsContainer()->getLogger()->info('CLEAR: ' . $domainUri);
             $response = $client->get($domainUri, [
-                RequestOptions::TIMEOUT => 2,
-                RequestOptions::CONNECT_TIMEOUT => 1,
-                RequestOptions::READ_TIMEOUT => 2,
+                RequestOptions::TIMEOUT => 5,
+                RequestOptions::CONNECT_TIMEOUT => 5,
+                RequestOptions::READ_TIMEOUT => 5,
             ]);
             if ($response->getStatusCode() == 200) {
                 $this->getParsContainer()->getLogger()->info('CLEAR SUCCESS: ' . $domainUri);
