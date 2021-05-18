@@ -160,27 +160,26 @@ class ParsMultiCache extends AbstractCachePool
 
     private function saveToFile(string $key)
     {
-        $filename = FilesystemHelper::getPath($this->folder . DIRECTORY_SEPARATOR . $key . '.php');
-        if (file_exists($filename)) {
-            if (function_exists('opcache_invalidate')) {
-                opcache_invalidate($filename, true);
-            }
-            unlink($filename);
-        }
-        $agg = new ConfigAggregator(
-            [
-                new ArrayProvider([ConfigAggregator::ENABLE_CACHE => true]),
-                new ArrayProvider($this->cache[$key] ?? []),
-            ],
-            $filename
-        );
         try {
+            $filename = FilesystemHelper::getPath($this->folder . DIRECTORY_SEPARATOR . $key . '.php');
+            if (file_exists($filename)) {
+                if (function_exists('opcache_invalidate')) {
+                    opcache_invalidate($filename, true);
+                }
+                unlink($filename);
+            }
+            $agg = new ConfigAggregator(
+                [
+                    new ArrayProvider([ConfigAggregator::ENABLE_CACHE => true]),
+                    new ArrayProvider($this->cache[$key] ?? []),
+                ],
+                $filename
+            );
             if (function_exists('opcache_compile_file')) {
                 opcache_compile_file($filename);
             }
         } catch (\Throwable $exception) {
         }
-
     }
 
     private function loadFromFile(string $key)
