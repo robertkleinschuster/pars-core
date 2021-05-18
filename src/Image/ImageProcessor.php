@@ -83,7 +83,7 @@ class ImageProcessor
             $client = new Client();
             try {
                 $client->get($calcUrlWithDomain, [
-                    RequestOptions::TIMEOUT => 1
+                    RequestOptions::TIMEOUT => 2
                 ]);
             } catch (\Throwable $exception) {
                 $this->getLogger()->error($exception->getMessage(), ['exception' => $exception]);

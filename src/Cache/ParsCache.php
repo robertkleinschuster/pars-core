@@ -36,9 +36,7 @@ class ParsCache extends AbstractCachePool
         $file = $slug->slugify($file);
         $this->file = $basePath . $file . '.php';
         FilesystemHelper::getDir($this->file);
-        if (!in_array($basePath, [self::IMAGE_BASE_PATH])) {
-            $this->savePath($basePath);
-        }
+        $this->savePath($basePath);
     }
 
     protected function loadFile()
