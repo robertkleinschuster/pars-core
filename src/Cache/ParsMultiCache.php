@@ -174,9 +174,13 @@ class ParsMultiCache extends AbstractCachePool
             ],
             $filename
         );
-        if (function_exists('opcache_compile_file')) {
-            opcache_compile_file($filename);
+        try {
+            if (function_exists('opcache_compile_file')) {
+                opcache_compile_file($filename);
+            }
+        } catch (\Throwable $exception) {
         }
+
     }
 
     private function loadFromFile(string $key)
