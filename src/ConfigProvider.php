@@ -2,7 +2,10 @@
 
 namespace Pars\Core;
 
+use Laminas\Diactoros\Response;
+use Laminas\Diactoros\Stream;
 use Laminas\Stratigility\Middleware\ErrorHandler;
+use League\Glide\Responses\PsrResponseFactory;
 use Mezzio\Authentication\AuthenticationInterface;
 use Mezzio\Session\SessionPersistenceInterface;
 use Pars\Core\Authentication\AuthenticationMiddleware;
@@ -31,6 +34,8 @@ use Pars\Core\Deployment\UpdateMiddlewareFactory;
 use Pars\Core\Deployment\UpdaterInterface;
 use Pars\Core\Image\ImageMiddleware;
 use Pars\Core\Image\ImageMiddlewareFactory;
+use Pars\Core\Image\ImageProcessor;
+use Pars\Core\Image\ImageProcessorFactory;
 use Pars\Core\Localization\LocaleFactory;
 use Pars\Core\Localization\LocaleInterface;
 use Pars\Core\Localization\LocalizationMiddleware;
@@ -48,6 +53,7 @@ use Pars\Core\Translation\ParsTranslator;
 use Pars\Core\Translation\ParsTranslatorFactory;
 use Pars\Core\Translation\TranslatorMiddleware;
 use Pars\Core\Translation\TranslatorMiddlewareFactory;
+use Pars\Helper\Filesystem\FilesystemHelper;
 
 class ConfigProvider
 {
@@ -71,9 +77,14 @@ class ConfigProvider
                 'entrypoints' => []
             ],
             'image' => [
-                'source' => '/u',
-                'cache' => '/c',
-                'path' => '/i'
+                'source' => FilesystemHelper::getPath('public/u'),
+                'cache' => FilesystemHelper::getPath('public/c'),
+                'path' => '/i',
+                'cache_with_file_extensions' => true,
+                'max_image_size' => 2000 * 2000,
+                'response' => new PsrResponseFactory(new Response(), function ($stream) {
+                    return new Stream($stream);
+                }),
             ],
             'localization' => [
                 'redirect' => false,
@@ -174,7 +185,8 @@ class ConfigProvider
                 ParsSessionPersistence::class => ParsSessionPersistenceFactory::class,
                 ParsSessionMiddleware::class => ParsSessionMiddlewareFactory::class,
                 ParsContainer::class => ParsContainerFactory::class,
-                UpdateMiddleware::class => UpdateMiddlewareFactory::class
+                UpdateMiddleware::class => UpdateMiddlewareFactory::class,
+                ImageProcessor::class => ImageProcessorFactory::class,
             ],
             'delegators' => [
                 ErrorHandler::class => [

@@ -102,6 +102,7 @@
       "yarn encore production"
     ],
     "yarn-watch": [
+      "Composer\\Config::disableProcessTimeout",
       "yarn encore dev --watch"
     ]
   }
