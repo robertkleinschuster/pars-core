@@ -10,6 +10,7 @@ use Laminas\ConfigAggregator\ConfigAggregator;
 use Pars\Bean\Finder\BeanFinderInterface;
 use Pars\Bean\Type\Base\BeanInterface;
 use Pars\Helper\Filesystem\FilesystemHelper;
+use Pars\Helper\String\StringHelper;
 
 class ParsCache extends AbstractCachePool
 {
@@ -32,8 +33,7 @@ class ParsCache extends AbstractCachePool
      */
     public function __construct(string $file, $basePath = self::DEFAULT_BASE_PATH)
     {
-        $slug = new Slugify();
-        $file = $slug->slugify($file);
+        $file = StringHelper::slugify($file);
         $this->file = $basePath . $file . '.php';
         FilesystemHelper::getDir($this->file);
         $this->savePath($basePath);
