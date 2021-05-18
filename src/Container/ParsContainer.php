@@ -6,6 +6,7 @@ namespace Pars\Core\Container;
 use Pars\Core\Config\ParsConfig;
 use Pars\Core\Database\ParsDatabaseAdapterAwareInterface;
 use Pars\Core\Database\ParsDatabaseAdapterAwareTrait;
+use Pars\Core\Image\ImageProcessor;
 use Pars\Core\Localization\LocaleInterface;
 use Pars\Core\Translation\ParsTranslatorAwareInterface;
 use Pars\Core\Translation\ParsTranslatorAwareTrait;
@@ -20,6 +21,9 @@ class ParsContainer implements ParsTranslatorAwareInterface, ParsDatabaseAdapter
     use LoggerAwareTrait;
     protected LocaleInterface $locale;
     protected ParsConfig $config;
+    protected ImageProcessor $imageProcessor;
+
+
     /**
      * @return LocaleInterface
      */
@@ -60,8 +64,20 @@ class ParsContainer implements ParsTranslatorAwareInterface, ParsDatabaseAdapter
         $this->config = $config;
     }
 
+    /**
+     * @return ImageProcessor
+     */
+    public function getImageProcessor(): ImageProcessor
+    {
+        return $this->imageProcessor;
+    }
 
-
-
+    /**
+     * @param ImageProcessor $imageProcessor
+     */
+    public function setImageProcessor(ImageProcessor $imageProcessor): void
+    {
+        $this->imageProcessor = $imageProcessor;
+    }
 
 }

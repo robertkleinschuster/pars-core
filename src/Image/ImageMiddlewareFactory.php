@@ -10,6 +10,6 @@ class ImageMiddlewareFactory
 {
     public function __invoke(ContainerInterface $container)
     {
-        return new ImageMiddleware($container->get(ParsConfig::class), $container->get(ImageProcessor::class));
+        return new ImageMiddleware($container->get(ImageProcessor::class));
     }
 }

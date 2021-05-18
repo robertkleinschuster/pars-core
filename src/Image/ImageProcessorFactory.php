@@ -4,12 +4,14 @@
 namespace Pars\Core\Image;
 
 
-use Pars\Core\Container\ParsContainer;
+use Pars\Core\Config\ParsConfig;
 use Psr\Container\ContainerInterface;
+use Psr\Log\LoggerInterface;
 
 class ImageProcessorFactory
 {
-    public function __invoke(ContainerInterface $container){
-        return new ImageProcessor($container->get(ParsContainer::class));
+    public function __invoke(ContainerInterface $container)
+    {
+        return new ImageProcessor($container->get(ParsConfig::class), $container->get(LoggerInterface::class));
     }
 }

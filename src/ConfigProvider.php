@@ -2,10 +2,7 @@
 
 namespace Pars\Core;
 
-use Laminas\Diactoros\Response;
-use Laminas\Diactoros\Stream;
 use Laminas\Stratigility\Middleware\ErrorHandler;
-use League\Glide\Responses\PsrResponseFactory;
 use Mezzio\Authentication\AuthenticationInterface;
 use Mezzio\Session\SessionPersistenceInterface;
 use Pars\Core\Authentication\AuthenticationMiddleware;
@@ -77,14 +74,11 @@ class ConfigProvider
                 'entrypoints' => []
             ],
             'image' => [
-                'source' => FilesystemHelper::getPath('public/u'),
-                'cache' => FilesystemHelper::getPath('public/c'),
+                'source' => '/u',
+                'cache' => '/c',
                 'path' => '/i',
                 'cache_with_file_extensions' => true,
                 'max_image_size' => 2000 * 2000,
-                'response' => new PsrResponseFactory(new Response(), function ($stream) {
-                    return new Stream($stream);
-                }),
             ],
             'localization' => [
                 'redirect' => false,

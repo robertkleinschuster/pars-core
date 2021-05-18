@@ -6,6 +6,7 @@ namespace Pars\Core\Container;
 
 use Pars\Core\Config\ParsConfig;
 use Pars\Core\Database\ParsDatabaseAdapter;
+use Pars\Core\Image\ImageProcessor;
 use Pars\Core\Localization\LocaleInterface;
 use Pars\Core\Translation\ParsTranslator;
 use Psr\Container\ContainerInterface;
@@ -25,6 +26,7 @@ class ParsContainerFactory
         $parsContainer->setDatabaseAdapter($container->get(ParsDatabaseAdapter::class));
         $parsContainer->setLogger($container->get(LoggerInterface::class));
         $parsContainer->setConfig($container->get(ParsConfig::class));
+        $parsContainer->setImageProcessor($container->get(ImageProcessor::class));
         return $parsContainer;
     }
 }

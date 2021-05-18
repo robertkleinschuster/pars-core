@@ -4,27 +4,98 @@
 namespace Pars\Core\Image;
 
 
+use GuzzleHttp\Client;
+use GuzzleHttp\RequestOptions;
+use Laminas\Diactoros\Response;
+use Laminas\Diactoros\Stream;
+use League\Glide\Responses\PsrResponseFactory;
 use League\Glide\Server;
 use League\Glide\ServerFactory;
 use League\Glide\Signatures\SignatureException;
 use League\Glide\Signatures\SignatureFactory;
-use Pars\Core\Container\ParsContainer;
-use Pars\Core\Container\ParsContainerAwareTrait;
+use League\Glide\Urls\UrlBuilderFactory;
+use Pars\Core\Cache\ParsCache;
+use Pars\Core\Config\ParsConfig;
+use Pars\Helper\Filesystem\FilesystemHelper;
 use Psr\Http\Message\ServerRequestInterface;
+use Psr\Log\LoggerAwareTrait;
+use Psr\Log\LoggerInterface;
 
 class ImageProcessor
 {
-    use ParsContainerAwareTrait;
+    use LoggerAwareTrait;
+
+    protected ParsConfig $config;
     protected Server $glide;
 
     /**
      * ImageProcessor constructor.
-     * @param Server $glide
+     * @param ParsConfig $parsConfig
+     * @param LoggerInterface $logger
      */
-    public function __construct(ParsContainer $parsContainer)
+    public function __construct(ParsConfig $parsConfig, LoggerInterface $logger)
     {
-        $this->setParsContainer($parsContainer);
-        $this->glide = ServerFactory::create($parsContainer->getConfig()->get('image'));
+        $this->setLogger($logger);
+        $this->config = $parsConfig;
+        $factory = new PsrResponseFactory(new Response(), function ($stream) {
+            return new Stream($stream);
+        });
+        $config = $this->getConfig()->get('image');
+        $config['response'] = $factory;
+        $config['cache'] = FilesystemHelper::getPath('public' . $config['cache']);
+        $config['source'] = FilesystemHelper::getPath('public' . $config['source']);
+        $this->glide = ServerFactory::create($config);
+    }
+
+    /**
+     * @return ParsConfig
+     */
+    public function getConfig(): ParsConfig
+    {
+        return $this->config;
+    }
+
+    /**
+     * @return LoggerInterface|null
+     */
+    public function getLogger(): ?LoggerInterface
+    {
+        return $this->logger;
+    }
+
+
+
+    /**
+     * @param string $path
+     * @param array $params
+     * @return string
+     */
+    public function buildUrl($path, $params = []): string
+    {
+        $cache = new ParsCache(__METHOD__);
+        $cacheId = md5($path . implode($params));
+        if (!$cache->has($cacheId)) {
+            $domain = $this->getConfig()->get('asset.domain');
+            $key = $this->getConfig()->getSecret();
+            $calcBasePath = $this->getConfig()->get('image.path');
+            $urlBuilder = UrlBuilderFactory::create($calcBasePath, $key);
+            $calcUrl = $urlBuilder->getUrl($path, $params);
+            $calcUrlWithDomain = "//" . $domain . $calcUrl;
+            $client = new Client();
+            try {
+                $client->get($calcUrlWithDomain, [
+                    RequestOptions::TIMEOUT => 1
+                ]);
+            } catch (\Throwable $exception) {
+                $this->getLogger()->error($exception->getMessage(), ['exception' => $exception]);
+                return $calcUrlWithDomain;
+            }
+            $cachePath = $this->glide->getCachePath($path, $params);
+            $cacheBasePath = $this->getConfig()->get('image.cache');
+            $cacheUrWithDomain = "//" . $domain . $cacheBasePath . '/'. $cachePath;
+            $cache->set($cacheId, $cacheUrWithDomain);
+        }
+        return $cache->get($cacheId);
     }
 
     /**
@@ -36,13 +107,13 @@ class ImageProcessor
         $result = false;
         $params = $request->getQueryParams();
         $path = $request->getUri()->getPath();
-        $basePath = $this->getParsContainer()->getConfig()->get('image.path');
-        $key = $this->getParsContainer()->getConfig()->getSecret();
+        $basePath = $this->getConfig()->get('image.path');
+        $key = $this->getConfig()->getSecret();
         try {
             SignatureFactory::create($key)->validateRequest($basePath . $path, $params);
             $result = true;
         } catch (SignatureException $exception) {
-            $this->getParsContainer()->getLogger()->error($exception->getMessage());
+            $this->getLogger()->error($exception->getMessage());
         }
         return $result;
     }
@@ -86,4 +157,5 @@ class ImageProcessor
         imagedestroy($image);
         exit;
     }
+
 }
