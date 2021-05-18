@@ -2,7 +2,6 @@
 
 namespace Pars\Core\Config;
 
-use Cache\Adapter\Common\Exception\CacheException;
 use Pars\Core\Cache\ParsCache;
 use Pars\Pattern\Exception\CoreException;
 use Psr\SimpleCache\InvalidArgumentException;

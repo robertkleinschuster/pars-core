@@ -17,6 +17,7 @@ use League\Glide\Urls\UrlBuilderFactory;
 use Pars\Core\Cache\ParsCache;
 use Pars\Core\Config\ParsConfig;
 use Pars\Helper\Filesystem\FilesystemHelper;
+use Pars\Helper\String\StringHelper;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Log\LoggerAwareTrait;
 use Psr\Log\LoggerInterface;
@@ -27,6 +28,7 @@ class ImageProcessor
 
     protected ParsConfig $config;
     protected Server $glide;
+    protected ParsCache $cache;
 
     /**
      * ImageProcessor constructor.
@@ -45,6 +47,8 @@ class ImageProcessor
         $config['cache'] = FilesystemHelper::getPath('public' . $config['cache']);
         $config['source'] = FilesystemHelper::getPath('public' . $config['source']);
         $this->glide = ServerFactory::create($config);
+        $this->cache = new ParsCache(__METHOD__, ParsCache::IMAGE_BASE_PATH);
+
     }
 
     /**
@@ -63,7 +67,6 @@ class ImageProcessor
         return $this->logger;
     }
 
-
     /**
      * @param string $path
      * @param array $params
@@ -71,15 +74,14 @@ class ImageProcessor
      */
     public function buildUrl($path, $params = []): string
     {
-        $cache = new ParsCache(__METHOD__, ParsCache::IMAGE_BASE_PATH);
-        $cacheId = md5($path . implode($params));
-        if (!$cache->has($cacheId)) {
-            $domain = $this->getConfig()->get('asset.domain');
-            $key = $this->getConfig()->getSecret();
-            $calcBasePath = $this->getConfig()->get('image.path');
-            $urlBuilder = UrlBuilderFactory::create($calcBasePath, $key);
-            $calcUrl = $urlBuilder->getUrl($path, $params);
-            $calcUrlWithDomain = "//" . $domain . $calcUrl;
+        $domain = $this->getConfig()->get('asset.domain');
+        $key = $this->getConfig()->getSecret();
+        $calcBasePath = $this->getConfig()->get('image.path');
+        $urlBuilder = UrlBuilderFactory::create($calcBasePath, $key);
+        $calcUrl = $urlBuilder->getUrl($path, $params);
+        $calcUrlWithDomain = "//" . $domain . $calcUrl;
+        $cacheId = md5($calcUrlWithDomain);
+        if (!$this->cache->has($cacheId)) {
             $client = new Client();
             try {
                 $client->get($calcUrlWithDomain, [
@@ -92,9 +94,9 @@ class ImageProcessor
             $cachePath = $this->glide->getCachePath($path, $params);
             $cacheBasePath = $this->getConfig()->get('image.cache');
             $cacheUrWithDomain = "//" . $domain . $cacheBasePath . '/' . $cachePath;
-            $cache->set($cacheId, $cacheUrWithDomain);
+            $this->cache->set($cacheId, $cacheUrWithDomain);
         }
-        return $cache->get($cacheId);
+        return $this->cache->get($cacheId);
     }
 
     /**

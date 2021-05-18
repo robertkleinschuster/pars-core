@@ -203,11 +203,11 @@ class ParsCache extends AbstractCachePool
         try {
             $filename = FilesystemHelper::getPath($this->file);
 
-            if (file_exists($filename)) {
+            if (@file_exists($filename)) {
                 if (function_exists('opcache_invalidate')) {
-                    opcache_invalidate($filename, true);
+                    @opcache_invalidate($filename, true);
                 }
-                unlink($filename);
+                @unlink($filename);
             }
 
             $agg = new ConfigAggregator(
@@ -219,7 +219,7 @@ class ParsCache extends AbstractCachePool
             );
 
             if (function_exists('opcache_compile_file')) {
-                opcache_compile_file($filename);
+                @opcache_compile_file($filename);
             }
         } catch (\Throwable $exception) {
         }
