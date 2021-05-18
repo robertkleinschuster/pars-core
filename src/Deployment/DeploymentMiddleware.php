@@ -47,6 +47,7 @@ class DeploymentMiddleware implements MiddlewareInterface
                 $keyNew = $this->config->getSecret(true);
                 $redirectUri = Uri::withoutQueryValue($request->getUri(), 'clearcache');
                 if ($clearcache == $key || $clearcache == $keyNew) {
+                    ignore_user_abort(true);
                     if ($nopropagate) {
                         $this->cacheClearer->clear();
                     } else {

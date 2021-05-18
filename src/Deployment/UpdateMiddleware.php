@@ -39,6 +39,7 @@ class UpdateMiddleware implements MiddlewareInterface
             $keyNew = $this->getParsContainer()->getConfig()->getSecret(true);
             $redirectUri = Uri::withoutQueryValue($request->getUri(), 'update');
             if ($update == $key || $update == $keyNew) {
+                ignore_user_abort(true);
                 if ($nopropagate) {
                     $this->updater->update();
                 } else {
