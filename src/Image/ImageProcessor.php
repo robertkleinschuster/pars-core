@@ -121,7 +121,14 @@ class ImageProcessor
     {
         $params = $request->getQueryParams();
         $path = $request->getUri()->getPath();
-        return $this->glide->getImageResponse(urldecode($path), $params)->withAddedHeader('pragma', 'public');
+        $path = urldecode($path);
+        $cacheFolder = $this->getConfig()->get('image.cache');
+        try {
+            FilesystemHelper::chmodRec("public$cacheFolder", 0755);
+        } catch (\Throwable $exception) {
+            $this->getLogger()->error($exception->getMessage(), ['exception' => $exception]);
+        }
+        return $this->glide->getImageResponse($path, $params)->withAddedHeader('pragma', 'public');
     }
 
 
