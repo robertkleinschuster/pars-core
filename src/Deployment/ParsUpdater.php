@@ -131,7 +131,7 @@ class ParsUpdater implements UpdaterInterface
         }
     }
 
-    protected function updateDB()
+    public function updateDB()
     {
         foreach ($this->getDbUpdaterList() as $dbUpdater) {
             try {

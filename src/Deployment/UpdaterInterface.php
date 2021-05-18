@@ -22,4 +22,6 @@ interface UpdaterInterface
      * @return mixed
      */
     public function update();
+
+    public function updateDB();
 }
