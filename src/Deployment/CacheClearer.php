@@ -31,6 +31,7 @@ class CacheClearer implements AdapterAwareInterface, OptionAwareInterface
     public const OPTION_CLEAR_CACHE_POOL = 'clear_cache_pool';
     public const OPTION_CLEAR_IMAGES = 'clear_images';
     public const OPTION_CLEAR_TRANSLATIONS = 'clear_translations';
+    public const OPTION_CLEAR_TEMPLATES= 'clear_templates';
 
     use OptionAwareTrait;
     use AdapterAwareTrait;
@@ -56,13 +57,10 @@ class CacheClearer implements AdapterAwareInterface, OptionAwareInterface
         $this->config = $parsContainer->getConfig();
         $this->translator = $parsContainer->getTranslator();
         $this->setDbAdapter($parsContainer->getDatabaseAdapter()->getDbAdapter());
-        $this->addOption(self::OPTION_CLEAR_ASSETS);
-        $this->addOption(self::OPTION_CLEAR_BUNDLES);
         $this->addOption(self::OPTION_CLEAR_CACHE_POOL);
         $this->addOption(self::OPTION_RESET_OPCACHE);
-        $this->addOption(self::OPTION_CLEAR_IMAGES);
-        $this->addOption(self::OPTION_CLEAR_TRANSLATIONS);
         $this->addOption(self::OPTION_CLEAR_CONFIG);
+        $this->addOption(self::OPTION_CLEAR_TEMPLATES);
     }
 
     /**
@@ -123,28 +121,22 @@ class CacheClearer implements AdapterAwareInterface, OptionAwareInterface
             if ($this->hasOption(self::OPTION_CLEAR_CACHE_POOL)) {
                 $this->clearPool();
             }
-            $this->clearSession();
-            if ($this->hasOption(self::OPTION_CLEAR_BUNDLES)) {
-                $this->clearBundles();
-            }
-            if ($this->hasOption(self::OPTION_CLEAR_ASSETS)) {
-                $this->clearAssets();
-            }
-            if ($this->hasOption(self::OPTION_CLEAR_IMAGES)) {
-                $this->clearImages();
-            }
-            if ($this->hasOption(self::OPTION_CLEAR_TRANSLATIONS)) {
-                $this->clearTranslations();
-            }
-            try {
-                FilesystemHelper::deleteDirectory('data/cache/twig');
-            } catch (\Throwable $exception) {
-                $this->getParsContainer()->getLogger()->error('CLEAR ERROR', ['exception' => $exception]);
+            if ($this->hasOption(self::OPTION_CLEAR_TEMPLATES)) {
+                $this->clearTemplates();
             }
         } catch (\Throwable $exception) {
             $this->getParsContainer()->getLogger()->error('CLEAR ERROR', ['exception' => $exception]);
         }
 
+    }
+
+    protected function clearTemplates()
+    {
+        try {
+            FilesystemHelper::deleteDirectory('data/cache/twig');
+        } catch (\Throwable $exception) {
+            $this->getParsContainer()->getLogger()->error('CLEAR ERROR', ['exception' => $exception]);
+        }
     }
 
     public function clearRemote()
@@ -209,26 +201,6 @@ class CacheClearer implements AdapterAwareInterface, OptionAwareInterface
     }
 
 
-    protected function clearSession()
-    {
-        $sessionConfig = $this->getAppConfig('mezzio-session-cache');
-        if (is_dir($sessionConfig['filesystem_folder'])) {
-            $dir = $sessionConfig['filesystem_folder'];
-            $files = array_diff(scandir($dir), ['.', '..']);
-            foreach ($files as $file) {
-                $path = $dir . DIRECTORY_SEPARATOR . $file;
-                if (is_file($path) && strpos($path, '.php') !== false) {
-                    $data = require $path;
-                    if (
-                        isset($data[3]) && $data[3] < time()
-                        || (time() - filemtime($path) > 3600)
-                    ) {
-                        unlink($path);
-                    }
-                }
-            }
-        }
-    }
 
     protected function clearBundles()
     {
