@@ -9,7 +9,6 @@ use Laminas\ConfigAggregator\ArrayProvider;
 use Laminas\ConfigAggregator\ConfigAggregator;
 use Pars\Bean\Finder\BeanFinderInterface;
 use Pars\Bean\Type\Base\BeanInterface;
-use Pars\Core\Config\ParsConfig;
 use Pars\Helper\Filesystem\FilesystemHelper;
 
 class ParsCache extends AbstractCachePool
@@ -18,6 +17,7 @@ class ParsCache extends AbstractCachePool
     use ParsCacheTrait;
 
     public const DEFAULT_BASE_PATH = 'data/cache/pool/';
+    public const IMAGE_BASE_PATH = 'data/cache/image/';
 
     /**
      * @type PhpCacheItem[]
@@ -36,7 +36,9 @@ class ParsCache extends AbstractCachePool
         $file = $slug->slugify($file);
         $this->file = $basePath . $file . '.php';
         FilesystemHelper::getDir($this->file);
-        $this->savePath($basePath);
+        if (!in_array($basePath, [self::IMAGE_BASE_PATH])) {
+            $this->savePath($basePath);
+        }
     }
 
     protected function loadFile()

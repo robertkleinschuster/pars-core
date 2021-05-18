@@ -64,7 +64,6 @@ class ImageProcessor
     }
 
 
-
     /**
      * @param string $path
      * @param array $params
@@ -72,7 +71,7 @@ class ImageProcessor
      */
     public function buildUrl($path, $params = []): string
     {
-        $cache = new ParsCache(__METHOD__);
+        $cache = new ParsCache(__METHOD__, ParsCache::IMAGE_BASE_PATH);
         $cacheId = md5($path . implode($params));
         if (!$cache->has($cacheId)) {
             $domain = $this->getConfig()->get('asset.domain');
@@ -92,7 +91,7 @@ class ImageProcessor
             }
             $cachePath = $this->glide->getCachePath($path, $params);
             $cacheBasePath = $this->getConfig()->get('image.cache');
-            $cacheUrWithDomain = "//" . $domain . $cacheBasePath . '/'. $cachePath;
+            $cacheUrWithDomain = "//" . $domain . $cacheBasePath . '/' . $cachePath;
             $cache->set($cacheId, $cacheUrWithDomain);
         }
         return $cache->get($cacheId);
