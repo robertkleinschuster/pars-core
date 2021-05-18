@@ -35,7 +35,6 @@ class ParsCache extends AbstractCachePool
     {
         $file = StringHelper::slugify($file);
         $this->file = $basePath . $file . '.php';
-        FilesystemHelper::getDir($this->file);
         $this->savePath($basePath);
     }
 
