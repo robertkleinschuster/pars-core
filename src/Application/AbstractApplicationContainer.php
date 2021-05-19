@@ -24,4 +24,6 @@ abstract class AbstractApplicationContainer extends ServiceManager
         }
     }
 
+    public abstract function getApplication();
+
 }

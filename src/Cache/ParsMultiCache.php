@@ -88,7 +88,7 @@ class ParsMultiCache extends AbstractCachePool
 
     protected function getFilename($key)
     {
-        return $this->folder . DIRECTORY_SEPARATOR . $key;
+        return PARS_DIR . '/' . $this->folder . DIRECTORY_SEPARATOR . $key;
     }
 
     /**
