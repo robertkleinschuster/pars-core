@@ -1,24 +1,13 @@
 <?php
-@define('PARS_DIR', getcwd());
-if (PHP_SAPI === 'cli-server' && $_SERVER['SCRIPT_FILENAME'] !== __FILE__) {
-    $decodedUri = urldecode($_SERVER['REQUEST_URI']);
-    $uri = $_SERVER['REQUEST_URI'];
-    if (count($_GET) == 0) {
-        $file = PARS_DIR . "/public$decodedUri";
-        if (file_exists($file) && is_file($file)) {
-            return false;
-        }
-        $file = PARS_DIR . "/public$uri";
-        if (file_exists($file) && is_file($file)) {
-            return false;
-        }
-    }
+require 'initialize.php';
+$run = require 'static.php';
+if ($run) {
+    @include 'setup.php';
+    (function () {
+        $container = require PARS_DIR . '/config/container.php';
+        $app = $container->getApplication();
+        $app->run();
+    })();
+} else {
+    return $run;
 }
-@include PARS_DIR . '/version.php';
-@define('PARS_VERSION', 'CORE');
-@include 'setup.php';
-(function () {
-    $container = require PARS_DIR . '/config/container.php';
-    $app = $container->getApplication();
-    $app->run();
-})();
