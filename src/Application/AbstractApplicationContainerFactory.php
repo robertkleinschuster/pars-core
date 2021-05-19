@@ -76,6 +76,7 @@ abstract class AbstractApplicationContainerFactory
     protected function initApplicationConfigProvider()
     {
         $this->addConfigProvider(\Pars\Core\ConfigProvider::class);
+        $this->addConfigProvider(\Pars\Helper\ConfigProvider::class);
         $this->addConfigProvider(\Pars\Model\ConfigProvider::class);
     }
 
