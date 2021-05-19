@@ -4,7 +4,6 @@ namespace Pars\Core\Cache;
 
 use Cache\Adapter\Common\AbstractCachePool;
 use Cache\Adapter\Common\PhpCacheItem;
-use Cocur\Slugify\Slugify;
 use Laminas\ConfigAggregator\ArrayProvider;
 use Laminas\ConfigAggregator\ConfigAggregator;
 use Pars\Bean\Finder\BeanFinderInterface;
