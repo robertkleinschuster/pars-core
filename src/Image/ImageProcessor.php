@@ -3,7 +3,6 @@
 
 namespace Pars\Core\Image;
 
-
 use GuzzleHttp\Client;
 use GuzzleHttp\RequestOptions;
 use Laminas\Diactoros\Response;
@@ -17,7 +16,6 @@ use League\Glide\Urls\UrlBuilderFactory;
 use Pars\Core\Cache\ParsCache;
 use Pars\Core\Config\ParsConfig;
 use Pars\Helper\Filesystem\FilesystemHelper;
-use Pars\Helper\String\StringHelper;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Log\LoggerAwareTrait;
 use Psr\Log\LoggerInterface;
@@ -80,8 +78,6 @@ class ImageProcessor
         $urlBuilder = UrlBuilderFactory::create($calcBasePath, $key);
         $calcUrl = $urlBuilder->getUrl($path, $params);
         $calcUrlWithDomain = $domain . $calcUrl;
-        return '//' . $calcUrlWithDomain;
-/*
         $cacheId = md5($calcUrlWithDomain);
         if (!$this->cache->has($cacheId)) {
             $client = new Client();
@@ -91,16 +87,17 @@ class ImageProcessor
                     RequestOptions::CONNECT_TIMEOUT => 0,
                     RequestOptions::READ_TIMEOUT => 0,
                 ]);
+                $cachePath = $this->glide->getCachePath($path, $params);
+                $cacheBasePath = $this->getConfig()->get('image.cache');
+                $cacheUrWithDomain = "//" . $domain . $cacheBasePath . '/' . $cachePath;
             } catch (\Throwable $exception) {
                 $this->getLogger()->error($exception->getMessage(), ['exception' => $exception]);
-                return '//' . $calcUrlWithDomain;
+                $cacheUrWithDomain = '//' . $calcUrlWithDomain;
             }
-            $cachePath = $this->glide->getCachePath($path, $params);
-            $cacheBasePath = $this->getConfig()->get('image.cache');
-            $cacheUrWithDomain = "//" . $domain . $cacheBasePath . '/' . $cachePath;
             $this->cache->set($cacheId, $cacheUrWithDomain);
+            $this->cache->commit();
         }
-        return $this->cache->get($cacheId);*/
+        return $this->cache->get($cacheId);
     }
 
     /**
