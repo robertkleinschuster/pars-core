@@ -6,7 +6,10 @@ use Cache\Adapter\Common\AbstractCachePool;
 use Cache\Adapter\Common\PhpCacheItem;
 use Cache\Cache;
 use Pars\Bean\Finder\BeanFinderInterface;
+use Pars\Bean\Type\Base\AbstractBaseBean;
+use Pars\Bean\Type\Base\AbstractBaseBeanList;
 use Pars\Bean\Type\Base\BeanInterface;
+use Pars\Bean\Type\Base\BeanListInterface;
 use Pars\Helper\String\StringHelper;
 
 /**
@@ -171,10 +174,30 @@ class ParsCache extends AbstractCachePool
      * @return $this
      * @throws \Psr\SimpleCache\InvalidArgumentException
      */
-    public function setBean($key, BeanInterface $bean)
+    public function setBean(string $key, BeanInterface $bean, int $ttl = null)
     {
-        $this->set($key, $bean->toArray(true));
+        $this->set($key, $bean->toArray(true), $ttl);
         return $this;
+    }
+
+    /**
+     * @param $key
+     * @param null $default
+     * @return mixed|AbstractBaseBean|BeanInterface|null
+     * @throws \Pars\Bean\Type\Base\BeanException
+     * @throws \Psr\SimpleCache\InvalidArgumentException
+     */
+    public function getBean(string $key, BeanInterface $default = null): ?BeanInterface
+    {
+        $result = $default;
+        $data = $this->get($key);
+        if ($data instanceof BeanInterface) {
+            return $data;
+        }
+        if (is_array($data)) {
+            $result = AbstractBaseBean::createFromArray($data);
+        }
+        return $result;
     }
 
     /**
@@ -183,10 +206,29 @@ class ParsCache extends AbstractCachePool
      * @return $this
      * @throws \Psr\SimpleCache\InvalidArgumentException
      */
-    public function setBeanList($key, BeanInterface $beanList)
+    public function setBeanList($key, BeanListInterface $beanList, int $ttl = null)
     {
-        $this->set($key, $beanList->toArray());
+        $this->set($key, $beanList->toArray(true), $ttl);
         return $this;
+    }
+
+    /**
+     * @param $key
+     * @param null $default
+     * @return mixed|AbstractBaseBeanList|BeanListInterface|null
+     * @throws \Psr\SimpleCache\InvalidArgumentException
+     */
+    public function getBeanList(string $key, BeanListInterface $default = null): ?BeanListInterface
+    {
+        $result = $default;
+        $data = $this->get($key);
+        if ($data instanceof BeanListInterface) {
+            return $data;
+        }
+        if (is_array($data)) {
+            $result = AbstractBaseBeanList::createFromArray($data);
+        }
+        return $result;
     }
 
     /**
@@ -195,9 +237,9 @@ class ParsCache extends AbstractCachePool
      * @return $this
      * @throws \Psr\SimpleCache\InvalidArgumentException
      */
-    public function setBeanFinderResult($key, BeanFinderInterface $finder)
+    public function setBeanFinderResult($key, BeanFinderInterface $finder, int $ttl = null)
     {
-        $this->set($key, $finder->getBeanList()->toArray());
+        $this->setBeanList($key, $finder->getBeanListDecorator(), $ttl);
         return $this;
     }
 
