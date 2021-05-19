@@ -173,7 +173,7 @@ class ParsCache extends AbstractCachePool
      */
     public function setBean($key, BeanInterface $bean)
     {
-        $this->set($key, $bean);
+        $this->set($key, $bean->toArray(true));
         return $this;
     }
 
