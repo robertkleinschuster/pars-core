@@ -30,7 +30,7 @@ abstract class AbstractApplicationContainerFactory
      */
     protected function getApplicationConfig()
     {
-        $cachePath = PARS_DIR . '/data/cache/config/config.php';
+        $cachePath = PARS_CONFIG_CACHE;
         $cacheDir = dirname($cachePath);
         if (!is_dir($cacheDir)) {
             mkdir($cacheDir);
@@ -57,8 +57,8 @@ abstract class AbstractApplicationContainerFactory
             \Mezzio\Twig\ConfigProvider::class,
         ];
         $this->initApplicationConfigProvider();
-        $this->addConfigProvider(new PhpFileProvider(PARS_DIR . '/config/autoload/{{,*.}global,{,*.}local}.php'));
-        $this->addConfigProvider(new PhpFileProvider(PARS_DIR . '/config/development.config.php'));
+        $this->addConfigProvider(new PhpFileProvider(PARS_CONFIG_PATTERN));
+        $this->addConfigProvider(new PhpFileProvider(PARS_DEV_CONFIG));
         $aggregator = new ConfigAggregator($this->configProvider, $cacheConfig['config_cache_path']);
         return $aggregator->getMergedConfig();
     }

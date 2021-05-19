@@ -5,6 +5,7 @@ namespace Pars\Core\Cache;
 use Cache\Adapter\Common\AbstractCachePool;
 use Cache\Adapter\Common\PhpCacheItem;
 use Cache\Cache;
+use Pars\Helper\String\StringHelper;
 
 /**
  * Class ParsMultiCache
@@ -21,8 +22,8 @@ class ParsMultiCache extends AbstractCachePool
 
     protected string $folder;
 
-    public const DEFAULT_BASE_PATH = 'data/cache/poolmulti/';
-    public const SESSION_BASE_PATH = 'data/session/';
+    public const DEFAULT_BASE_PATH = '/poolmulti';
+    public const SESSION_BASE_PATH = PARS_SESSION_DIR;
 
 
     /**
@@ -30,21 +31,15 @@ class ParsMultiCache extends AbstractCachePool
      */
     public function __construct(string $basePath = self::DEFAULT_BASE_PATH)
     {
-        $this->folder = PARS_DIR . '/' . $basePath;
         $this->cache = [];
-        if ($basePath != self::SESSION_BASE_PATH) {
+        if ($basePath == self::SESSION_BASE_PATH) {
+            $this->folder = self::SESSION_BASE_PATH;
+        } else {
+            $basePath = StringHelper::slugify($basePath);
+            $this->folder = PARS_CACHE_DIR . $basePath;
             $this->savePath($basePath);
         }
     }
-
-    public function set($key, $value, $ttl = null)
-    {
-        $item = $this->getItem($key);
-        $item->set($value);
-        $item->expiresAfter($ttl);
-        return $this->saveDeferred($item);
-    }
-
 
     /**
      * {@inheritdoc}
@@ -88,7 +83,7 @@ class ParsMultiCache extends AbstractCachePool
 
     protected function getFilename($key)
     {
-        return PARS_DIR . '/' . $this->folder . DIRECTORY_SEPARATOR . $key;
+        return $this->folder . DIRECTORY_SEPARATOR . $key;
     }
 
     /**
@@ -171,6 +166,12 @@ class ParsMultiCache extends AbstractCachePool
             $filename = $this->getFilename($key);
             $cache = new Cache($filename);
             $cache->set($key, $this->cache[$key]);
+            $glob = glob($filename . '/*');
+            foreach ($glob as $item) {
+                if (function_exists('opcache_invalidate')) {
+                    opcache_invalidate($item);
+                }
+            }
             $result = true;
         } catch (\Throwable $exception) {
             syslog(LOG_ERR, 'Could not save cache ' . $filename . ' ' . $exception->getMessage());

@@ -18,8 +18,8 @@ class ParsCache extends AbstractCachePool
 
     use ParsCacheTrait;
 
-    public const DEFAULT_BASE_PATH = 'data/cache/pool/';
-    public const IMAGE_BASE_PATH = 'data/cache/image/';
+    public const DEFAULT_BASE_PATH = '/pool';
+    public const IMAGE_BASE_PATH = '/image';
 
     /**
      * @type PhpCacheItem[]
@@ -35,8 +35,9 @@ class ParsCache extends AbstractCachePool
     public function __construct(string $file, string $basePath = self::DEFAULT_BASE_PATH)
     {
         $file = StringHelper::slugify($file);
-        $this->file = PARS_DIR . '/' . $basePath . $file;
+        $this->file = PARS_CACHE_DIR . $basePath . '/' . $file;
         $this->savePath($basePath);
+        register_shutdown_function([$this, 'commit']);
     }
 
     protected function loadFile()

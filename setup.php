@@ -1,6 +1,6 @@
 <?php
 
-if (!file_exists(PARS_DIR . '/config/autoload/database.local.php')) {
+if (!file_exists(PARS_DB_CONFIG)) {
     header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
     header("Cache-Control: post-check=0, pre-check=0", false);
     header("Pragma: no-cache");
@@ -11,7 +11,7 @@ if (!file_exists(PARS_DIR . '/config/autoload/database.local.php')) {
         if (isset($result->server_info)) {
             $tpl = file_get_contents(__DIR__ . '/database.local.php.dist');
             $config = str_replace(array_keys($data), array_values($data), $tpl);
-            file_put_contents('config/autoload/database.local.php', $config);
+            file_put_contents(PARS_DB_CONFIG, $config);
         }
         if ($result === false) {
             $error = 'Error connecting to DB: ' . mysqli_connect_error();

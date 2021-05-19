@@ -10,7 +10,7 @@ trait ParsCacheTrait
 {
     private static string $pathsKey = 'paths';
     private static string $pathsFileName = 'pars-path-cache';
-    private static string $pathsBasePath = 'data/cache/paths/';
+    private static string $pathsBasePath = '/paths';
 
     protected function savePath(string $basePath)
     {

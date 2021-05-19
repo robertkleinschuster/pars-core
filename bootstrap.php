@@ -4,7 +4,7 @@ $run = require 'static.php';
 if ($run) {
     @include 'setup.php';
     (function () {
-        $container = require PARS_DIR . '/container.php';
+        $container = require PARS_CONTAINER;
         $app = $container->getApplication();
         $app->run();
     })();
