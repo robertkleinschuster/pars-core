@@ -30,7 +30,7 @@ class ParsMultiCache extends AbstractCachePool
      */
     public function __construct(string $basePath = self::DEFAULT_BASE_PATH)
     {
-        $this->folder = $basePath;
+        $this->folder = PARS_DIR . '/' . $basePath;
         $this->cache = [];
         if ($basePath != self::SESSION_BASE_PATH) {
             $this->savePath($basePath);
