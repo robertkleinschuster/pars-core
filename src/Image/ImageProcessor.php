@@ -44,8 +44,8 @@ class ImageProcessor
         });
         $config = $this->getConfig()->get('image');
         $config['response'] = $factory;
-        $config['cache'] = FilesystemHelper::getPath('public' . $config['cache']);
-        $config['source'] = FilesystemHelper::getPath('public' . $config['source']);
+        $config['cache'] = FilesystemHelper::createPath('public' . $config['cache']);
+        $config['source'] = FilesystemHelper::createPath('public' . $config['source']);
         $this->glide = ServerFactory::create($config);
         $this->cache = new ParsCache(__METHOD__, ParsCache::IMAGE_BASE_PATH);
 
@@ -85,7 +85,9 @@ class ImageProcessor
             $client = new Client();
             try {
                 $client->get($calcUrlWithDomain, [
-                    RequestOptions::TIMEOUT => 2
+                    RequestOptions::TIMEOUT => 0,
+                    RequestOptions::CONNECT_TIMEOUT => 0,
+                    RequestOptions::READ_TIMEOUT => 0
                 ]);
             } catch (\Throwable $exception) {
                 $this->getLogger()->error($exception->getMessage(), ['exception' => $exception]);

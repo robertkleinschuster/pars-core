@@ -24,13 +24,13 @@ class ParsMultiCache extends AbstractCachePool
 
 
     /**
-     * @param string $file
      * @param string $basePath
      */
     public function __construct(string $basePath = self::DEFAULT_BASE_PATH)
     {
         $this->folder = $basePath;
         $this->cache = [];
+        FilesystemHelper::createDirectory($this->folder, true);
         if ($basePath != self::SESSION_BASE_PATH) {
             $this->savePath($basePath);
         }
@@ -76,13 +76,17 @@ class ParsMultiCache extends AbstractCachePool
     protected function clearAllObjectsFromCache()
     {
         foreach ($this->cache as $key => $value) {
-            $filename = FilesystemHelper::getPath($this->folder . DIRECTORY_SEPARATOR . $key . '.php');
+            $filename = $this->getFilename($key);
             if (file_exists($filename)) {
                 unlink($filename);
             }
         }
         $this->cache = [];
         return true;
+    }
+
+    protected function getFilename($key){
+        return $this->folder . DIRECTORY_SEPARATOR . $key . '.php';
     }
 
     /**
@@ -161,7 +165,7 @@ class ParsMultiCache extends AbstractCachePool
     private function saveToFile(string $key)
     {
         try {
-            $filename = FilesystemHelper::getPath($this->folder . DIRECTORY_SEPARATOR . $key . '.php');
+            $filename = $this->getFilename($key);
             if (file_exists($filename)) {
                 if (function_exists('opcache_invalidate')) {
                     opcache_invalidate($filename, true);
