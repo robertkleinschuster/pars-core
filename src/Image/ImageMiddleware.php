@@ -29,7 +29,6 @@ class ImageMiddleware implements MiddlewareInterface
     {
         try {
             if ($this->imageProcessor->validateRequest($request)) {
-                ignore_user_abort(true);
                 return $this->imageProcessor->getImageResponse($request);
             } else {
                 $this->imageProcessor->displayPlaceholder($request, 'invalid request');

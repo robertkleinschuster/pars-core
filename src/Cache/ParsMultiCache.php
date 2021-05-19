@@ -4,10 +4,12 @@ namespace Pars\Core\Cache;
 
 use Cache\Adapter\Common\AbstractCachePool;
 use Cache\Adapter\Common\PhpCacheItem;
-use Laminas\ConfigAggregator\ArrayProvider;
-use Laminas\ConfigAggregator\ConfigAggregator;
-use Pars\Helper\Filesystem\FilesystemHelper;
+use Cache\Cache;
 
+/**
+ * Class ParsMultiCache
+ * @package Pars\Core\Cache
+ */
 class ParsMultiCache extends AbstractCachePool
 {
     use ParsCacheTrait;
@@ -30,7 +32,6 @@ class ParsMultiCache extends AbstractCachePool
     {
         $this->folder = $basePath;
         $this->cache = [];
-        FilesystemHelper::createDirectory($this->folder, true);
         if ($basePath != self::SESSION_BASE_PATH) {
             $this->savePath($basePath);
         }
@@ -85,8 +86,9 @@ class ParsMultiCache extends AbstractCachePool
         return true;
     }
 
-    protected function getFilename($key){
-        return $this->folder . DIRECTORY_SEPARATOR . $key . '.php';
+    protected function getFilename($key)
+    {
+        return $this->folder . DIRECTORY_SEPARATOR . $key;
     }
 
     /**
@@ -94,10 +96,8 @@ class ParsMultiCache extends AbstractCachePool
      */
     protected function clearOneObjectFromCache($key)
     {
-        $this->commit();
         unset($this->cache[$key]);
-        $this->saveToFile($key);
-        return true;
+        return $this->commit();
     }
 
     /**
@@ -110,8 +110,7 @@ class ParsMultiCache extends AbstractCachePool
             $value = clone $value;
         }
         $this->cache[$item->getKey()] = [$value, $item->getTags(), $item->getExpirationTimestamp()];
-        $this->saveToFile($item->getKey());
-        return true;
+        return $this->saveToFile($item->getKey());
     }
 
 
@@ -133,8 +132,7 @@ class ParsMultiCache extends AbstractCachePool
     protected function removeList($name)
     {
         unset($this->cache[$name]);
-        $this->saveToFile($name);
-        return true;
+        return $this->saveToFile($name);
     }
 
     /**
@@ -143,7 +141,7 @@ class ParsMultiCache extends AbstractCachePool
     protected function appendListItem($name, $key)
     {
         $this->cache[$name][] = $key;
-        $this->saveToFile($name);
+        return $this->saveToFile($name);
     }
 
     /**
@@ -157,46 +155,41 @@ class ParsMultiCache extends AbstractCachePool
                     unset($this->cache[$name][$i]);
                 }
             }
-            $this->saveToFile($name);
+            return $this->saveToFile($name);
         }
+        return true;
     }
 
-
+    /**
+     * @param string $key
+     * @throws \Cache\Exception\CacheException
+     */
     private function saveToFile(string $key)
     {
+        $result = false;
         try {
             $filename = $this->getFilename($key);
-            if (file_exists($filename)) {
-                if (function_exists('opcache_invalidate')) {
-                    opcache_invalidate($filename, true);
-                }
-                unlink($filename);
-            }
-            $agg = new ConfigAggregator(
-                [
-                    new ArrayProvider([ConfigAggregator::ENABLE_CACHE => true]),
-                    new ArrayProvider($this->cache[$key] ?? []),
-                ],
-                $filename
-            );
-            if (function_exists('opcache_compile_file')) {
-                opcache_compile_file($filename);
-            }
+            $cache = new Cache($filename);
+            $cache->set($key, $this->cache[$key]);
+            $result = true;
         } catch (\Throwable $exception) {
+            syslog(LOG_ERR, $exception->getMessage());
         }
+        return $result;
     }
 
+    /**
+     * @param string $key
+     * @throws \Cache\Exception\CacheException
+     */
     private function loadFromFile(string $key)
     {
-        if ($this->cacheIsset($key)) {
-            return $this->cache[$key];
-        }
-        $agg = new ConfigAggregator(
-            [],
-            $this->folder . DIRECTORY_SEPARATOR . $key . '.php'
-        );
-        if (count($agg->getMergedConfig())) {
-            $this->cache[$key] = $agg->getMergedConfig();
+        if (!$this->cacheIsset($key)) {
+            $file = $this->getFilename($key);
+            $cache = new Cache($file);
+            if ($cache->has($key)) {
+                $this->cache[$key] = $cache->get($key);
+            }
         }
     }
 

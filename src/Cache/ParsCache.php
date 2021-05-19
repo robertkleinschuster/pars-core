@@ -4,13 +4,15 @@ namespace Pars\Core\Cache;
 
 use Cache\Adapter\Common\AbstractCachePool;
 use Cache\Adapter\Common\PhpCacheItem;
-use Laminas\ConfigAggregator\ArrayProvider;
-use Laminas\ConfigAggregator\ConfigAggregator;
+use Cache\Cache;
 use Pars\Bean\Finder\BeanFinderInterface;
 use Pars\Bean\Type\Base\BeanInterface;
-use Pars\Helper\Filesystem\FilesystemHelper;
 use Pars\Helper\String\StringHelper;
 
+/**
+ * Class ParsCache
+ * @package Pars\Core\Cache
+ */
 class ParsCache extends AbstractCachePool
 {
 
@@ -33,15 +35,15 @@ class ParsCache extends AbstractCachePool
     public function __construct(string $file, string $basePath = self::DEFAULT_BASE_PATH)
     {
         $file = StringHelper::slugify($file);
-        $this->file = FilesystemHelper::createPath($basePath . $file . '.php');
+        $this->file = $basePath . $file;
         $this->savePath($basePath);
     }
 
     protected function loadFile()
     {
         if ($this->cache == null) {
-            $agg = new ConfigAggregator([], $this->file);
-            $this->cache = $agg->getMergedConfig();
+            $cache = new Cache($this->file);
+            $this->cache = $cache->get('cache');
         }
     }
 
@@ -50,7 +52,9 @@ class ParsCache extends AbstractCachePool
      */
     protected function fetchObjectFromCache($key)
     {
+
         $this->loadFile();
+
         if (!$this->cacheIsset($key)) {
             return [false, null, [], null];
         }
@@ -80,9 +84,8 @@ class ParsCache extends AbstractCachePool
      */
     protected function clearOneObjectFromCache($key)
     {
-        $this->commit();
         unset($this->cache[$key]);
-        $this->saveToFile();
+        $this->commit();
         return true;
     }
 
@@ -199,29 +202,15 @@ class ParsCache extends AbstractCachePool
 
     private function saveToFile()
     {
+        $result = false;
         try {
-            $filename = $this->file;
-
-            if (file_exists($filename)) {
-                if (function_exists('opcache_invalidate')) {
-                    opcache_invalidate($filename, true);
-                }
-                unlink($filename);
-            }
-
-            $agg = new ConfigAggregator(
-                [
-                    new ArrayProvider([ConfigAggregator::ENABLE_CACHE => true]),
-                    new ArrayProvider($this->cache),
-                ],
-                $filename
-            );
-
-            if (function_exists('opcache_compile_file')) {
-                opcache_compile_file($filename);
-            }
+            $cache = new Cache($this->file);
+            $cache->set('cache', $this->cache);
+            $result = true;
         } catch (\Throwable $exception) {
+            syslog(LOG_ERR, $exception->getMessage());
         }
+        return $result;
     }
 
     /**
@@ -248,7 +237,6 @@ class ParsCache extends AbstractCachePool
         foreach ($this->cache as $key => $value) {
             $result[$key] = $this->get($key);
         }
-        unset($result[ConfigAggregator::ENABLE_CACHE]);
         return $result;
     }
 }

@@ -26,7 +26,7 @@ class ErrorResolverListener
     public function __invoke(Throwable $error, ServerRequestInterface $request, ResponseInterface $response)
     {
         if (function_exists('opcache_reset')) {
-            opcache_reset();
+        //    opcache_reset();
         }
     }
 }

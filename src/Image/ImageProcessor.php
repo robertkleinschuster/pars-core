@@ -80,6 +80,8 @@ class ImageProcessor
         $urlBuilder = UrlBuilderFactory::create($calcBasePath, $key);
         $calcUrl = $urlBuilder->getUrl($path, $params);
         $calcUrlWithDomain = $domain . $calcUrl;
+        return '//' . $calcUrlWithDomain;
+/*
         $cacheId = md5($calcUrlWithDomain);
         if (!$this->cache->has($cacheId)) {
             $client = new Client();
@@ -98,7 +100,7 @@ class ImageProcessor
             $cacheUrWithDomain = "//" . $domain . $cacheBasePath . '/' . $cachePath;
             $this->cache->set($cacheId, $cacheUrWithDomain);
         }
-        return $this->cache->get($cacheId);
+        return $this->cache->get($cacheId);*/
     }
 
     /**

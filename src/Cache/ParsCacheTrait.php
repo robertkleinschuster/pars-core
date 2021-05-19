@@ -9,7 +9,7 @@ use Pars\Helper\Filesystem\FilesystemHelper;
 trait ParsCacheTrait
 {
     private static string $pathsKey = 'paths';
-    private static string $pathsFileName = __CLASS__;
+    private static string $pathsFileName = 'pars-path-cache';
     private static string $pathsBasePath = 'data/cache/paths/';
 
     protected function savePath(string $basePath)
