@@ -47,7 +47,7 @@ class UpdateMiddleware implements MiddlewareInterface
                     $this->updater->updateRemote();
                     $this->updater->update();
                 }
-                return new RedirectResponse($redirectUri);
+                return (new RedirectResponse($redirectUri))->withAddedHeader('update-success', 'true');
             }
         }
         if ($version) {

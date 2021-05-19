@@ -16,7 +16,6 @@ use Pars\Core\Translation\ParsTranslator;
 use Pars\Helper\Filesystem\FilesystemHelper;
 use Pars\Pattern\Option\OptionAwareInterface;
 use Pars\Pattern\Option\OptionAwareTrait;
-use Psr\Http\Message\UriInterface;
 
 /**
  * Class Cache
@@ -31,7 +30,7 @@ class CacheClearer implements AdapterAwareInterface, OptionAwareInterface
     public const OPTION_CLEAR_CACHE_POOL = 'clear_cache_pool';
     public const OPTION_CLEAR_IMAGES = 'clear_images';
     public const OPTION_CLEAR_TRANSLATIONS = 'clear_translations';
-    public const OPTION_CLEAR_TEMPLATES= 'clear_templates';
+    public const OPTION_CLEAR_TEMPLATES = 'clear_templates';
 
     use OptionAwareTrait;
     use AdapterAwareTrait;
@@ -141,28 +140,34 @@ class CacheClearer implements AdapterAwareInterface, OptionAwareInterface
 
     public function clearRemote()
     {
-        $this->clearFrontend();
-        $this->clearAdmin();
+        $try = 0;
+        while ($try < 5 && $this->clearFrontend() === false) {
+            $try++;
+        }
+        $try = 0;
+        while ($try < 5 && $this->clearAdmin() === false) {
+            $try++;
+        }
     }
 
     protected function clearFrontend()
     {
         $domain = $this->config->getFrontendDomain();
-        $this->clearByDomain($domain);
+        return $this->clearByDomain($domain);
     }
 
     protected function clearAdmin()
     {
         $domain = $this->config->getAssetDomain();
-        $this->clearByDomain($domain);
+        return $this->clearByDomain($domain);
     }
 
 
     protected function clearByDomain(string $domain)
     {
         $domainUri = new Uri($domain);
-        $domainUri = Uri::withQueryValue($domainUri, 'clearcache', $this->getConfig()->getSecret(true));
         $domainUri = Uri::withQueryValue($domainUri, 'nopropagate', true);
+        $domainUri = Uri::withQueryValue($domainUri, 'clearcache', $this->getConfig()->getSecret(true));
         try {
             $client = new Client();
             $this->getParsContainer()->getLogger()->info('CLEAR: ' . $domainUri);
@@ -171,14 +176,16 @@ class CacheClearer implements AdapterAwareInterface, OptionAwareInterface
                 RequestOptions::CONNECT_TIMEOUT => 5,
                 RequestOptions::READ_TIMEOUT => 5,
             ]);
-            if ($response->getStatusCode() == 200) {
+            if ($response->getStatusCode() == 200 && $response->hasHeader('clear-success')) {
                 $this->getParsContainer()->getLogger()->info('CLEAR SUCCESS: ' . $domainUri);
+                return true;
             } else {
                 $this->getParsContainer()->getLogger()->info('CLEAR ERROR: ' . $domainUri);
             }
         } catch (\Throwable $exception) {
             $this->getParsContainer()->getLogger()->error('CLEAR ERROR', ['exception' => $exception]);
         }
+        return false;
     }
 
     protected function getAppConfig(string $key)
@@ -199,7 +206,6 @@ class CacheClearer implements AdapterAwareInterface, OptionAwareInterface
         ParsCache::clearAll();
         ParsMultiCache::clearAll();
     }
-
 
 
     protected function clearBundles()

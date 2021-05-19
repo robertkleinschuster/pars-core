@@ -91,20 +91,26 @@ class ParsUpdater implements UpdaterInterface
      */
     public function updateRemote()
     {
-        $this->updateFrontend();
-        $this->updateAdmin();
+        $try = 0;
+        while ($try < 5 && $this->updateFrontend() === false) {
+            $try++;
+        }
+        $try = 0;
+        while ($try < 5 && $this->updateAdmin() === false) {
+            $try++;
+        }
     }
 
     protected function updateAdmin()
     {
         $domain = $this->getParsContainer()->getConfig()->getAssetDomain();
-        $this->updateByDomain($domain);
+        return $this->updateByDomain($domain);
     }
 
     protected function updateFrontend()
     {
         $domain = $this->getParsContainer()->getConfig()->getFrontendDomain();
-        $this->updateByDomain($domain);
+        return $this->updateByDomain($domain);
     }
 
     protected function updateByDomain(string $domain)
@@ -120,8 +126,9 @@ class ParsUpdater implements UpdaterInterface
                 RequestOptions::CONNECT_TIMEOUT => 300,
                 RequestOptions::READ_TIMEOUT => 300,
             ]);
-            if ($response->getStatusCode() == 200) {
+            if ($response->getStatusCode() == 200 && $response->hasHeader('update-success')) {
                 $this->getParsContainer()->getLogger()->info('UPDATE SUCCESS: ' . $domainUri);
+                return true;
             } else {
                 $this->getParsContainer()->getLogger()->info('UPDATE ERROR: ' . $domainUri);
             }
@@ -129,6 +136,7 @@ class ParsUpdater implements UpdaterInterface
         } catch (\Throwable $exception) {
             $this->getParsContainer()->getLogger()->info('UPDATE ERROR: ' . $domainUri, ['exception' => $exception]);
         }
+        return false;
     }
 
     public function updateDB()

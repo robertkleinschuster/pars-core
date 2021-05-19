@@ -173,7 +173,7 @@ class ParsMultiCache extends AbstractCachePool
             $cache->set($key, $this->cache[$key]);
             $result = true;
         } catch (\Throwable $exception) {
-            syslog(LOG_ERR, $exception->getMessage());
+            syslog(LOG_ERR, 'Could not save cache ' . $filename . ' ' . $exception->getMessage());
         }
         return $result;
     }

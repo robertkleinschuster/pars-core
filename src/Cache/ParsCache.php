@@ -208,7 +208,7 @@ class ParsCache extends AbstractCachePool
             $cache->set('cache', $this->cache);
             $result = true;
         } catch (\Throwable $exception) {
-            syslog(LOG_ERR, $exception->getMessage());
+            syslog(LOG_ERR, 'Could not save cache ' . $this->file . ' ' . $exception->getMessage());
         }
         return $result;
     }
