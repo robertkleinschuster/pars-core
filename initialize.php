@@ -12,6 +12,7 @@ const PARS_DB_CONFIG = PARS_DIR . '/config/autoload/database.local.php';
 const PARS_CONFIG_PATTERN = PARS_DIR . '/config/autoload/{{,*.}global,{,*.}local}.php';
 const PARS_DEV_CONFIG = PARS_DIR . '/config/development.config.php';
 const PARS_PUBLIC = PARS_DIR . '/public';
+const PARS_TEMPLATE_DIR = PARS_DIR . '/templates';
 
 if (!@include PARS_CONTAINER) {
     trigger_error('Container file not found. CWD: ' . PARS_DIR);

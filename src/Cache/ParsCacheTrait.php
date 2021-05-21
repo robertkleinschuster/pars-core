@@ -30,7 +30,7 @@ trait ParsCacheTrait
         $cache = new ParsCache(self::$pathsFileName, self::$pathsBasePath);
         $paths = $cache->get(self::$pathsKey, []);
         foreach ($paths as $path) {
-            FilesystemHelper::deleteDirectory($path);
+            FilesystemHelper::deleteDirectory(PARS_CACHE_DIR . '/' . $path);
         }
         $cache->clear();
     }

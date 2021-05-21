@@ -23,7 +23,7 @@ class Profiler extends \Laminas\Db\Adapter\Profiler\Profiler
     public function profilerStart($target)
     {
         $result = parent::profilerStart($target);
-        $this->profiles[$this->currentIndex]['trace'] = DebugHelper::getBacktrace(5, ['profilerStart'], [Statement::class, DatabaseBeanLoader::class, AbstractBeanLoader::class, FinderBeanListDecorator::class, AbstractBeanFinder::class]);
+        $this->profiles[$this->currentIndex]['trace'] = DebugHelper::getBacktrace(5, ['profilerStart'], [Statement::class, DatabaseBeanLoader::class, AbstractBeanLoader::class, FinderBeanListDecorator::class, AbstractBeanFinder::class], false);
         return $result;
     }
 

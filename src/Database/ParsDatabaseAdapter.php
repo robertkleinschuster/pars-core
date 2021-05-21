@@ -7,6 +7,7 @@ namespace Pars\Core\Database;
 use Laminas\Db\Adapter\AdapterAwareInterface;
 use Laminas\Db\Adapter\AdapterAwareTrait;
 use Laminas\Db\Adapter\AdapterInterface;
+use Pars\Helper\Debug\DebugHelper;
 use Psr\Log\LoggerAwareTrait;
 use Psr\Log\LoggerInterface;
 
@@ -24,6 +25,15 @@ class ParsDatabaseAdapter implements AdapterAwareInterface
         if ($logger) {
             $this->setLogger($logger);
         }
+    }
+
+    public function getDebug()
+    {
+        $result = [];
+        if ($this->getDbAdapter()->getProfiler()) {
+            $result = $this->getDbAdapter()->getProfiler()->getProfiles();
+        }
+        return $result;
     }
 
     /**
