@@ -2,6 +2,8 @@
 
 namespace Pars\Core;
 
+use Laminas\Log\Writer\Factory\WriterFactory;
+use Laminas\ServiceManager\Factory\InvokableFactory;
 use Laminas\Stratigility\Middleware\ErrorHandler;
 use Mezzio\Authentication\AuthenticationInterface;
 use Mezzio\Session\SessionPersistenceInterface;
@@ -37,7 +39,9 @@ use Pars\Core\Localization\LocaleFactory;
 use Pars\Core\Localization\LocaleInterface;
 use Pars\Core\Localization\LocalizationMiddleware;
 use Pars\Core\Localization\LocalizationMiddlewareFactory;
+use Pars\Core\Logging\ErrorLogWriter;
 use Pars\Core\Logging\ErrorResolverListenerDelegatorFactory;
+use Pars\Core\Logging\LogFormatter;
 use Pars\Core\Logging\LoggingErrorListenerDelegatorFactory;
 use Pars\Core\Logging\LoggingMiddleware;
 use Pars\Core\Logging\LoggingMiddlewareFactory;
@@ -144,6 +148,9 @@ class ConfigProvider
                         ],
                         'backtrace' => [
                             'name' => \Laminas\Log\Processor\Backtrace::class,
+                            'options' => [
+                                'ignoredNamespaces' => ['Psr\\Log']
+                            ]
                         ],
                     ],
                 ],
@@ -181,6 +188,8 @@ class ConfigProvider
                 ParsContainer::class => ParsContainerFactory::class,
                 UpdateMiddleware::class => UpdateMiddlewareFactory::class,
                 ImageProcessor::class => ImageProcessorFactory::class,
+                ErrorLogWriter::class => WriterFactory::class,
+                LogFormatter::class => InvokableFactory::class
             ],
             'delegators' => [
                 ErrorHandler::class => [

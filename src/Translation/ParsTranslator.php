@@ -61,7 +61,7 @@ class ParsTranslator implements TranslatorAwareInterface, LocaleAwareInterface
             Translator::EVENT_MISSING_TRANSLATION,
             function (EventInterface $event) {
                 $data = $event->getParams();
-                $this->getLogger()->warning('Missing translation', $data);
+                $this->getLogger()->warning('Missing translation:  ' . $data['message'], $data);
                 $this->saveMissingTranslation($data['locale'], $data['message'], $data['text_domain']);
             }
         );
