@@ -108,6 +108,16 @@ class DatabaseColumnDefinition implements \ArrayAccess
     }
 
     /**
+     * @param string $table
+     * @return $this
+     */
+    public function addTable(string $table): self
+    {
+        $this->additionalTable_List[] = $table;
+        return $this;
+    }
+
+    /**
      * @return string
      */
     public function getJoinField(): string
