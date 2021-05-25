@@ -15,6 +15,8 @@ use Laminas\Db\Sql\Ddl\Constraint\ForeignKey;
 use Laminas\Db\Sql\Ddl\Constraint\PrimaryKey;
 use Laminas\Db\Sql\Ddl\CreateTable;
 use Laminas\Db\Sql\Sql;
+use Pars\Core\Container\ParsContainer;
+use Pars\Core\Container\ParsContainerAwareTrait;
 use Pars\Helper\Validation\ValidationHelperAwareInterface;
 use Pars\Helper\Validation\ValidationHelperAwareTrait;
 
@@ -22,6 +24,7 @@ abstract class AbstractDatabaseUpdater implements ValidationHelperAwareInterface
 {
     use ValidationHelperAwareTrait;
     use AdapterAwareTrait;
+    use ParsContainerAwareTrait;
 
     public const MODE_PREVIEW = 'preview';
     public const MODE_EXECUTE = 'execute';
@@ -43,14 +46,17 @@ abstract class AbstractDatabaseUpdater implements ValidationHelperAwareInterface
     abstract public function getCode(): string;
 
     /**
-     * SchemaUpdater constructor.
-     * @param $adapter
+     * /**
+     * AbstractDatabaseUpdater constructor.
+     * @param ParsContainer $parsContainer
+     * @throws \Pars\Pattern\Exception\CoreException
      */
-    public function __construct(Adapter $adapter)
+    public function __construct(ParsContainer $parsContainer)
     {
-        $this->adapter = $adapter;
+        $this->setParsContainer($parsContainer);
+        $this->adapter = $parsContainer->getDatabaseAdapter()->getDbAdapter();
         $this->metadata = \Laminas\Db\Metadata\Source\Factory::createSourceFromAdapter($this->adapter);
-        $this->existingTableList = $this->metadata->getTableNames($adapter->getCurrentSchema());
+        $this->existingTableList = $this->metadata->getTableNames($this->adapter->getCurrentSchema());
     }
 
     /**
