@@ -78,6 +78,7 @@ class ImageProcessor
         $urlBuilder = UrlBuilderFactory::create($calcBasePath, $key);
         $calcUrl = $urlBuilder->getUrl($path, $params);
         $calcUrlWithDomain = $domain . $calcUrl;
+        return '//' . $calcUrlWithDomain;
         $cacheId = md5($calcUrlWithDomain);
         if (!$this->cache->has($cacheId)) {
             $client = new Client();
