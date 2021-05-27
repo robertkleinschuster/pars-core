@@ -3,6 +3,7 @@
 namespace Pars\Core\Container;
 
 
+use Mezzio\Helper\UrlHelper;
 use Pars\Core\Config\ParsConfig;
 use Pars\Core\Database\ParsDatabaseAdapterAwareInterface;
 use Pars\Core\Database\ParsDatabaseAdapterAwareTrait;
@@ -22,7 +23,7 @@ class ParsContainer implements ParsTranslatorAwareInterface, ParsDatabaseAdapter
     protected LocaleInterface $locale;
     protected ParsConfig $config;
     protected ImageProcessor $imageProcessor;
-
+    protected UrlHelper $urlHelper;
 
     /**
      * @return LocaleInterface
@@ -79,5 +80,23 @@ class ParsContainer implements ParsTranslatorAwareInterface, ParsDatabaseAdapter
     {
         $this->imageProcessor = $imageProcessor;
     }
+
+    /**
+     * @return UrlHelper
+     */
+    public function getUrlHelper(): UrlHelper
+    {
+        return $this->urlHelper;
+    }
+
+    /**
+     * @param UrlHelper $urlHelper
+     */
+    public function setUrlHelper(UrlHelper $urlHelper): void
+    {
+        $this->urlHelper = $urlHelper;
+    }
+
+
 
 }

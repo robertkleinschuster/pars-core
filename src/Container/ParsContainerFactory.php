@@ -4,6 +4,7 @@
 namespace Pars\Core\Container;
 
 
+use Mezzio\Helper\UrlHelper;
 use Pars\Core\Config\ParsConfig;
 use Pars\Core\Database\ParsDatabaseAdapter;
 use Pars\Core\Image\ImageProcessor;
@@ -27,6 +28,7 @@ class ParsContainerFactory
         $parsContainer->setLogger($container->get(LoggerInterface::class));
         $parsContainer->setConfig($container->get(ParsConfig::class));
         $parsContainer->setImageProcessor($container->get(ImageProcessor::class));
+        $parsContainer->setUrlHelper($container->get(UrlHelper::class));
         return $parsContainer;
     }
 }
