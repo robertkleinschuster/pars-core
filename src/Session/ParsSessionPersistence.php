@@ -130,9 +130,9 @@ class ParsSessionPersistence implements SessionPersistenceInterface
         if ('' === $id || $session->isRegenerated()) {
             $id = $this->regenerateSession($id);
         }
-
-        $this->persistSessionDataToCache($id, $session->toArray());
-
+        register_shutdown_function(function() use ($id, $session){
+            $this->persistSessionDataToCache($id, $session->toArray());
+        });
         $response = $this->addSessionCookieHeaderToResponse($response, $id, $session);
         $response = $this->addCacheHeadersToResponse($response);
 
