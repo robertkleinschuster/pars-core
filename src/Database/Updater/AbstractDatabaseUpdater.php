@@ -15,10 +15,13 @@ use Laminas\Db\Sql\Ddl\Constraint\ForeignKey;
 use Laminas\Db\Sql\Ddl\Constraint\PrimaryKey;
 use Laminas\Db\Sql\Ddl\CreateTable;
 use Laminas\Db\Sql\Sql;
+use Pars\Bean\Finder\BeanFinderInterface;
+use Pars\Bean\Processor\BeanProcessorInterface;
 use Pars\Core\Container\ParsContainer;
 use Pars\Core\Container\ParsContainerAwareTrait;
 use Pars\Helper\Validation\ValidationHelperAwareInterface;
 use Pars\Helper\Validation\ValidationHelperAwareTrait;
+use Pars\Pattern\Exception\CoreException;
 
 abstract class AbstractDatabaseUpdater implements ValidationHelperAwareInterface, AdapterAwareInterface
 {
@@ -509,4 +512,34 @@ abstract class AbstractDatabaseUpdater implements ValidationHelperAwareInterface
         }
         return $results;
     }
+
+    protected function saveBeanData(
+        BeanFinderInterface $finder,
+        BeanProcessorInterface $processor,
+        string $key,
+        array $data
+    )
+    {
+        $finder->filterValue($key, $data[$key]);
+        if ($finder->count() == 0 && $this->isExecute()) {
+            $factory = $finder->getBeanFactory();
+            $beanList = $factory->getEmptyBeanList();
+            $bean = $factory->getEmptyBean($data);
+            $bean->fromArray($data);
+            $beanList->push($bean);
+            $processor->setBeanList($beanList);
+            $processor->save();
+            if ($processor instanceof ValidationHelperAwareInterface) {
+                if ($processor->getValidationHelper()->hasError()) {
+                    throw new CoreException($processor->getValidationHelper()->getSummary());
+                }
+            }
+        }
+        return !$finder->count();
+    }
+    protected function getLocaleDefault()
+    {
+        return $this->getParsContainer()->getConfig()->get('locale.default');
+    }
+
 }
