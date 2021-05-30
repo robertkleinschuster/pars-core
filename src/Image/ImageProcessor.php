@@ -72,6 +72,9 @@ class ImageProcessor
      */
     public function buildUrl($path, $params = []): string
     {
+        if (!isset($params['fit'])) {
+            $params['fit'] = 'crop';
+        }
         $domain = $this->getConfig()->get('asset.domain');
         $key = $this->getConfig()->getSecret();
         $calcBasePath = $this->getConfig()->get('image.path');
@@ -99,6 +102,139 @@ class ImageProcessor
             $this->cache->commit();
         }
         return $this->cache->get($cacheId);
+    }
+
+    /**
+     * @param $path
+     * @param $params
+     * @param ...$p
+     */
+    public function buildHtml($path, $params, ...$p)
+    {
+        static $count = 0;
+        $count++;
+        $param = $params;
+        $attributes = [];
+        if (!is_array($params)) {
+            $params = [];
+        }
+        if (is_integer($param)) {
+            $params['w'] = $param;
+        } else if (is_string($param)) {
+            $params['alt'] = $param;
+        }
+        if (count($p) > 0) {
+            if (is_string($p[0]) && !isset($params['alt'])) {
+                $params['alt'] = $p[0];
+                unset($p[0]);
+            } elseif (is_integer($p[0]) && is_integer($param)) {
+                $params['h'] = $p[0];
+                unset($p[0]);
+                if (isset($p[1]) && is_string($p[1])) {
+                    $params['alt'] = $p[1];
+                    unset($p[1]);
+                }
+            } elseif (is_integer($p[0]) && is_string($param)) {
+                $params['w'] = $p[0];
+                unset($p[0]);
+                if (isset($p[1]) && is_integer($p[1])) {
+                    $params['h'] = $p[1];
+                    unset($p[1]);
+                }
+            }
+            $params['class'] = '';
+            while (count($p)) {
+                $pop = array_pop($p);
+                if (is_string($pop)) {
+                    $params['class'] .= ' ' . $pop;
+                } elseif (is_array($pop)) {
+                    $attributes += $pop;
+                }
+            }
+        }
+        $attr = '';
+        foreach ($attributes as $key => $val) {
+            $attr .= " $key='$val'";
+        }
+
+        if (!isset($params['w'])) {
+            $params['w'] = 351;
+        }
+        $loading = $params['loading'] ?? $count > 1 ? 'lazy' : 'eager';
+        $widthSmall = $params['w'];
+        $heightSmall = $params['h'] ?? null;
+        $widthMedium = $widthSmall * 2;
+        $heightMedium = $heightSmall * 1.7;
+        $widthLarge = $widthSmall * 3;
+        $heightLarge = $heightSmall * 2;
+        if (!isset($params['fit'])) {
+            $params['fit'] = 'crop';
+        }
+        $alt = $params['alt'] ?? '';
+        $class = $params['class'] ?? '';
+        // Small
+        // Jpeg
+        $params['fm'] = 'jpg';
+        $params['dpr'] = 1;
+        $small = $this->buildUrl($path, $params);
+        $params['dpr'] = 2;
+        $smallX2 = $this->buildUrl($path, $params);
+        // Webp
+        $params['fm'] = 'webp';
+        $params['dpr'] = 1;
+        $smallWebP = $this->buildUrl($path, $params);
+        $params['dpr'] = 2;
+        $smallX2WebP = $this->buildUrl($path, $params);
+        // Medium
+        // Jpeg
+        $params['fm'] = 'jpg';
+        $params['w'] = $widthMedium;
+        $params['h'] = $heightMedium;
+        $params['dpr'] = 1;
+        $medium = $this->buildUrl($path, $params);
+        $params['dpr'] = 2;
+        $mediumX2 = $this->buildUrl($path, $params);
+        // Webp
+        $params['fm'] = 'webp';
+        $params['dpr'] = 1;
+        $mediumWebP = $this->buildUrl($path, $params);
+        $params['dpr'] = 2;
+        $mediumX2WebP = $this->buildUrl($path, $params);
+        // Large
+        // Jpeg
+        $params['fm'] = 'jpg';
+        $params['w'] = $widthLarge;
+        $params['h'] = $heightLarge;
+        $params['dpr'] = 1;
+        $large = $this->buildUrl($path, $params);
+        $params['dpr'] = 2;
+        $largeX2 = $this->buildUrl($path, $params);
+        // Webp
+        $params['fm'] = 'webp';
+        $params['dpr'] = 1;
+        $largeWebP = $this->buildUrl($path, $params);
+        $params['dpr'] = 2;
+        $largeX2WebP = $this->buildUrl($path, $params);
+        $result = '';
+        if ($loading == 'lazy') {
+            $result .= "<noscript class='loading-lazy'>";
+        }
+        $result .= "<picture class='$class'>";
+        $result .= "<source media='(min-width: {$widthLarge}px)' srcset='$largeWebP 1x, $largeX2WebP 2x' type='image/webp'>";
+        $result .= "<source media='(min-width: {$widthLarge}px)' srcset='$large 1x, $largeX2 2x'>";
+
+        $result .= "<source media='(min-width: {$widthMedium}px)' srcset='$mediumWebP 1x, $mediumX2WebP 2x' type='image/webp'>";
+        $result .= "<source media='(min-width: {$widthMedium}px)' srcset='$medium 1x, $mediumX2 2x'>";
+
+        $result .= "<source srcset='$smallWebP 1x, $smallX2WebP 2x' type='image/webp'>";
+        $result .= "<source srcset='$small 1x, $smallX2 2x'>";
+
+        $result .= "<img $attr loading='lazy' width='$widthSmall' height='$heightSmall' class='img' src='$small' alt='$alt'>";
+        $result .= "</picture>";
+        if ($loading == 'lazy') {
+            $result .= "</noscript>";
+        }
+        return $result;
     }
 
     /**
