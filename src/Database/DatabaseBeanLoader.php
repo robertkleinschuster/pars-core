@@ -349,7 +349,7 @@ class DatabaseBeanLoader extends AbstractBeanLoader implements AdapterAwareInter
      * @param int $offset
      * @return $this
      */
-    public function limit(int $limit, int $offset)
+    public function limit(int $limit, int $offset = 0)
     {
         $this->setLimit($limit);
         $this->setOffset($offset);
