@@ -184,11 +184,16 @@ abstract class AbstractDatabaseUpdater implements ValidationHelperAwareInterface
         }
     }
 
-    protected function query(AbstractSql $statement)
+    protected function query($statement)
     {
-        $sql = new Sql($this->adapter);
         $result = '';
-        $query = $sql->buildSqlString($statement, $this->adapter);
+
+        if ($statement instanceof AbstractSql) {
+            $sql = new Sql($this->adapter);
+            $query = $sql->buildSqlString($statement, $this->adapter);
+        } else {
+            $query = $statement;
+        }
         if ($this->isExecute()) {
             $result = $this->adapter->query($query, Adapter::QUERY_MODE_EXECUTE);
         }
