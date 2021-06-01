@@ -60,6 +60,10 @@ class DatabaseBeanLoader extends AbstractBeanLoader implements AdapterAwareInter
      */
     private $offset;
 
+    /**
+     * @var
+     */
+    private $customColumn_Map;
 
     /**
      * UserBeanLoader constructor.
@@ -79,6 +83,7 @@ class DatabaseBeanLoader extends AbstractBeanLoader implements AdapterAwareInter
         $this->exclude_Map = [];
         $this->like_Map = [];
         $this->order_Map = [];
+        $this->customColumn_Map = [];
     }
 
     /**
@@ -101,6 +106,7 @@ class DatabaseBeanLoader extends AbstractBeanLoader implements AdapterAwareInter
         $this->exclude_Map = [];
         $this->like_Map = [];
         $this->order_Map = [];
+        $this->customColumn_Map = [];
         $this->limit = null;
         $this->offset = null;
         $this->result = null;
@@ -411,7 +417,10 @@ class DatabaseBeanLoader extends AbstractBeanLoader implements AdapterAwareInter
         $beanData = [];
         foreach ($this->getField_List() as $field) {
             $beanData[$field] = $data["{$this->getTable($field)}.{$this->getColumn($field)}"];
-        };
+        }
+        foreach ($this->customColumn_Map as $alias => $column) {
+            $beanData[$alias] = $data[$alias];
+        }
         return $converter->convert($bean, $beanData)->toBean();
     }
 
@@ -447,7 +456,18 @@ class DatabaseBeanLoader extends AbstractBeanLoader implements AdapterAwareInter
     protected function handleOrder(Select $select)
     {
         foreach ($this->order_Map as $field => $order) {
-            $select->order("{$this->getTable($field)}.{$this->getColumn($field)} $order");
+            if (isset($this->customColumn_Map[$field])) {
+                $column = $this->customColumn_Map[$field];
+                if ($column instanceof Select) {
+                    $sql = new Sql($this->adapter);
+                    $subQuery = $sql->buildSqlString($column);
+                    $select->order(new Expression("($subQuery) $order"));
+                } else {
+                    $select->order("$field $order");
+                }
+            } else {
+                $select->order("{$this->getTable($field)}.{$this->getColumn($field)} $order");
+            }
         }
     }
 
@@ -461,7 +481,19 @@ class DatabaseBeanLoader extends AbstractBeanLoader implements AdapterAwareInter
         foreach ($this->getField_List() as $field) {
             $columns[] = "{$this->getTable($field)}.{$this->getColumn($field)}";
         }
+        foreach ($this->customColumn_Map as $alias => $item) {
+            $columns[$alias] = $item;
+        }
         $select->columns($columns, false);
+    }
+
+    /**
+     * @param $column
+     * @return $this
+     */
+    public function addCustomColumn($column, $alias) {
+        $this->customColumn_Map[$alias] = $column;
+        return $this;
     }
 
     /**
