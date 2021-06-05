@@ -5,8 +5,6 @@ namespace Pars\Core\Deployment;
 use GuzzleHttp\Client;
 use GuzzleHttp\Psr7\Uri;
 use GuzzleHttp\RequestOptions;
-use Laminas\Db\Adapter\AdapterAwareInterface;
-use Laminas\Db\Adapter\AdapterAwareTrait;
 use Pars\Core\Cache\ParsCache;
 use Pars\Core\Cache\ParsMultiCache;
 use Pars\Core\Config\ParsConfig;
@@ -21,7 +19,7 @@ use Pars\Pattern\Option\OptionAwareTrait;
  * Class Cache
  * @package Pars\Core\Deployment
  */
-class CacheClearer implements AdapterAwareInterface, OptionAwareInterface
+class CacheClearer implements OptionAwareInterface
 {
     public const OPTION_RESET_OPCACHE = 'reset_opcache';
     public const OPTION_CLEAR_CONFIG = 'clear_config';
@@ -33,7 +31,6 @@ class CacheClearer implements AdapterAwareInterface, OptionAwareInterface
     public const OPTION_CLEAR_TEMPLATES = 'clear_templates';
 
     use OptionAwareTrait;
-    use AdapterAwareTrait;
     use ParsContainerAwareTrait;
 
     /**
@@ -55,7 +52,6 @@ class CacheClearer implements AdapterAwareInterface, OptionAwareInterface
         $this->setParsContainer($parsContainer);
         $this->config = $parsContainer->getConfig();
         $this->translator = $parsContainer->getTranslator();
-        $this->setDbAdapter($parsContainer->getDatabaseAdapter()->getDbAdapter());
         $this->addOption(self::OPTION_CLEAR_CACHE_POOL);
         $this->addOption(self::OPTION_RESET_OPCACHE);
         $this->addOption(self::OPTION_CLEAR_CONFIG);

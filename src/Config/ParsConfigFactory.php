@@ -10,7 +10,7 @@ class ParsConfigFactory
 {
     public function __invoke(ContainerInterface $container)
     {
-        $appConfig =  $container->get(ParsApplicationConfig::class);
+        $appConfig = $container->get(ParsApplicationConfig::class);
         $config = new ParsConfig(
             $container->get(ConfigFinderInterface::class),
             $container->get(ConfigProcessorInterface::class),

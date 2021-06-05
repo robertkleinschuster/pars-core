@@ -16,20 +16,11 @@ class DatabaseBeanSaver extends AbstractBeanSaver implements AdapterAwareInterfa
     use AdapterAwareTrait;
     use DatabaseInfoTrait;
     use ParsDatabaseAdapterAwareTrait;
-    /**
-     * DatabaseBeanSaver constructor.
-     * @param Adapter|ParsDatabaseAdapter $adapter
-     */
-    public function __construct($adapter)
+
+
+    public function __construct(ParsDatabaseAdapter $adapter)
     {
-        if ($adapter instanceof Adapter) {
-            $this->setDbAdapter($adapter);
-        } elseif ($adapter instanceof ParsDatabaseAdapter) {
-            $this->setDatabaseAdapter($adapter);
-            $this->setDbAdapter($adapter->getDbAdapter());
-        } else {
-            throw new CoreException('No valid database adapter given');
-        }
+        $this->setDatabaseAdapter($adapter);
     }
 
     /**

@@ -4,46 +4,46 @@
 namespace Pars\Core\Database;
 
 
-use Laminas\Db\Adapter\AdapterAwareInterface;
-use Laminas\Db\Adapter\AdapterAwareTrait;
-use Laminas\Db\Adapter\AdapterInterface;
-use Pars\Helper\Debug\DebugHelper;
+use Doctrine\DBAL\Connection;
 use Psr\Log\LoggerAwareTrait;
 use Psr\Log\LoggerInterface;
 
-class ParsDatabaseAdapter implements AdapterAwareInterface
+class ParsDatabaseAdapter
 {
-    use AdapterAwareTrait;
     use LoggerAwareTrait;
+    protected Connection $connection;
+
 
     /**
      * ParsDbAdapter constructor.
      */
-    public function __construct(AdapterInterface $adapter, LoggerInterface $logger = null)
+    public function __construct(Connection $connection, LoggerInterface $logger)
     {
-        $this->setDbAdapter($adapter);
-        if ($logger) {
-            $this->setLogger($logger);
-        }
+        $this->connection = $connection;
+        $this->setLogger($logger);
     }
+
+    /**
+     * @return Connection
+     */
+    public function getConnection(): Connection
+    {
+        return $this->connection;
+    }
+
+
 
     public function getDebug()
     {
         $result = [];
-        if ($this->getDbAdapter()->getProfiler()) {
-            $result = $this->getDbAdapter()->getProfiler()->getProfiles();
-        }
+
         return $result;
     }
 
     /**
-     * @return AdapterInterface
+     * @param string $message
+     * @param array $data
      */
-    public function getDbAdapter(): AdapterInterface
-    {
-        return $this->adapter;
-    }
-
     protected function logError(string $message, array $data)
     {
         if (isset($this->logger)) {
@@ -51,6 +51,10 @@ class ParsDatabaseAdapter implements AdapterAwareInterface
         }
     }
 
+    /**
+     * @param string $message
+     * @param array $data
+     */
     protected function logWarning(string $message, array $data)
     {
         if (isset($this->logger)) {
@@ -61,7 +65,7 @@ class ParsDatabaseAdapter implements AdapterAwareInterface
     public function startTransaction()
     {
         try {
-            $this->getDbAdapter()->getDriver()->getConnection()->beginTransaction();
+            $this->getConnection()->beginTransaction();
         } catch (\Throwable $exception) {
             $this->logError($exception->getMessage(), ['exception' => $exception]);
         }
@@ -71,7 +75,7 @@ class ParsDatabaseAdapter implements AdapterAwareInterface
     public function commitTransaction()
     {
         try {
-            $this->getDbAdapter()->getDriver()->getConnection()->commit();
+            $this->getConnection()->commit();
         } catch (\Throwable $exception) {
             $this->logError($exception->getMessage(), ['exception' => $exception]);
         }
@@ -80,7 +84,7 @@ class ParsDatabaseAdapter implements AdapterAwareInterface
     public function rollbackTransaction()
     {
         try {
-            $this->getDbAdapter()->getDriver()->getConnection()->commit();
+            $this->getConnection()->rollBack();
         } catch (\Throwable $exception) {
             $this->logError($exception->getMessage(), ['exception' => $exception]);
         }

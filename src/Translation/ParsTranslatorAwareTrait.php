@@ -4,7 +4,6 @@
 namespace Pars\Core\Translation;
 
 
-use Laminas\I18n\Translator\TranslatorInterface;
 use Pars\Bean\Type\Base\BeanException;
 use Pars\Pattern\Exception\CoreException;
 
@@ -13,11 +12,11 @@ trait ParsTranslatorAwareTrait
     /**
      * @var ParsTranslator
      */
-    protected ParsTranslator $translator;
+    protected ?ParsTranslator $translator = null;
 
     /**
-    * @return ParsTranslator
-    */
+     * @return ParsTranslator
+     */
     public function getTranslator(): ParsTranslator
     {
         if (!$this->hasTranslator()) {
@@ -27,19 +26,19 @@ trait ParsTranslatorAwareTrait
     }
 
     /**
-    * @param ParsTranslator $translator
-    *
-    * @return $this
-    */
-    public function setTranslator(ParsTranslator $translator): self
+     * @param ParsTranslator $translator
+     *
+     * @return $this
+     */
+    public function setTranslator(?ParsTranslator $translator): self
     {
         $this->translator = $translator;
         return $this;
     }
 
     /**
-    * @return bool
-    */
+     * @return bool
+     */
     public function hasTranslator(): bool
     {
         return isset($this->translator);
@@ -56,7 +55,11 @@ trait ParsTranslatorAwareTrait
      */
     public function translate(string $code, array $vars = [], ?string $namespace = null): string
     {
-        return $this->getTranslator()->translate($code, $vars, $namespace);
+        if ($this->hasTranslator()) {
+
+            return $this->getTranslator()->translate($code, $vars, $namespace);
+        }
+        return $code;
     }
 
     /**
@@ -68,7 +71,10 @@ trait ParsTranslatorAwareTrait
      */
     public function translateValidation(string $code, array $vars = []): string
     {
-        return $this->getTranslator()->translate($code, $vars, ParsTranslator::NAMESPACE_VALIDATION);
+        if ($this->hasTranslator()) {
+            return $this->getTranslator()->translate($code, $vars, ParsTranslator::NAMESPACE_VALIDATION);
+        }
+        return $code;
     }
 
     /**
@@ -82,6 +88,9 @@ trait ParsTranslatorAwareTrait
      */
     public function translatepl(string $code, int $count, array $vars = [], ?string $namespace = null): string
     {
-        return $this->getTranslator()->translatepl($code, $count, $vars, $namespace);
+        if ($this->hasTranslator()) {
+            return $this->getTranslator()->translatepl($code, $count, $vars, $namespace);
+        }
+        return $code;
     }
 }

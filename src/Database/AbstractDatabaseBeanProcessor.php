@@ -8,6 +8,7 @@ use Pars\Bean\Type\Base\BeanInterface;
 use Pars\Bean\Validator\CallbackBeanValidator;
 use Pars\Core\Container\ParsContainer;
 use Pars\Core\Container\ParsContainerAwareTrait;
+use Pars\Core\Translation\ParsTranslator;
 use Pars\Core\Translation\ParsTranslatorAwareInterface;
 use Pars\Core\Translation\ParsTranslatorAwareTrait;
 use Pars\Helper\Validation\ValidationHelperAwareInterface;
@@ -25,14 +26,12 @@ abstract class AbstractDatabaseBeanProcessor extends AbstractBeanProcessor imple
     use ParsDatabaseAdapterAwareTrait;
     use ParsTranslatorAwareTrait;
     use ValidationHelperAwareTrait;
-    use ParsContainerAwareTrait;
 
-    public function __construct(ParsContainer $parsContainer)
+    public function __construct(ParsDatabaseAdapter $adapter, ParsTranslator $translator = null)
     {
-        $this->setParsContainer($parsContainer);
-        $this->setDatabaseAdapter($parsContainer->getDatabaseAdapter());
-        $this->setTranslator($parsContainer->getTranslator());
-        $saver = new DatabaseBeanSaver($this->getDatabaseAdapter());
+        $this->setDatabaseAdapter($adapter);
+        $this->setTranslator($translator);
+        $saver = new DatabaseBeanSaver($adapter);
         parent::__construct($saver);
         $this->initSaver($saver);
         $this->initMetaFieldHandler();

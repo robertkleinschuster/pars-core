@@ -32,6 +32,7 @@
     "laminas/laminas-mail": "^2.14",
     "laminas/laminas-config-aggregator": "^1.5",
     "laminas/laminas-zendframework-bridge": "^1.2",
+    "doctrine/dbal": "^3.1",
     "mezzio/mezzio": "^3.4",
     "mezzio/mezzio-fastroute": "^3.2",
     "mezzio/mezzio-platesrenderer": "^2.3",

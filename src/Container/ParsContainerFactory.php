@@ -21,14 +21,6 @@ class ParsContainerFactory
      */
     public function __invoke(ContainerInterface $container)
     {
-        $parsContainer = new ParsContainer();
-        $parsContainer->setLocale($container->get(LocaleInterface::class));
-        $parsContainer->setTranslator($container->get(ParsTranslator::class));
-        $parsContainer->setDatabaseAdapter($container->get(ParsDatabaseAdapter::class));
-        $parsContainer->setLogger($container->get(LoggerInterface::class));
-        $parsContainer->setConfig($container->get(ParsConfig::class));
-        $parsContainer->setImageProcessor($container->get(ImageProcessor::class));
-        $parsContainer->setUrlHelper($container->get(UrlHelper::class));
-        return $parsContainer;
+        return new ParsContainer($container);
     }
 }

@@ -2,28 +2,17 @@
 
 namespace Pars\Core\Database;
 
-use Laminas\Db\Adapter\Adapter;
-use Laminas\Db\Adapter\AdapterAwareInterface;
-use Laminas\Db\Adapter\AdapterAwareTrait;
-use Laminas\Db\Adapter\Driver\StatementInterface;
-use Laminas\Db\ResultSet\ResultSet;
-use Laminas\Db\Sql\Expression;
-use Laminas\Db\Sql\Predicate\Like;
-use Laminas\Db\Sql\Predicate\Predicate;
-use Laminas\Db\Sql\Select;
-use Laminas\Db\Sql\Sql;
+use Doctrine\DBAL\Query\QueryBuilder;
+use Doctrine\DBAL\Result;
 use Pars\Bean\Finder\BeanFinderInterface;
 use Pars\Bean\Loader\AbstractBeanLoader;
 use Pars\Bean\Type\Base\BeanInterface;
-use Pars\Pattern\Exception\CoreException;
 use Pars\Pattern\Exception\DatabaseException;
 
-class DatabaseBeanLoader extends AbstractBeanLoader implements AdapterAwareInterface, ParsDatabaseAdapterAwareInterface
+class DatabaseBeanLoader extends AbstractBeanLoader implements ParsDatabaseAdapterAwareInterface
 {
-    use AdapterAwareTrait;
     use DatabaseInfoTrait;
     use ParsDatabaseAdapterAwareTrait;
-
 
     /**
      * @var string[]
@@ -46,7 +35,7 @@ class DatabaseBeanLoader extends AbstractBeanLoader implements AdapterAwareInter
     private $order_Map;
 
     /**
-     * @var ResultSet
+     * @var Result
      */
     private $result = null;
 
@@ -65,20 +54,15 @@ class DatabaseBeanLoader extends AbstractBeanLoader implements AdapterAwareInter
      */
     private $customColumn_Map;
 
+    private $lock = false;
+
     /**
      * UserBeanLoader constructor.
-     * @param Adapter|ParsDatabaseAdapter $adapter
+     * @param ParsDatabaseAdapter $adapter
      */
-    public function __construct($adapter)
+    public function __construct(ParsDatabaseAdapter $adapter)
     {
-        if ($adapter instanceof Adapter) {
-            $this->setDbAdapter($adapter);
-        } elseif ($adapter instanceof ParsDatabaseAdapter) {
-            $this->setDatabaseAdapter($adapter);
-            $this->setDbAdapter($adapter->getDbAdapter());
-        } else {
-            throw new CoreException('No valid database adapter given');
-        }
+        $this->setDatabaseAdapter($adapter);
         $this->where_Map = [];
         $this->exclude_Map = [];
         $this->like_Map = [];
@@ -185,7 +169,7 @@ class DatabaseBeanLoader extends AbstractBeanLoader implements AdapterAwareInter
      * @return DatabaseBeanLoader
      * @throws \Exception
      */
-    public function filterValue($field, $value = null, $logic = Predicate::OP_AND)
+    public function filterValue($field, $value = null, $logic = BeanFinderInterface::FILTER_MODE_AND)
     {
         if ($field instanceof Predicate) {
             $this->where_Map[$logic][] = $field;
@@ -205,7 +189,7 @@ class DatabaseBeanLoader extends AbstractBeanLoader implements AdapterAwareInter
      * @return DatabaseBeanLoader
      * @throws \Exception
      */
-    public function unsetValue($field, $value = null, $logic = Predicate::OP_AND)
+    public function unsetValue($field, $value = null, $logic = BeanFinderInterface::FILTER_MODE_AND)
     {
         if ($this->hasField($field)) {
             unset($this->where_Map[$logic]["{$this->getTable($field)}.{$this->getColumn($field)}"]);
@@ -220,7 +204,7 @@ class DatabaseBeanLoader extends AbstractBeanLoader implements AdapterAwareInter
      * @param string $logic
      * @throws \Exception
      */
-    public function excludeValue(string $field, $value, $logic = Predicate::OP_AND)
+    public function excludeValue(string $field, $value, $logic = BeanFinderInterface::FILTER_MODE_AND)
     {
         if ($this->hasField($field)) {
             $this->exclude_Map[$logic]["{$this->getTable($field)}.{$this->getColumn($field)}"] = $value;
@@ -247,7 +231,7 @@ class DatabaseBeanLoader extends AbstractBeanLoader implements AdapterAwareInter
      * @param string $mode
      * @return $this
      */
-    public function addLike(string $str, $fields, $mode = Predicate::OP_AND)
+    public function addLike(string $str, $fields, $mode = BeanFinderInterface::FILTER_MODE_AND)
     {
         $this->like_Map[$str] = [
             'fields' => $fields,
@@ -262,90 +246,106 @@ class DatabaseBeanLoader extends AbstractBeanLoader implements AdapterAwareInter
      */
     public function addOrder(string $field, bool $desc = false)
     {
-        $this->order_Map[$field] = $desc ? 'DESC' : 'ASC';
+        $this->order_Map["{$this->getTable($field)}.{$this->getColumn($field)}"] = $desc ? 'DESC' : 'ASC';
     }
 
-    /**
-     * @param Select $select
-     * @throws \Exception
-     */
-    protected function handleJoins(Select $select)
+
+    protected function handleJoins(QueryBuilder $builder)
     {
-        $self = $select->getRawState(Select::TABLE);
+        $self = $builder->getQueryPart('from');
         foreach ($this->getField_List() as $field) {
             $table = $this->getTable($field);
             if ($table !== $self) {
-                $joins = $select->getRawState(Select::JOINS);
-                if (!in_array($table, array_column($joins->getJoins(), 'name'))) {
+                $joins = $builder->getQueryPart('join');
+                if (!in_array($table, array_column($joins, 'joinTable'))) {
                     $column = $this->getColumn($this->getJoinField($field));
                     $columnSelf = $this->getColumn($this->getJoinFieldSelf($field));
                     $tableSelf = $this->getJoinTableSelf($field, $self);
                     if ($this->hasJoinInfo($table)) {
-                        $select->join($table, $this->getJoinOn($table), [], $this->getJoinType($table));
+                        $type = $this->getJoinType($table);
+                        $condition = $this->getJoinOn($table);
+                        $exp = $builder->expr()->and($builder->expr()->eq("$tableSelf.$columnSelf", "$table.$column"));
+                        if (is_array($condition)) {
+                            foreach ($condition as $key => $value) {
+                                $exp = $exp->with($builder->expr()->eq($key, $builder->createNamedParameter($value)));
+                            }
+                        }
+                        $builder->{"{$type}Join"}($self, $table, $table, $exp);
                     } else {
-                        $select->join($table, "$tableSelf.$columnSelf = $table.$column", []);
+                        $builder->join($self, $table, $table, "$tableSelf.$columnSelf = $table.$column");
                     }
                 }
             }
         }
     }
 
-    /**
-     * @param Select $select
-     */
-    protected function handleWhere(Select $select)
+
+    protected function handleWhere(QueryBuilder $builder)
     {
         foreach ($this->exclude_Map as $logic => $map) {
             foreach ($map as $column => $value) {
-                $where = new Predicate();
-                $where->notEqualTo($column, $value);
-                $select->where($where);
+                if (is_array($value)) {
+                    $where = $builder->expr()->notIn($column, $builder->createNamedParameter($value));
+                } else {
+                    $where = $builder->expr()->neq($column, $builder->createNamedParameter($value));
+                }
+                switch ($logic) {
+                    case BeanFinderInterface::FILTER_MODE_OR:
+                        $builder->orWhere($where);
+                        break;
+                    case BeanFinderInterface::FILTER_MODE_AND:
+                        $builder->andWhere($where);
+                        break;
+                }
+
             }
         }
 
         foreach ($this->where_Map as $logic => $map) {
-            $select->where($map, $logic);
+            foreach ($map as $column => $value) {
+                if (is_array($value)) {
+                    $where = $builder->expr()->in($column, $builder->createNamedParameter($value));
+                } else {
+                    $where = $builder->expr()->eq($column, $builder->createNamedParameter($value));
+                }
+                switch ($logic) {
+                    case BeanFinderInterface::FILTER_MODE_OR:
+                        $builder->orWhere($where);
+                        break;
+                    case BeanFinderInterface::FILTER_MODE_AND:
+                        $builder->andWhere($where);
+                        break;
+                }
+
+            }
         }
     }
 
-    /**
-     * @param Select $select
-     * @return DatabaseBeanLoader
-     */
-    protected function handleLimit(Select $select)
+
+    protected function handleLimit(QueryBuilder $builder)
     {
         if ($this->hasLimit()) {
-            $select->limit($this->getLimit());
+            $builder->setMaxResults($this->getLimit());
         }
         if ($this->hasOffset()) {
-            $select->offset($this->getOffset());
+            $builder->setFirstResult($this->getOffset());
         }
         return $this;
     }
 
-    /**
-     * @param Select $select
-     * @return DatabaseBeanLoader
-     */
-    protected function handleLike(Select $select)
+
+    protected function handleLike(QueryBuilder $builder)
     {
-        $likePredicate = null;
-        if ($likePredicate == null) {
-            $likePredicate = new Predicate();
-        }
         foreach ($this->like_Map as $str => $like) {
-            if (is_array($like['fields'])) {
-                $predicate = new Predicate();
-                foreach ($like['fields'] as $field) {
-                    $predicate->addPredicate(new Like("{$this->getTable($field)}.{$this->getColumn($field)}", $str), $like['mode']);
-                }
-                $likePredicate->addPredicate($predicate, $like['mode']);
-            } elseif (is_string($like['fields'])) {
-                $likePredicate->addPredicate(new Like("{$this->getTable($like['fields'])}.{$this->getColumn($like['fields'])}", $str), $like['mode']);
+            $fields = $like['fields'];
+            if (!is_array($fields)) {
+                $fields = [$fields];
             }
-        }
-        if ($likePredicate->count()) {
-            $select->where($likePredicate);
+            foreach ($fields as $field) {
+                $column = "{$this->getTable($field)}.{$this->getColumn($field)}";
+                $where = $builder->expr()->like($column, $builder->createNamedParameter($str));
+                $builder->andWhere($where);
+            }
         }
         return $this;
     }
@@ -363,20 +363,16 @@ class DatabaseBeanLoader extends AbstractBeanLoader implements AdapterAwareInter
     }
 
 
-    /**
-     * @return int
-     */
     public function count(): int
     {
-        $select = $this->buildSelect();
-        $select->columns(['COUNT' => new Expression('COUNT(*)')], false);
-        $result = $this->getPreparedStatement($select)->execute();
-        return $result->current()['COUNT'] ?? 0;
+        $builder = $this->buildQuery();
+        $builder->select('COUNT(*) AS COUNT');
+        return $builder->executeQuery()->fetchOne();
     }
 
     protected function init(): int
     {
-        return $this->getResult()->count();
+        return $this->getResult()->rowCount();
     }
 
     protected function load(): ?array
@@ -384,23 +380,17 @@ class DatabaseBeanLoader extends AbstractBeanLoader implements AdapterAwareInter
         if ($this->result === null) {
             throw new DatabaseException('Could not fetch data. Run find first.');
         }
-        if ($this->result->key() < $this->result->count() - 1) {
-            $ret = $this->result->current();
-            $this->result->next();
+        $ret = $this->result->fetchAssociative();
+        if ($ret) {
             return $ret;
         }
         return null;
     }
 
-
-    /**
-     * @param bool $limit
-     * @return \Laminas\Db\Adapter\Driver\ResultInterface|ResultSet
-     */
     protected function getResult()
     {
         if (null === $this->result) {
-            $this->result = $this->getPreparedStatement($this->buildSelect(true, true))->execute();
+            $this->result = $this->buildQuery(true, true)->executeQuery();
         }
         return $this->result;
     }
@@ -419,119 +409,81 @@ class DatabaseBeanLoader extends AbstractBeanLoader implements AdapterAwareInter
             $beanData[$field] = $data["{$this->getTable($field)}.{$this->getColumn($field)}"];
         }
         foreach ($this->customColumn_Map as $alias => $column) {
-            $beanData[$alias] = $data[$alias];
+           # $beanData[$alias] = $data[$alias];
         }
         return $converter->convert($bean, $beanData)->toBean();
     }
 
-
-    /**
-     * @param bool $limit
-     * @param bool $selectColumns
-     * @return Select
-     */
-    protected function buildSelect(bool $limit = false, bool $selectColumns = false): Select
+    public function buildQuery(bool $limit = false, bool $selectColumns = false)
     {
-        $sql = new Sql($this->adapter);
+
+        $builder = $this->getDatabaseAdapter()->getConnection()->createQueryBuilder();
         $table_List = $this->getTable_List();
-        $select = $sql->select(reset($table_List));
-        $this->handleJoins($select);
-        $this->handleWhere($select);
-        $this->handleLike($select);
-        $this->handleOrder($select);
+        $builder->from(reset($table_List));
+        $this->handleJoins($builder);
+        $this->handleWhere($builder);
+        $this->handleLike($builder);
+        $this->handleOrder($builder);
         if ($limit) {
-            $this->handleLimit($select);
+            $this->handleLimit($builder);
         }
         if ($selectColumns) {
-            $this->handleSelect($select);
+            $this->handleSelect($builder);
         }
 
-        return $select;
+        return $builder;
     }
 
-    /**
-     * @param Select $select
-     * @throws \Exception
-     */
-    protected function handleOrder(Select $select)
+
+    protected function handleOrder(QueryBuilder $builder)
     {
         foreach ($this->order_Map as $field => $order) {
             if (isset($this->customColumn_Map[$field])) {
-                $column = $this->customColumn_Map[$field];
+              /*  $column = $this->customColumn_Map[$field];
                 if ($column instanceof Select) {
                     $sql = new Sql($this->adapter);
                     $subQuery = $sql->buildSqlString($column);
                     $select->order(new Expression("($subQuery) $order"));
                 } else {
-                    $select->order("$field $order");
-                }
+                    $builder->addOrderBy($field, $order);
+                }*/
             } else {
-                $select->order("{$this->getTable($field)}.{$this->getColumn($field)} $order");
+                $builder->addOrderBy($field, $order);
             }
         }
     }
 
-    /**
-     * @param $select
-     * @throws \Exception
-     */
-    protected function handleSelect(Select $select)
+
+    protected function handleSelect(QueryBuilder $builder)
     {
         $columns = [];
         foreach ($this->getField_List() as $field) {
             $columns[] = "{$this->getTable($field)}.{$this->getColumn($field)}";
         }
         foreach ($this->customColumn_Map as $alias => $item) {
-            $columns[$alias] = $item;
+            #$columns[$alias] = $item;
         }
-        $select->columns($columns, false);
+        $builder->select(...$columns);
     }
 
     /**
      * @param $column
      * @return $this
      */
-    public function addCustomColumn($column, $alias) {
+    public function addCustomColumn($column, $alias)
+    {
         $this->customColumn_Map[$alias] = $column;
         return $this;
     }
 
-    /**
-     * @param Select $select
-     * @return \Laminas\Db\Adapter\Driver\ResultInterface|StatementInterface|\Laminas\Db\ResultSet\ResultSet|\Laminas\Db\ResultSet\ResultSetInterface|null
-     */
-    protected function getPreparedStatement(Select $select)
-    {
-        return $this->adapter->query((new Sql($this->adapter))->buildSqlString($select));
-    }
-
-    /**
-     * @param string $field
-     * @return array
-     * @throws \Exception
-     */
     public function preloadValueList(string $field): array
     {
-        $select = $this->buildSelect(true, false);
-        $select->reset(Select::COLUMNS);
+        $builder = $this->buildQuery(true, false);
         $column = $this->getColumn($field);
         $table = $this->getTable($field);
         $tableColumn = "$table.$column";
-        $select->columns([$tableColumn => $tableColumn], false);
-        $result = $this->getPreparedStatement($select)->execute();
-        $ret = [];
-        foreach ($result as $row) {
-            $ret[] = $row[$tableColumn];
-        }
-        return $ret;
-    }
-
-    /**
-     * @return string
-     */
-    public function getLastQuery(): string
-    {
-        return $this->adapter->getProfiler()->getLastProfile()['sql'];
+        $builder->select($tableColumn);
+        return $builder->fetchAllKeyValue();
     }
 
     public function search(string $search, array $field_List = null)
@@ -539,7 +491,7 @@ class DatabaseBeanLoader extends AbstractBeanLoader implements AdapterAwareInter
         if (null === $field_List) {
             $field_List = $this->getField_List();
         }
-        $this->addLike("%$search%", $field_List, Predicate::OP_OR);
+        $this->addLike("%$search%", $field_List, BeanFinderInterface::FILTER_MODE_OR);
         return $this;
     }
 
@@ -563,7 +515,7 @@ class DatabaseBeanLoader extends AbstractBeanLoader implements AdapterAwareInter
                 $this->filterValue($field, $values);
             }
             if ($mode == BeanFinderInterface::FILTER_MODE_OR) {
-                $this->filterValue($field, $values, Predicate::OP_OR);
+                $this->filterValue($field, $values, BeanFinderInterface::FILTER_MODE_OR);
             }
         }
     }
@@ -574,4 +526,12 @@ class DatabaseBeanLoader extends AbstractBeanLoader implements AdapterAwareInter
             $this->excludeValue($field, $value);
         }
     }
+
+    public function lock()
+    {
+        $this->lock = true;
+        return $this;
+    }
+
+
 }
