@@ -2,7 +2,6 @@
 
 namespace Pars\Core\Database;
 
-use Laminas\Db\Sql\ExpressionInterface;
 
 class DatabaseTableJoinDefinition
 {

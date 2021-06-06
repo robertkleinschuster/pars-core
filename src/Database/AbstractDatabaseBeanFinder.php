@@ -3,12 +3,7 @@
 
 namespace Pars\Core\Database;
 
-
-use Laminas\Db\Adapter\Adapter;
-use Pars\Bean\Factory\BeanFactoryInterface;
 use Pars\Bean\Finder\AbstractBeanFinder;
-use Pars\Core\Container\ParsContainer;
-use Pars\Core\Container\ParsContainerAwareTrait;
 
 /**
  * Class AbstractDatabaseBeanFinder
@@ -16,25 +11,5 @@ use Pars\Core\Container\ParsContainerAwareTrait;
  */
 abstract class AbstractDatabaseBeanFinder extends AbstractBeanFinder implements ParsDatabaseAdapterAwareInterface
 {
-    use ParsDatabaseAdapterAwareTrait;
-
-    public function __construct(ParsDatabaseAdapter $adapter)
-    {
-        $this->setDatabaseAdapter($adapter);
-        $loader = new DatabaseBeanLoader($adapter);
-        parent::__construct($loader, $this->createBeanFactory());
-        $this->initLoader($loader);
-    }
-
-    /**
-     * @return BeanFactoryInterface
-     */
-    protected abstract function createBeanFactory(): BeanFactoryInterface;
-
-    /**
-     * @param DatabaseBeanLoader $loader
-     * @return mixed
-     */
-    protected abstract function initLoader(DatabaseBeanLoader $loader);
-
+    use DatabaseBeanFinderTrait;
 }

@@ -31,7 +31,30 @@ class ParsDatabaseAdapter
         return $this->connection;
     }
 
+    /**
+     * @return \Doctrine\DBAL\Query\QueryBuilder
+     */
+    public function getQueryBuilder()
+    {
+        return $this->getConnection()->createQueryBuilder();
+    }
 
+    /**
+     * @return \Doctrine\DBAL\Schema\AbstractSchemaManager
+     * @throws \Doctrine\DBAL\Exception
+     */
+    public function getSchemaManager()
+    {
+        return $this->getConnection()->createSchemaManager();
+    }
+
+    /**
+     * @return \Doctrine\DBAL\Query\Expression\ExpressionBuilder
+     */
+    public function getExpressionBuilder()
+    {
+        return $this->getConnection()->createExpressionBuilder();
+    }
 
     public function getDebug()
     {
@@ -62,7 +85,7 @@ class ParsDatabaseAdapter
         }
     }
 
-    public function startTransaction()
+    public function transactionBegin()
     {
         try {
             $this->getConnection()->beginTransaction();
@@ -72,7 +95,7 @@ class ParsDatabaseAdapter
     }
 
 
-    public function commitTransaction()
+    public function transactionCommit()
     {
         try {
             $this->getConnection()->commit();
@@ -81,7 +104,7 @@ class ParsDatabaseAdapter
         }
     }
 
-    public function rollbackTransaction()
+    public function transactionRollback()
     {
         try {
             $this->getConnection()->rollBack();

@@ -2,7 +2,7 @@
 
 namespace Pars\Core\Database;
 
-use Laminas\Db\Sql\ExpressionInterface;
+use Doctrine\DBAL\ParameterType;
 
 trait DatabaseInfoTrait
 {
@@ -103,10 +103,10 @@ trait DatabaseInfoTrait
     /**
      * @param string $table
      * @param string $type
-     * @param string|ExpressionInterface $on
+     * @param array $on
      * @return DatabaseTableJoinDefinition
      */
-    public function addJoinInfo(string $table, string $type, $on): DatabaseTableJoinDefinition
+    public function addJoinInfo(string $table, string $type, $on = null): DatabaseTableJoinDefinition
     {
         $joinInfo = (new DatabaseTableJoinDefinition())->setTable($table)->setType($type)->setOn($on);
         $this->dbTableJoinDefinition_Map[$table] = $joinInfo;
@@ -277,4 +277,32 @@ trait DatabaseInfoTrait
         }
         throw new \Exception('No field found for column ' . $column);
     }
+
+    protected function buildPlaceholder(string $field, string $prefix, $value = null): string
+    {
+        static $count = null;
+        if ($count === null) {
+            $count = 0;
+        }
+        $count++;
+        $field = strtolower($field);
+        $prefix = strtolower($prefix);
+        return ":{$prefix}_{$field}_{$count}";
+    }
+
+    protected function getValueParameterType($value)
+    {
+        if (null === $value) {
+            return ParameterType::NULL;
+        }
+        switch (gettype($value)) {
+            case 'integer':
+                return ParameterType::INTEGER;
+            case 'boolean':
+                return ParameterType::BOOLEAN;
+            default:
+                return ParameterType::STRING;
+        }
+    }
+
 }

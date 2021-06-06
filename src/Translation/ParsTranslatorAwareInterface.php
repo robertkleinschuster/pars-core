@@ -16,7 +16,7 @@ interface ParsTranslatorAwareInterface
      *
      * @return $this
      */
-    public function setTranslator(ParsTranslator $translator): self;
+    public function setTranslator(?ParsTranslator $translator): self;
     /**
      * @return bool
      */

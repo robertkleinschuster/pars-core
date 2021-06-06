@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Pars\Core\Database;
 
-use Laminas\Db\Adapter\AdapterInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
@@ -19,10 +18,6 @@ class DatabaseMiddleware implements MiddlewareInterface
 
     public const ADAPTER_ATTRIBUTE = 'db_adapter';
 
-    /**
-     * @var ParsDatabaseAdapter
-     */
-    private $adapter;
 
     /**
      * DatabaseMiddleware constructor.
@@ -30,15 +25,11 @@ class DatabaseMiddleware implements MiddlewareInterface
      */
     public function __construct(ParsDatabaseAdapter $adapter)
     {
-        $this->adapter = $adapter;
     }
 
 
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
-        return $handler->handle($request
-            ->withAttribute(self::ADAPTER_ATTRIBUTE, $this->adapter->getDbAdapter())
-            ->withAttribute(ParsDatabaseAdapter::class, $this->adapter)
-        );
+        return $handler->handle($request);
     }
 }

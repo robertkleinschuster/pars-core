@@ -2,18 +2,13 @@
 
 namespace Pars\Core\Database;
 
-use Laminas\Db\Adapter\Adapter;
-use Laminas\Db\Adapter\AdapterAwareInterface;
-use Laminas\Db\Adapter\AdapterAwareTrait;
-use Laminas\Db\Sql\Expression;
-use Laminas\Db\Sql\Sql;
+
 use Pars\Bean\Saver\AbstractBeanSaver;
 use Pars\Bean\Type\Base\BeanInterface;
 use Pars\Pattern\Exception\CoreException;
 
-class DatabaseBeanSaver extends AbstractBeanSaver implements AdapterAwareInterface, ParsDatabaseAdapterAwareInterface
+class DatabaseBeanSaver extends AbstractBeanSaver implements ParsDatabaseAdapterAwareInterface
 {
-    use AdapterAwareTrait;
     use DatabaseInfoTrait;
     use ParsDatabaseAdapterAwareTrait;
 
@@ -42,7 +37,7 @@ class DatabaseBeanSaver extends AbstractBeanSaver implements AdapterAwareInterfa
     protected function saveBean(BeanInterface $bean): bool
     {
         $result_List = [];
-        $this->adapter->getDriver()->getConnection()->beginTransaction();
+        $this->getDatabaseAdapter()->transactionBegin();;
         $tableList = $this->getTable_List();
         foreach ($tableList as $table) {
             if ($this->beanExistsUnique($bean, $table)) {
@@ -53,9 +48,9 @@ class DatabaseBeanSaver extends AbstractBeanSaver implements AdapterAwareInterfa
         }
         $result = !in_array(false, $result_List) && count($result_List) > 0;
         if ($result) {
-            $this->adapter->getDriver()->getConnection()->commit();
+            $this->getDatabaseAdapter()->transactionCommit();;
         } else {
-            $this->adapter->getDriver()->getConnection()->rollback();
+            $this->getDatabaseAdapter()->transactionRollback();;
         }
         return $result;
     }
@@ -68,25 +63,26 @@ class DatabaseBeanSaver extends AbstractBeanSaver implements AdapterAwareInterfa
     protected function deleteBean(BeanInterface $bean): bool
     {
         $result_List = [];
-        $this->adapter->getDriver()->getConnection()->beginTransaction();
+        $this->getDatabaseAdapter()->transactionBegin();;
         $tableList = $this->getTable_List();
         $tableList = array_reverse($tableList);
         foreach ($tableList as $table) {
             $deletedata = $this->getDataFromBean($bean, $table, true, true);
             // ensure only a single row is deleted
             if (count($deletedata) && $this->count($table, $deletedata) === 1) {
-                $sql = new Sql($this->adapter);
-                $delete = $sql->delete($table);
-                $delete->where($deletedata);
-                $result = $this->adapter->query($sql->buildSqlString($delete), $this->adapter::QUERY_MODE_EXECUTE);
-                $result_List[] = $result->getAffectedRows() > 0;
+                $builder = $this->getDatabaseAdapter()->getQueryBuilder();
+                $delete = $builder->delete($table);
+                foreach ($deletedata as $key => $value) {
+                    $delete->andWhere($builder->expr()->eq($key, $builder->createNamedParameter($value, $this->getValueParameterType($value))));
+                }
+                $result_List[] = $delete->executeStatement();
             }
         }
         $result = !in_array(false, $result_List, true) && count($result_List) > 0;
         if ($result) {
-            $this->adapter->getDriver()->getConnection()->commit();
+            $this->getDatabaseAdapter()->transactionCommit();
         } else {
-            $this->adapter->getDriver()->getConnection()->rollback();
+            $this->getDatabaseAdapter()->transactionRollback();
         }
         return $result;
     }
@@ -102,20 +98,23 @@ class DatabaseBeanSaver extends AbstractBeanSaver implements AdapterAwareInterfa
     {
         $insertdata = $this->getDataFromBean($bean, $table);
         if (count($insertdata)) {
-            $sql = new Sql($this->adapter);
-            $insert = $sql->insert($table);
-            $insert->columns(array_keys($insertdata));
-            $insert->values(array_values($insertdata));
+            $builder = $this->getDatabaseAdapter()->getQueryBuilder();
+            $insert = $builder->insert($table);
+            foreach ($insertdata as &$value) {
+                $value = $insert->createNamedParameter($value, $this->getValueParameterType($value));
+            }
+            $insert->values($insertdata);
 
-            $result = $this->adapter->query($sql->buildSqlString($insert), $this->adapter::QUERY_MODE_EXECUTE);
+
+            $result = $insert->executeStatement();
             $keyField_List = $this->getKeyField_List($table, true);
             if (count($keyField_List) == 1) {
                 foreach ($keyField_List as $field) {
                     $converter = new DatabaseBeanConverter();
-                    $converter->convert($bean)->set($field, $result->getGeneratedValue());
+                    $converter->convert($bean)->set($field, $this->getDatabaseAdapter()->getConnection()->lastInsertId());
                 }
             }
-            return $result->getAffectedRows() > 0 || $result->getAffectedRows() == 0;
+            return $result;
         }
         return count($insertdata) == 0;
     }
@@ -132,17 +131,20 @@ class DatabaseBeanSaver extends AbstractBeanSaver implements AdapterAwareInterfa
         $data = $this->getDataFromBean($bean, $table);
         // Ensure only a single row is changed
         if (count($data) && $this->beanExistsUnique($bean, $table)) {
-            $sql = new Sql($this->adapter);
-            $update = $sql->update($table);
+            $builder = $this->getDatabaseAdapter()->getQueryBuilder();
+            $update = $builder->update($table);
             $keyFieldList = $this->getKeyField_List($table);
             foreach ($keyFieldList as $field) {
                 if ($bean->isset($field)) {
-                    $update->where([$this->getColumn($field) => $bean->get($field)]);
+                    $value = $bean->get($field);
+                    $update->andWhere($builder->expr()->eq($this->getColumn($field),
+                    $builder->createNamedParameter($value, $this->getValueParameterType($value))));
                 }
             }
-            $update->set($data);
-            $result = $this->adapter->query($sql->buildSqlString($update), $this->adapter::QUERY_MODE_EXECUTE);
-            return $result->getAffectedRows() > 0 || $result->getAffectedRows() == 0;
+            foreach ($data as $key => $value) {
+                $update->set($key, $builder->createNamedParameter($value, $this->getValueParameterType($value)));
+            }
+            return $update->executeStatement();
         }
         return count($data) == 0;
     }
@@ -216,14 +218,17 @@ class DatabaseBeanSaver extends AbstractBeanSaver implements AdapterAwareInterfa
      * @param string $table
      * @param array $data
      * @return int|mixed
+     * @throws CoreException
+     * @throws \Doctrine\DBAL\Exception
      */
     protected function count(string $table, array $data): int
     {
-        $sql = new Sql($this->adapter);
-        $select = $sql->select($table);
-        $select->where($data);
-        $select->columns(['COUNT' => new Expression('COUNT(*)')], false);
-        $result = $this->adapter->query($sql->buildSqlString($select), $this->adapter::QUERY_MODE_EXECUTE);
-        return (int)($result->current()['COUNT'] ?? 0);
+        $builder = $this->getDatabaseAdapter()->getQueryBuilder();
+        $select = $builder->select('COUNT(*) AS COUNT');
+        $select->from($table);
+        foreach ($data as $key => $value) {
+            $select->andWhere($builder->expr()->eq($key, $builder->createNamedParameter($value, $this->getValueParameterType($value))));
+        }
+        return (int)($builder->executeQuery()->fetchOne() ?? 0);
     }
 }

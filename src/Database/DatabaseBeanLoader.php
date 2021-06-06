@@ -2,9 +2,12 @@
 
 namespace Pars\Core\Database;
 
+use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Query\QueryBuilder;
 use Doctrine\DBAL\Result;
 use Pars\Bean\Finder\BeanFinderInterface;
+use Pars\Bean\Finder\FilterExpression;
+use Pars\Bean\Finder\FilterIdentifier;
 use Pars\Bean\Loader\AbstractBeanLoader;
 use Pars\Bean\Type\Base\BeanInterface;
 use Pars\Pattern\Exception\DatabaseException;
@@ -23,6 +26,11 @@ class DatabaseBeanLoader extends AbstractBeanLoader implements ParsDatabaseAdapt
      * @var string[]
      */
     private $exclude_Map;
+
+    /**
+     * @var FilterExpression[]
+     */
+    private $expression_List;
 
     /**
      * @var array[]
@@ -68,6 +76,7 @@ class DatabaseBeanLoader extends AbstractBeanLoader implements ParsDatabaseAdapt
         $this->like_Map = [];
         $this->order_Map = [];
         $this->customColumn_Map = [];
+        $this->expression_List = [];
     }
 
     /**
@@ -94,6 +103,7 @@ class DatabaseBeanLoader extends AbstractBeanLoader implements ParsDatabaseAdapt
         $this->limit = null;
         $this->offset = null;
         $this->result = null;
+        $this->expression_List = [];
         return $this;
     }
 
@@ -171,14 +181,9 @@ class DatabaseBeanLoader extends AbstractBeanLoader implements ParsDatabaseAdapt
      */
     public function filterValue($field, $value = null, $logic = BeanFinderInterface::FILTER_MODE_AND)
     {
-        if ($field instanceof Predicate) {
-            $this->where_Map[$logic][] = $field;
-        } else {
-            if ($this->hasField($field)) {
-                $this->where_Map[$logic]["{$this->getTable($field)}.{$this->getColumn($field)}"] = $value;
-            }
+        if ($this->hasField($field)) {
+            $this->where_Map[$logic][$field] = $value;
         }
-
         return $this;
     }
 
@@ -192,7 +197,7 @@ class DatabaseBeanLoader extends AbstractBeanLoader implements ParsDatabaseAdapt
     public function unsetValue($field, $value = null, $logic = BeanFinderInterface::FILTER_MODE_AND)
     {
         if ($this->hasField($field)) {
-            unset($this->where_Map[$logic]["{$this->getTable($field)}.{$this->getColumn($field)}"]);
+            unset($this->where_Map[$logic][$field]);
         }
         return $this;
     }
@@ -207,7 +212,7 @@ class DatabaseBeanLoader extends AbstractBeanLoader implements ParsDatabaseAdapt
     public function excludeValue(string $field, $value, $logic = BeanFinderInterface::FILTER_MODE_AND)
     {
         if ($this->hasField($field)) {
-            $this->exclude_Map[$logic]["{$this->getTable($field)}.{$this->getColumn($field)}"] = $value;
+            $this->exclude_Map[$logic][$field] = $value;
         }
     }
 
@@ -253,11 +258,16 @@ class DatabaseBeanLoader extends AbstractBeanLoader implements ParsDatabaseAdapt
     protected function handleJoins(QueryBuilder $builder)
     {
         $self = $builder->getQueryPart('from');
+        $self = reset($self)['table'];
         foreach ($this->getField_List() as $field) {
             $table = $this->getTable($field);
             if ($table !== $self) {
                 $joins = $builder->getQueryPart('join');
-                if (!in_array($table, array_column($joins, 'joinTable'))) {
+                $addedTables = [];
+                if (isset($joins[$self])) {
+                    $addedTables = array_column($joins[$self], 'joinTable');
+                }
+                if (!in_array($table, $addedTables)) {
                     $column = $this->getColumn($this->getJoinField($field));
                     $columnSelf = $this->getColumn($this->getJoinFieldSelf($field));
                     $tableSelf = $this->getJoinTableSelf($field, $self);
@@ -267,7 +277,9 @@ class DatabaseBeanLoader extends AbstractBeanLoader implements ParsDatabaseAdapt
                         $exp = $builder->expr()->and($builder->expr()->eq("$tableSelf.$columnSelf", "$table.$column"));
                         if (is_array($condition)) {
                             foreach ($condition as $key => $value) {
-                                $exp = $exp->with($builder->expr()->eq($key, $builder->createNamedParameter($value)));
+
+                                $exp = $exp->with($builder->expr()->eq("{$this->getTable($key)}.{$this->getColumn($key)}", $builder->createNamedParameter($value,
+                                    $this->getValueParameterType($value), $this->buildPlaceholder($key, 'join', $value))));
                             }
                         }
                         $builder->{"{$type}Join"}($self, $table, $table, $exp);
@@ -283,11 +295,22 @@ class DatabaseBeanLoader extends AbstractBeanLoader implements ParsDatabaseAdapt
     protected function handleWhere(QueryBuilder $builder)
     {
         foreach ($this->exclude_Map as $logic => $map) {
-            foreach ($map as $column => $value) {
+            foreach ($map as $field => $value) {
                 if (is_array($value)) {
-                    $where = $builder->expr()->notIn($column, $builder->createNamedParameter($value));
+                    $where = $builder->expr()->notIn(
+                        "{$this->getTable($field)}.{$this->getColumn($field)}",
+                        $builder->createNamedParameter($value)
+                    );
+                } elseif ($value === null) {
+                    $where = $builder->expr()->isNotNull("{$this->getTable($field)}.{$this->getColumn($field)}");
                 } else {
-                    $where = $builder->expr()->neq($column, $builder->createNamedParameter($value));
+                    $where = $builder->expr()->neq(
+                        "{$this->getTable($field)}.{$this->getColumn($field)}",
+                        $builder->createNamedParameter($value,
+                            $this->getValueParameterType($value),
+                            $this->buildPlaceholder($field, 'exclude', $value)
+                        )
+                    );
                 }
                 switch ($logic) {
                     case BeanFinderInterface::FILTER_MODE_OR:
@@ -302,11 +325,69 @@ class DatabaseBeanLoader extends AbstractBeanLoader implements ParsDatabaseAdapt
         }
 
         foreach ($this->where_Map as $logic => $map) {
-            foreach ($map as $column => $value) {
+            foreach ($map as $field => $value) {
                 if (is_array($value)) {
-                    $where = $builder->expr()->in($column, $builder->createNamedParameter($value));
+                    $where = $builder->expr()->in(
+                        "{$this->getTable($field)}.{$this->getColumn($field)}",
+                        $builder->createNamedParameter($value, Connection::PARAM_STR_ARRAY, $this->buildPlaceholder($field, 'filter_in'))
+                    );
+                } elseif ($value === null) {
+                    $where = $builder->expr()->isNull("{$this->getTable($field)}.{$this->getColumn($field)}");
                 } else {
-                    $where = $builder->expr()->eq($column, $builder->createNamedParameter($value));
+                    $where = $builder->expr()->eq(
+                        "{$this->getTable($field)}.{$this->getColumn($field)}",
+                        $builder->createNamedParameter($value,
+                            $this->getValueParameterType($value),
+                            $this->buildPlaceholder($field, 'filter', $value)
+                        )
+                    );
+                }
+                switch ($logic) {
+                    case BeanFinderInterface::FILTER_MODE_OR:
+                        $builder->orWhere($where);
+                        break;
+                    case BeanFinderInterface::FILTER_MODE_AND:
+                        $builder->andWhere($where);
+                        break;
+                }
+
+            }
+        }
+
+
+        foreach ($this->expression_List as $logic => $expressions) {
+            foreach ($expressions as $expression) {
+                /**
+                 * @var FilterExpression $expression
+                 */
+                $left = $expression->getLeft();
+                $right = $expression->getRight();
+                if ($left instanceof FilterIdentifier) {
+                    $left = $left->getIdentifier();
+                } elseif ($left instanceof \DateTime) {
+                    $left = $left->format(DatabaseBeanConverter::DATE_FORMAT);
+                } else {
+                    $left = $builder->createNamedParameter($left, $this->getValueParameterType($left));
+                }
+                if ($right instanceof FilterIdentifier) {
+                    $right = $right->getIdentifier();
+                } elseif ($right instanceof \DateTime) {
+                    $right = $right->format(DatabaseBeanConverter::DATE_FORMAT);
+                } else {
+                    $right = $builder->createNamedParameter($right, $this->getValueParameterType($right));
+                }
+                switch ($expression->getOperator()) {
+                    case FilterExpression::OPERATOR_EQUAL:
+                        $where = $builder->expr()->eq($left, $right);
+                        break;
+                    case FilterExpression::OPERATOR_NOT_EQUAL:
+                        $where = $builder->expr()->neq($left, $right);
+                        break;
+                    case FilterExpression::OPERATOR_GREATER_THAN:
+                        $where = $builder->expr()->gt($left, $right);
+                        break;
+                    default:
+                        $where = $builder->expr()->eq($left, $right);
                 }
                 switch ($logic) {
                     case BeanFinderInterface::FILTER_MODE_OR:
@@ -338,13 +419,18 @@ class DatabaseBeanLoader extends AbstractBeanLoader implements ParsDatabaseAdapt
     {
         foreach ($this->like_Map as $str => $like) {
             $fields = $like['fields'];
+            $mode = $like['mode'];
             if (!is_array($fields)) {
                 $fields = [$fields];
             }
             foreach ($fields as $field) {
                 $column = "{$this->getTable($field)}.{$this->getColumn($field)}";
-                $where = $builder->expr()->like($column, $builder->createNamedParameter($str));
-                $builder->andWhere($where);
+                $where = $builder->expr()->like($column, $builder->createNamedParameter($str, $this->getValueParameterType($str), $this->buildPlaceholder($column, 'search')));
+                if ($mode == BeanFinderInterface::FILTER_MODE_OR) {
+                    $builder->orWhere($where);
+                } else {
+                    $builder->andWhere($where);
+                }
             }
         }
         return $this;
@@ -409,7 +495,7 @@ class DatabaseBeanLoader extends AbstractBeanLoader implements ParsDatabaseAdapt
             $beanData[$field] = $data["{$this->getTable($field)}.{$this->getColumn($field)}"];
         }
         foreach ($this->customColumn_Map as $alias => $column) {
-           # $beanData[$alias] = $data[$alias];
+            $beanData[$alias] = $data[$alias];
         }
         return $converter->convert($bean, $beanData)->toBean();
     }
@@ -439,14 +525,8 @@ class DatabaseBeanLoader extends AbstractBeanLoader implements ParsDatabaseAdapt
     {
         foreach ($this->order_Map as $field => $order) {
             if (isset($this->customColumn_Map[$field])) {
-              /*  $column = $this->customColumn_Map[$field];
-                if ($column instanceof Select) {
-                    $sql = new Sql($this->adapter);
-                    $subQuery = $sql->buildSqlString($column);
-                    $select->order(new Expression("($subQuery) $order"));
-                } else {
-                    $builder->addOrderBy($field, $order);
-                }*/
+                $column = $this->customColumn_Map[$field];
+                $builder->addOrderBy("($column)", $order);
             } else {
                 $builder->addOrderBy($field, $order);
             }
@@ -458,10 +538,12 @@ class DatabaseBeanLoader extends AbstractBeanLoader implements ParsDatabaseAdapt
     {
         $columns = [];
         foreach ($this->getField_List() as $field) {
-            $columns[] = "{$this->getTable($field)}.{$this->getColumn($field)}";
+            $alias = $this->getDatabaseAdapter()->getConnection()->quote("{$this->getTable($field)}.{$this->getColumn($field)}");
+            $column = $this->getDatabaseAdapter()->getConnection()->quoteIdentifier("{$this->getTable($field)}.{$this->getColumn($field)}");
+            $columns[] = "$column AS $alias";
         }
-        foreach ($this->customColumn_Map as $alias => $item) {
-            #$columns[$alias] = $item;
+        foreach ($this->customColumn_Map as $alias => $column) {
+            $columns[] = "($column) AS $alias";
         }
         $builder->select(...$columns);
     }
@@ -476,6 +558,7 @@ class DatabaseBeanLoader extends AbstractBeanLoader implements ParsDatabaseAdapt
         return $this;
     }
 
+
     public function preloadValueList(string $field): array
     {
         $builder = $this->buildQuery(true, false);
@@ -483,7 +566,7 @@ class DatabaseBeanLoader extends AbstractBeanLoader implements ParsDatabaseAdapt
         $table = $this->getTable($field);
         $tableColumn = "$table.$column";
         $builder->select($tableColumn);
-        return $builder->fetchAllKeyValue();
+        return $builder->fetchFirstColumn();
     }
 
     public function search(string $search, array $field_List = null)
@@ -511,13 +594,18 @@ class DatabaseBeanLoader extends AbstractBeanLoader implements ParsDatabaseAdapt
     public function filter(array $data_Map, string $mode)
     {
         foreach ($data_Map as $field => $values) {
-            if ($mode == BeanFinderInterface::FILTER_MODE_AND) {
-                $this->filterValue($field, $values);
-            }
-            if ($mode == BeanFinderInterface::FILTER_MODE_OR) {
-                $this->filterValue($field, $values, BeanFinderInterface::FILTER_MODE_OR);
+            if ($values instanceof FilterExpression) {
+                $this->filterExpression($values, $mode);
+            } else {
+                $this->filterValue($field, $values, $mode);
             }
         }
+    }
+
+    protected function filterExpression(FilterExpression $expression, string $mode)
+    {
+        $this->expression_List[$mode][] = $expression;
+        return $this;
     }
 
     public function exclude(array $data_Map)

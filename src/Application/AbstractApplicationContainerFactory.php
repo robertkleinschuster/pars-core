@@ -42,7 +42,6 @@ abstract class AbstractApplicationContainerFactory
             \Laminas\Validator\ConfigProvider::class,
             \Laminas\I18n\ConfigProvider::class,
             \Laminas\Log\ConfigProvider::class,
-            \Laminas\Db\ConfigProvider::class,
             \Laminas\HttpHandlerRunner\ConfigProvider::class,
             \Laminas\Diactoros\ConfigProvider::class,
             \Mezzio\ConfigProvider::class,

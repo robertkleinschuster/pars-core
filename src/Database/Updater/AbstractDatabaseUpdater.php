@@ -3,13 +3,9 @@
 namespace Pars\Core\Database\Updater;
 
 use Laminas\Db\Adapter\Adapter;
-use Laminas\Db\Adapter\AdapterAwareInterface;
-use Laminas\Db\Adapter\AdapterAwareTrait;
 use Laminas\Db\Sql\AbstractSql;
 use Laminas\Db\Sql\Ddl\AlterTable;
 use Laminas\Db\Sql\Ddl\Column\Column;
-use Laminas\Db\Sql\Ddl\Column\Integer;
-use Laminas\Db\Sql\Ddl\Column\Timestamp;
 use Laminas\Db\Sql\Ddl\Constraint\AbstractConstraint;
 use Laminas\Db\Sql\Ddl\Constraint\ForeignKey;
 use Laminas\Db\Sql\Ddl\Constraint\PrimaryKey;
@@ -23,10 +19,9 @@ use Pars\Helper\Validation\ValidationHelperAwareInterface;
 use Pars\Helper\Validation\ValidationHelperAwareTrait;
 use Pars\Pattern\Exception\CoreException;
 
-abstract class AbstractDatabaseUpdater implements ValidationHelperAwareInterface, AdapterAwareInterface
+abstract class AbstractDatabaseUpdater implements ValidationHelperAwareInterface
 {
     use ValidationHelperAwareTrait;
-    use AdapterAwareTrait;
     use ParsContainerAwareTrait;
 
     public const MODE_PREVIEW = 'preview';
@@ -57,24 +52,28 @@ abstract class AbstractDatabaseUpdater implements ValidationHelperAwareInterface
     public function __construct(ParsContainer $parsContainer)
     {
         $this->setParsContainer($parsContainer);
-        $this->adapter = $parsContainer->getDatabaseAdapter()->getDbAdapter();
-        $this->metadata = \Laminas\Db\Metadata\Source\Factory::createSourceFromAdapter($this->adapter);
-        $this->existingTableList = $this->metadata->getTableNames($this->adapter->getCurrentSchema());
+        $this->existingTableList = $this->getDatabaseAdapter()->getSchemaManager()->listTables();
+    }
+
+    /**
+     * @return \Pars\Core\Database\ParsDatabaseAdapter
+     */
+    public function getDatabaseAdapter()
+    {
+        return $this->getParsContainer()->getDatabaseAdapter();
     }
 
     /**
      * @param string $table
-     * @param string $constraintName
+     * @param $constraint
      * @return bool
+     * @throws \Doctrine\DBAL\Exception
      */
-    public function hasConstraints(string $table, string $constraintName)
+    public function hasConstraints(string $table, $constraint)
     {
-        foreach ($this->metadata->getConstraints($table, $this->adapter->getCurrentSchema()) as $constraint) {
-            if (trim(strtolower($constraint->getName())) == trim(strtolower($constraintName))) {
-                return true;
-            }
-        }
-        return false;
+        $keys = $this->getDatabaseAdapter()->getSchemaManager()->listTableForeignKeys($table);
+        $idxs = $this->getDatabaseAdapter()->getSchemaManager()->listTableIndexes($table);
+        return in_array($constraint, $keys) || in_array($constraint, $idxs);
     }
 
     /**
@@ -186,22 +185,28 @@ abstract class AbstractDatabaseUpdater implements ValidationHelperAwareInterface
 
     protected function query($statement)
     {
-        $result = '';
-
-        if ($statement instanceof AbstractSql) {
-            $sql = new Sql($this->adapter);
-            $query = $sql->buildSqlString($statement, $this->adapter);
-        } else {
-            $query = $statement;
-        }
         if ($this->isExecute()) {
-            $result = $this->adapter->query($query, Adapter::QUERY_MODE_EXECUTE);
+            if (!is_array($statement)) {
+                $statement = [$statement];
+            }
+            foreach ($statement as $item) {
+                $this->getDatabaseAdapter()->getConnection()->executeStatement($item);
+            }
         }
-        if ($this->isPreview()) {
-            $result = str_replace(PHP_EOL, '<br>', $query);
+        foreach ($statement as &$item) {
+            $item = str_replace(PHP_EOL, '<br>', $item);
         }
+
+        return $statement;
+    }
+
+    protected function updateSchema()
+    {
+        $sql = $this->getSchema()->getMigrateFromSql($this->getCurrentSchema(true), $this->getPlatform());
+        $result = $this->query($sql);
         return $result;
     }
+
 
     /**
      * @param string $table
@@ -364,27 +369,6 @@ abstract class AbstractDatabaseUpdater implements ValidationHelperAwareInterface
         }
     }
 
-    /**
-     * @param string $table
-     * @return AlterTable|CreateTable
-     */
-    protected function getTableStatement(string $tableName, bool $forceUpdate = false)
-    {
-        if (!in_array($tableName, $this->existingTableList) && !$forceUpdate) {
-            $table = new CreateTable($tableName);
-        } else {
-            $table = new AlterTable($tableName);
-        }
-        return $table;
-    }
-
-    protected function addDefaultColumnsToTable(AbstractSql $table)
-    {
-        $this->addColumnToTable($table, new Timestamp('Timestamp_Create', true));
-        $this->addColumnToTable($table, new Integer('Person_ID_Create', true));
-        $this->addColumnToTable($table, new Timestamp('Timestamp_Edit', true));
-        $this->addColumnToTable($table, new Integer('Person_ID_Edit', true));
-    }
 
     protected function addDefaultConstraintsToTable(AbstractSql $table)
     {
@@ -398,29 +382,6 @@ abstract class AbstractDatabaseUpdater implements ValidationHelperAwareInterface
         $this->dropConstraintFromTable($table, new ForeignKey(null, 'Person_ID_Edit', 'Person', 'Person_ID'));
     }
 
-
-    /**
-     * @param AbstractSql $table
-     * @param Column $column
-     * @return Column
-     * @throws \Exception
-     */
-    protected function addColumnToTable(AbstractSql $table, Column $column)
-    {
-        if ($table instanceof CreateTable) {
-            $table->addColumn($column);
-        }
-        if ($table instanceof AlterTable) {
-            $columns = $this->metadata->getColumnNames((string)$table->getRawState(AlterTable::TABLE), $this->adapter->getCurrentSchema());
-            if (!in_array($column->getName(), $columns)) {
-                $table->addColumn($column);
-            } else {
-                $table->changeColumn($column->getName(), $column);
-            }
-        }
-
-        return $column;
-    }
 
     /**
      * @param AbstractSql $table
@@ -542,6 +503,7 @@ abstract class AbstractDatabaseUpdater implements ValidationHelperAwareInterface
         }
         return !$finder->count();
     }
+
     protected function getLocaleDefault()
     {
         return $this->getParsContainer()->getConfig()->get('locale.default');
