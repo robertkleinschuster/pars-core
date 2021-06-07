@@ -2,19 +2,13 @@
 
 namespace Pars\Core\Database\Updater;
 
-use Laminas\Db\Adapter\Adapter;
-use Laminas\Db\Sql\AbstractSql;
-use Laminas\Db\Sql\Ddl\AlterTable;
-use Laminas\Db\Sql\Ddl\Column\Column;
-use Laminas\Db\Sql\Ddl\Constraint\AbstractConstraint;
-use Laminas\Db\Sql\Ddl\Constraint\ForeignKey;
-use Laminas\Db\Sql\Ddl\Constraint\PrimaryKey;
-use Laminas\Db\Sql\Ddl\CreateTable;
-use Laminas\Db\Sql\Sql;
+use Doctrine\DBAL\Schema\SchemaException;
+use Doctrine\DBAL\Schema\Table;
 use Pars\Bean\Finder\BeanFinderInterface;
 use Pars\Bean\Processor\BeanProcessorInterface;
 use Pars\Core\Container\ParsContainer;
 use Pars\Core\Container\ParsContainerAwareTrait;
+use Pars\Helper\String\StringHelper;
 use Pars\Helper\Validation\ValidationHelperAwareInterface;
 use Pars\Helper\Validation\ValidationHelperAwareTrait;
 use Pars\Pattern\Exception\CoreException;
@@ -125,6 +119,7 @@ abstract class AbstractDatabaseUpdater implements ValidationHelperAwareInterface
     public function getUpdateMethodList(): array
     {
         $methods = [];
+        $methods[] = 'baseTables';
         foreach (get_class_methods(static::class) as $method) {
             if (strpos($method, self::PREFIX_UPDATE) === 0) {
                 $methods[] = $method;
@@ -200,13 +195,6 @@ abstract class AbstractDatabaseUpdater implements ValidationHelperAwareInterface
         return $statement;
     }
 
-    protected function updateSchema()
-    {
-        $sql = $this->getSchema()->getMigrateFromSql($this->getCurrentSchema(true), $this->getPlatform());
-        $result = $this->query($sql);
-        return $result;
-    }
-
 
     /**
      * @param string $table
@@ -215,25 +203,23 @@ abstract class AbstractDatabaseUpdater implements ValidationHelperAwareInterface
      */
     protected function getKeyList(string $table, $column)
     {
-        $sql = new Sql($this->adapter);
-        $select = $sql->select($table);
+        $builder = $this->getDatabaseAdapter()->getQueryBuilder();
         $col = $column;
         if (!is_array($column)) {
             $column = [$column];
         }
-        $select->columns($column);
-        $dbresult = $this->adapter->query(
-            $sql->buildSqlString($select, $this->adapter),
-            Adapter::QUERY_MODE_EXECUTE
-        );
+        $builder->select(...$column);
+        $builder->from($table);
+
         $result = [];
         if (is_array($col)) {
-            $dbdata = $dbresult->toArray();
+            $dbdata = $builder->fetchAllAssociative();
             foreach ($col as $item) {
                 $result[$item] = array_column($dbdata, $item);
             }
         } else {
-            $result = array_column($dbresult->toArray(), $col);
+            $dbdata = $builder->fetchAllAssociative();
+            $result = array_column($dbdata, $col);
         }
         return $result;
     }
@@ -262,30 +248,35 @@ abstract class AbstractDatabaseUpdater implements ValidationHelperAwareInterface
                     $item[$key] = json_encode($value);
                 }
             }
-            $sql = new Sql($this->adapter);
+            $builder = $this->getDatabaseAdapter()->getQueryBuilder();
             if ($this->isUpdate($item, $keyColumn, $existingKey_List)) {
                 if (!$noUpdate) {
-                    $update = $sql->update($table);
+                    $builder->update($table);
                     if (is_array($keyColumn)) {
                         foreach ($keyColumn as $column) {
-                            $update->where([$column => $item[$column]]);
+                            $builder->andWhere($builder->expr()->eq($column, $builder->createNamedParameter($item[$column])));
                             unset($item[$column]);
                         }
                     } else {
-                        $update->where([$keyColumn => $item[$keyColumn]]);
+                        $builder->andWhere($builder->expr()->eq($keyColumn, $builder->createNamedParameter($item[$keyColumn])));
                         unset($item[$keyColumn]);
                     }
-                    $update->set($item);
-                    $result[] = $this->query($update);
+                    foreach ($item as $key => $value) {
+                        $builder->set($key, $builder->createNamedParameter($value));
+                    }
+                    $result[] = $builder->getSQL();
+                    if ($this->isExecute()) {
+                        $builder->executeStatement();
+                    }
                 } elseif (count(array_intersect(array_keys($item), $forceUpdateColumns))) {
-                    $update = $sql->update($table);
+                    $builder->update($table);
                     if (is_array($keyColumn)) {
                         foreach ($keyColumn as $column) {
-                            $update->where([$column => $item[$column]]);
+                            $builder->andWhere($builder->expr()->eq($column, $builder->createNamedParameter($item[$column])));
                             unset($item[$column]);
                         }
                     } else {
-                        $update->where([$keyColumn => $item[$keyColumn]]);
+                        $builder->andWhere($builder->expr()->eq($keyColumn, $builder->createNamedParameter($item[$keyColumn])));
                         unset($item[$keyColumn]);
                     }
                     $data = [];
@@ -294,16 +285,27 @@ abstract class AbstractDatabaseUpdater implements ValidationHelperAwareInterface
                             $data[$forceUpdateColumn] = $item[$forceUpdateColumn];
                         }
                     }
-                    $update->set($data);
-                    $result[] = $this->query($update);
+                    foreach ($data as $key => $value) {
+                        $builder->set($key, $builder->createNamedParameter($value));
+                    }
+                    $result[] = $builder->getSQL();
+                    if ($this->isExecute()) {
+                        $builder->executeStatement();
+                    }
                 }
             } else {
-                $insert = $sql->insert($table);
-                $insert->columns(array_keys($item));
-                $insert->values(array_values($item));
-                $result[] = $this->query($insert);
+                $builder->insert($table);
+                foreach ($item as $key => &$value) {
+                    $value = $builder->createNamedParameter($value);
+                }
+                $builder->values($item);
+                $result[] = $builder->getSQL();
+                if ($this->isExecute()) {
+                    $builder->executeStatement();
+                }
             }
         }
+        $builder = $this->getDatabaseAdapter()->getQueryBuilder();
         if (is_array($keyColumn)) {
             $key_List = [];
             foreach ($existingKey_List as $existingKey => $existingKeys) {
@@ -322,20 +324,27 @@ abstract class AbstractDatabaseUpdater implements ValidationHelperAwareInterface
 
             foreach ($key_List as $item) {
                 if (!in_array($item, $data_Map_Del)) {
-                    $delete = $sql->delete($table);
-                    $delete->where($item);
-                    $result[] = $this->query($delete);
+                    $builder->delete($table);
+                    foreach ($item as $key => $v) {
+                        $builder->andWhere($builder->expr()->eq($key, $builder->createNamedParameter($v)));
+                    }
+                    $result[] = $builder->getSQL();
+                    if ($this->isExecute()) {
+                        $builder->executeStatement();
+                    }
                 }
             }
         } else {
             foreach ($existingKey_List as $id) {
                 $newKey_List = array_column($data_Map, $keyColumn);
                 if (!in_array($id, $newKey_List)) {
-                    $delete = $sql->delete($table);
-                    $delete->where([$keyColumn => $id]);
-                    $result[] = $this->query($delete);
+                    $builder->delete($table);
+                    $builder->andWhere($builder->expr()->eq($keyColumn, $builder->createNamedParameter($id)));
+                    $result[] = $builder->getSQL();
+                    if ($this->isExecute()) {
+                        $builder->executeStatement();
+                    }
                 }
-
             }
         }
         return $result;
@@ -369,116 +378,6 @@ abstract class AbstractDatabaseUpdater implements ValidationHelperAwareInterface
         }
     }
 
-
-    protected function addDefaultConstraintsToTable(AbstractSql $table)
-    {
-        $this->addConstraintToTable($table, new ForeignKey(null, 'Person_ID_Create', 'Person', 'Person_ID'));
-        $this->addConstraintToTable($table, new ForeignKey(null, 'Person_ID_Edit', 'Person', 'Person_ID'));
-    }
-
-    protected function dropDefaultConstraintsFromTable(AbstractSql $table)
-    {
-        $this->dropConstraintFromTable($table, new ForeignKey(null, 'Person_ID_Create', 'Person', 'Person_ID'));
-        $this->dropConstraintFromTable($table, new ForeignKey(null, 'Person_ID_Edit', 'Person', 'Person_ID'));
-    }
-
-
-    /**
-     * @param AbstractSql $table
-     * @param Column $column
-     * @return Column
-     * @throws \Exception
-     */
-    protected function dropColumnFromTable(AbstractSql $table, Column $column)
-    {
-        if ($table instanceof AlterTable) {
-            $columns = $this->metadata->getColumnNames((string)$table->getRawState(AlterTable::TABLE), $this->adapter->getCurrentSchema());
-            if (in_array($column->getName(), $columns)) {
-                $table->dropColumn($column->getName(), $column);
-            }
-        }
-        return $column;
-    }
-
-    /**
-     * @param AbstractSql $table
-     * @param AbstractConstraint $constraint
-     */
-    protected function addConstraintToTable(AbstractSql $table, AbstractConstraint $constraint)
-    {
-        $tableName = (string)$table->getRawState(AlterTable::TABLE);
-        $path = explode('\\', get_class($constraint));
-        $type = array_pop($path);
-        if ($constraint instanceof PrimaryKey) {
-            $constraintName = "_laminas_{$tableName}_PRIMARY";
-        } else {
-            $constraintName = $this->abbreviate($type, 2) . '' . $this->abbreviate($tableName, 4) . '' . $this->abbreviate(implode('', $constraint->getColumns()), 4);
-        }
-
-        if ($table instanceof CreateTable || $constraint instanceof ForeignKey) {
-            $constraint->setName($constraintName);
-            $table->addConstraint($constraint);
-        }
-    }
-
-
-    /**
-     * @param AbstractSql $table
-     * @param AbstractConstraint $constraint
-     */
-    protected function dropConstraintFromTable(AbstractSql $table, AbstractConstraint $constraint)
-    {
-        $tableName = (string)$table->getRawState(AlterTable::TABLE);
-        $path = explode('\\', get_class($constraint));
-        $type = array_pop($path);
-        if ($constraint instanceof PrimaryKey) {
-            $constraintName = "_laminas_{$tableName}_PRIMARY";
-        } else {
-            $constraintName = $this->abbreviate($type, 2) . '' . $this->abbreviate($tableName, 4) . '' . $this->abbreviate(implode('', $constraint->getColumns()), 4);
-        }
-        $constraintName_old = $this->abbreviate($type, 2) . '' . $this->abbreviate($tableName, 2) . '' . $this->abbreviate(implode('', $constraint->getColumns()), 2);
-
-        if ($table instanceof CreateTable || $constraint instanceof ForeignKey) {
-            $arrDropped = [];
-
-            if ($this->hasConstraints($tableName, $constraintName)) {
-                $table->dropConstraint($constraintName);
-                $arrDropped[] = $constraintName;
-            }
-
-            if (
-                !in_array($constraintName_old, $arrDropped)
-                && $this->hasConstraints($tableName, $constraintName_old)
-            ) {
-                $table->dropConstraint($constraintName_old);
-            }
-
-            if (
-                !in_array($constraintName_old . '_', $arrDropped)
-                && $this->hasConstraints($tableName, $constraintName_old . '_')
-            ) {
-                $table->dropConstraint($constraintName_old . '_');
-            }
-
-            if ($this->hasConstraints($tableName, $constraintName . '_')) {
-                $table->dropConstraint($constraintName . '_');
-            }
-        }
-    }
-
-
-    protected function abbreviate($string, $l = 2)
-    {
-        $results = ''; // empty string
-        $vowels = ['a', 'e', 'i', 'o', 'u', 'y']; // vowels
-        preg_match_all('/[A-Z][a-z]*/', ucfirst($string), $m); // Match every word that begins with a capital letter, added ucfirst() in case there is no uppercase letter
-        foreach ($m[0] as $substring) {
-            $substring = str_replace($vowels, '', $substring); // String to lower case and remove all vowels
-            $results .= preg_replace('/([a-z]{' . $l . '})(.*)/', '$1', $substring); // Extract the first N letters.
-        }
-        return $results;
-    }
-
     protected function saveBeanData(
         BeanFinderInterface $finder,
         BeanProcessorInterface $processor,
@@ -507,6 +406,272 @@ abstract class AbstractDatabaseUpdater implements ValidationHelperAwareInterface
     protected function getLocaleDefault()
     {
         return $this->getParsContainer()->getConfig()->get('locale.default');
+    }
+
+    protected const TYPE_VARCHAR = 'string';
+    protected const TYPE_BOOLEAN = 'boolean';
+    protected const TYPE_INTEGER = 'integer';
+    protected const TYPE_TEXT = 'text';
+    protected const TYPE_JSON = 'json';
+    protected const TYPE_TIMESTAMP = 'datetime';
+
+    public function getSchemaManager()
+    {
+        return $this->getDatabaseAdapter()->getSchemaManager();
+    }
+
+    protected function getSchema()
+    {
+        static $schema = null;
+        if (null === $schema) {
+            $schema = clone $this->getSchemaManager()->createSchema();
+        }
+        return $schema;
+    }
+
+    protected function getCurrentSchema(bool $update = false)
+    {
+        static $schema = null;
+        if (null === $schema) {
+            $schema = $this->getSchemaManager()->createSchema();
+        }
+
+        $result = clone $schema;
+        if ($update) {
+            $schema = $this->getSchemaManager()->createSchema();
+        }
+        return $result;
+    }
+
+    protected function getPlatform()
+    {
+        return $this->getDatabaseAdapter()->getConnection()->getDatabasePlatform();
+    }
+
+    protected function getTableStatement(string $tableName, $schema = null)
+    {
+        if (null == $schema) {
+            $schema = $this->getSchema();
+        }
+        if ($schema->hasTable($tableName)) {
+            $table = $schema->getTable($tableName);
+        } else {
+            $table = $schema->createTable($tableName);
+        }
+        return $table;
+    }
+
+
+    protected function initAsTypeTable(Table $table)
+    {
+        $tableName = $table->getName();
+        $this->addColumnToTable($table, "{$tableName}_Code");
+        $this->addColumnToTable($table, "{$tableName}_Template", null, true);
+        $this->addColumnToTable($table, "{$tableName}_Active");
+        $this->addColumnToTable($table, "{$tableName}_Order");
+        $this->addPrimaryKeyToTable($table, "{$tableName}_Code");
+        $this->addDefaultColumnsToTable($table);
+    }
+
+    protected function initAsStateTable(Table $table)
+    {
+        $tableName = $table->getName();
+        $this->addColumnToTable($table, "{$tableName}_Code");
+        $this->addColumnToTable($table, "{$tableName}_Active");
+        $this->addColumnToTable($table, "{$tableName}_Order");
+        $this->addPrimaryKeyToTable($table, "{$tableName}_Code");
+        $this->addDefaultColumnsToTable($table);
+    }
+
+    protected function addColumnToTable(Table $table, string $name, string $type = null, bool $nullable = null, bool $deleteCascade = false)
+    {
+        $default = 0;
+
+        if (null === $type) {
+            if (StringHelper::endsWith($name, '_Order')) {
+                $type = self::TYPE_INTEGER;
+                $default = 0;
+            }
+            if (StringHelper::endsWith($name, '_Name')) {
+                $type = self::TYPE_VARCHAR;
+            }
+            if (StringHelper::endsWith($name, '_Reference')) {
+                $type = self::TYPE_VARCHAR;
+            }
+            if (StringHelper::endsWith($name, '_Template')) {
+                $type = self::TYPE_VARCHAR;
+            }
+            if (StringHelper::endsWith($name, '_Active')) {
+                $type = self::TYPE_BOOLEAN;
+                $default = 1;
+            }
+            if (StringHelper::endsWith($name, '_Code')) {
+                $type = self::TYPE_VARCHAR;
+            }
+            if (StringHelper::endsWith($name, '_Data')) {
+                $type = self::TYPE_JSON;
+                if (null === $nullable) {
+                    $nullable = true;
+                }
+            }
+            if (StringHelper::endsWith($name, '_Text')) {
+                $type = self::TYPE_TEXT;
+                if (null === $nullable) {
+                    $nullable = true;
+                }
+            }
+            if (StringHelper::endsWith($name, '_ID')) {
+                $type = self::TYPE_INTEGER;
+            }
+        }
+
+        if ($table->hasColumn($name)) {
+            $column = $table->getColumn($name);
+        } else {
+            $column = $table->addColumn($name, $type);
+        }
+        if (in_array($type, ['text', 'json'])) {
+            $column->setLength(65535);
+        }
+        if (in_array($type, ['varchar'])) {
+            $column->setLength(255);
+        }
+        if (in_array($type, ['boolean'])) {
+            $column->setDefault($default);
+        }
+        if (in_array($type, [self::TYPE_TIMESTAMP])) {
+            $column->setDefault('CURRENT_TIMESTAMP');
+        }
+        if (StringHelper::endsWith($name, '_Order')) {
+            $column->setDefault(0);
+        }
+
+        $column->setNotnull(!$nullable);
+
+        if ($name === $table->getName() . '_ID') {
+            $column->setAutoincrement(true);
+            $this->addPrimaryKeyToTable($table, $name);
+        }
+
+        if (StringHelper::endsWith($name, '_Reference')) {
+            $this->addIndexToTable($table, $name);
+        }
+
+        if (StringHelper::endsWith($name, '_Active')) {
+            $this->addIndexToTable($table, $name);
+        }
+
+        if (StringHelper::endsWith($name, '_Order')) {
+            $this->addIndexToTable($table, $name);
+        }
+
+        $exp = explode('_', $name);
+        $foreignColumn = end($exp);
+        $foreignTable = reset($exp);
+        if ($table->getName() !== $foreignTable
+            && $this->getSchema()->hasTable($foreignTable)
+            && in_array($foreignColumn, ['ID', 'Code'])
+        ) {
+            $this->addForeignKeyToTable($table, $foreignTable, $name, null, $deleteCascade);
+        }
+        return $column;
+    }
+
+    protected function addPrimaryKeyToTable(Table $table, $key)
+    {
+        if (!is_array($key)) {
+            $key = [$key];
+        }
+        if (!$table->hasPrimaryKey()) {
+            $table->setPrimaryKey($key);
+        }
+    }
+
+    protected function addUniqueKeyToTable(Table $table, $key)
+    {
+        if (!is_array($key)) {
+            $key = [$key];
+        }
+        $table->addUniqueConstraint($key);
+    }
+
+    protected function addIndexToTable(Table $table, $key)
+    {
+        if (!is_array($key)) {
+            $key = [$key];
+        }
+        try {
+            $table->addIndex($key);
+        } catch (SchemaException $schemaException) {
+
+        }
+    }
+
+    protected function addDefaultColumnsToTable(Table $table)
+    {
+        $this->addColumnToTable($table, 'Timestamp_Create', self::TYPE_TIMESTAMP)
+            ->setNotnull(false)->setDefault('CURRENT_TIMESTAMP');
+        $this->addColumnToTable($table, 'Person_ID_Create', self::TYPE_INTEGER)
+            ->setNotnull(false);
+        $this->addColumnToTable($table, 'Timestamp_Edit', self::TYPE_TIMESTAMP)
+            ->setNotnull(false)->setDefault('CURRENT_TIMESTAMP');
+        $this->addColumnToTable($table, 'Person_ID_Edit', self::TYPE_INTEGER)
+            ->setNotnull(false);
+        $this->addForeignKeyToTable($table, 'Person', 'Person_ID_Create', 'Person_ID');
+        $this->addForeignKeyToTable($table, 'Person', 'Person_ID_Edit', 'Person_ID');
+    }
+
+    protected function addForeignKeyToTable(Table $table, string $foreignTable, string $localColumn, string $foreignColumn = null, bool $deleteCascade = false)
+    {
+        if (null === $foreignColumn) {
+            $foreignColumn = $localColumn;
+        }
+        $options = [];
+        if ($deleteCascade) {
+            $options['onDelete'] = 'CASCADE';
+        }
+        $table->addForeignKeyConstraint($foreignTable, [$localColumn], [$foreignColumn], $options);
+    }
+
+    public function baseTables()
+    {
+        $schema = clone $this->getSchemaManager()->createSchema();
+
+        $table = $this->getTableStatement('Person', $schema);
+        $this->addColumnToTable($table, 'Person_ID', 'integer')
+            ->setAutoincrement(true);
+        $this->addColumnToTable($table, 'Person_Firstname', 'varchar')
+            ->setLength(255)->setNotnull(false);
+        $this->addColumnToTable($table, 'Person_Lastname', 'varchar')
+            ->setLength(255)->setNotnull(false);
+        $this->addPrimaryKeyToTable($table, 'Person_ID');
+        $this->addDefaultColumnsToTable($table);
+
+        $table = $this->getTableStatement('_DBVersion', $schema);
+        $this->addColumnToTable($table, 'DBVersion_ID')
+            ->setAutoincrement(true);
+        $this->addPrimaryKeyToTable($table, 'DBVersion_ID');
+        $this->addColumnToTable($table, 'DBVersion_Name', null, true);
+        $this->addColumnToTable($table, 'DBVersion_Data', null, true);
+        $this->addColumnToTable($table, 'DBVersion_Reference', null, true);
+        $this->addDefaultColumnsToTable($table);
+
+        $table = $this->getTableStatement('_DBTmp', $schema);
+        $this->addColumnToTable($table, 'DBTmp_Code');
+        $this->addPrimaryKeyToTable($table, 'DBTmp_Code');
+        $this->addColumnToTable($table, 'DBTmp_Data', null, true);
+        $this->addDefaultColumnsToTable($table);
+
+        $table = $this->getTableStatement('_DBLock', $schema);
+        $this->addColumnToTable($table, 'DBLock_ID')
+            ->setAutoincrement(true);
+        $this->addPrimaryKeyToTable($table, 'DBLock_ID');
+        $this->addColumnToTable($table, 'DBLock_Reference', null, true);
+        $this->addColumnToTable($table, 'Person_ID', null, true);
+        $this->addDefaultColumnsToTable($table);
+
+        $sql = $schema->getMigrateFromSql($this->getCurrentSchema(true), $this->getPlatform());
+        return $this->query($sql);
     }
 
 }

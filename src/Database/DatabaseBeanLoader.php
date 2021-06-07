@@ -251,7 +251,21 @@ class DatabaseBeanLoader extends AbstractBeanLoader implements ParsDatabaseAdapt
      */
     public function addOrder(string $field, bool $desc = false)
     {
-        $this->order_Map["{$this->getTable($field)}.{$this->getColumn($field)}"] = $desc ? 'DESC' : 'ASC';
+        if ($this->hasField($field)) {
+            $this->order_Map[$this->buildColumn($field)] = $desc ? 'DESC' : 'ASC';
+        } else {
+            $this->order_Map[$field] = $desc ? 'DESC' : 'ASC';
+        }
+    }
+
+    /**
+     * @param string $field
+     * @return string
+     * @throws \Exception
+     */
+    protected function buildColumn(string $field): string
+    {
+        return "{$this->getTable($field)}.{$this->getColumn($field)}";
     }
 
 
@@ -278,7 +292,7 @@ class DatabaseBeanLoader extends AbstractBeanLoader implements ParsDatabaseAdapt
                         if (is_array($condition)) {
                             foreach ($condition as $key => $value) {
 
-                                $exp = $exp->with($builder->expr()->eq("{$this->getTable($key)}.{$this->getColumn($key)}", $builder->createNamedParameter($value,
+                                $exp = $exp->with($builder->expr()->eq($this->buildColumn($field), $builder->createNamedParameter($value,
                                     $this->getValueParameterType($value), $this->buildPlaceholder($key, 'join', $value))));
                             }
                         }
@@ -298,11 +312,11 @@ class DatabaseBeanLoader extends AbstractBeanLoader implements ParsDatabaseAdapt
             foreach ($map as $field => $value) {
                 if (is_array($value)) {
                     $where = $builder->expr()->notIn(
-                        "{$this->getTable($field)}.{$this->getColumn($field)}",
+                        $this->buildColumn($field),
                         $builder->createNamedParameter($value)
                     );
                 } elseif ($value === null) {
-                    $where = $builder->expr()->isNotNull("{$this->getTable($field)}.{$this->getColumn($field)}");
+                    $where = $builder->expr()->isNotNull($this->buildColumn($field));
                 } else {
                     $where = $builder->expr()->neq(
                         "{$this->getTable($field)}.{$this->getColumn($field)}",
@@ -328,14 +342,14 @@ class DatabaseBeanLoader extends AbstractBeanLoader implements ParsDatabaseAdapt
             foreach ($map as $field => $value) {
                 if (is_array($value)) {
                     $where = $builder->expr()->in(
-                        "{$this->getTable($field)}.{$this->getColumn($field)}",
+                        $this->buildColumn($field),
                         $builder->createNamedParameter($value, Connection::PARAM_STR_ARRAY, $this->buildPlaceholder($field, 'filter_in'))
                     );
                 } elseif ($value === null) {
-                    $where = $builder->expr()->isNull("{$this->getTable($field)}.{$this->getColumn($field)}");
+                    $where = $builder->expr()->isNull($this->buildColumn($field));
                 } else {
                     $where = $builder->expr()->eq(
-                        "{$this->getTable($field)}.{$this->getColumn($field)}",
+                        $this->buildColumn($field),
                         $builder->createNamedParameter($value,
                             $this->getValueParameterType($value),
                             $this->buildPlaceholder($field, 'filter', $value)
@@ -424,7 +438,7 @@ class DatabaseBeanLoader extends AbstractBeanLoader implements ParsDatabaseAdapt
                 $fields = [$fields];
             }
             foreach ($fields as $field) {
-                $column = "{$this->getTable($field)}.{$this->getColumn($field)}";
+                $column = $this->buildColumn($field);
                 $where = $builder->expr()->like($column, $builder->createNamedParameter($str, $this->getValueParameterType($str), $this->buildPlaceholder($column, 'search')));
                 if ($mode == BeanFinderInterface::FILTER_MODE_OR) {
                     $builder->orWhere($where);
@@ -476,7 +490,8 @@ class DatabaseBeanLoader extends AbstractBeanLoader implements ParsDatabaseAdapt
     protected function getResult()
     {
         if (null === $this->result) {
-            $this->result = $this->buildQuery(true, true)->executeQuery();
+            $builder = $this->buildQuery(true, true);
+            $this->result = $builder->executeQuery();
         }
         return $this->result;
     }
@@ -492,7 +507,7 @@ class DatabaseBeanLoader extends AbstractBeanLoader implements ParsDatabaseAdapt
         $converter = new DatabaseBeanConverter();
         $beanData = [];
         foreach ($this->getField_List() as $field) {
-            $beanData[$field] = $data["{$this->getTable($field)}.{$this->getColumn($field)}"];
+            $beanData[$field] = $data[$this->buildColumn($field)];
         }
         foreach ($this->customColumn_Map as $alias => $column) {
             $beanData[$alias] = $data[$alias];
@@ -538,8 +553,8 @@ class DatabaseBeanLoader extends AbstractBeanLoader implements ParsDatabaseAdapt
     {
         $columns = [];
         foreach ($this->getField_List() as $field) {
-            $alias = $this->getDatabaseAdapter()->getConnection()->quote("{$this->getTable($field)}.{$this->getColumn($field)}");
-            $column = $this->getDatabaseAdapter()->getConnection()->quoteIdentifier("{$this->getTable($field)}.{$this->getColumn($field)}");
+            $alias = $this->getDatabaseAdapter()->getConnection()->quote($this->buildColumn($field));
+            $column = $this->getDatabaseAdapter()->getConnection()->quoteIdentifier($this->buildColumn($field));
             $columns[] = "$column AS $alias";
         }
         foreach ($this->customColumn_Map as $alias => $column) {

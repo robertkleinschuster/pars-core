@@ -41,9 +41,9 @@ class DatabaseBeanSaver extends AbstractBeanSaver implements ParsDatabaseAdapter
         $tableList = $this->getTable_List();
         foreach ($tableList as $table) {
             if ($this->beanExistsUnique($bean, $table)) {
-                $result_List[] = $this->update($bean, $table);
+                $result_List[$table] = $this->update($bean, $table);
             } else {
-                $result_List[] = $this->insert($bean, $table);
+                $result_List[$table] = $this->insert($bean, $table);
             }
         }
         $result = !in_array(false, $result_List) && count($result_List) > 0;
@@ -144,7 +144,8 @@ class DatabaseBeanSaver extends AbstractBeanSaver implements ParsDatabaseAdapter
             foreach ($data as $key => $value) {
                 $update->set($key, $builder->createNamedParameter($value, $this->getValueParameterType($value)));
             }
-            return $update->executeStatement();
+            $update->executeStatement();
+            return true;
         }
         return count($data) == 0;
     }

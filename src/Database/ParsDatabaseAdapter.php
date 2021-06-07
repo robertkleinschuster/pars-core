@@ -112,4 +112,20 @@ class ParsDatabaseAdapter
             $this->logError($exception->getMessage(), ['exception' => $exception]);
         }
     }
+
+    /**
+     * @return DatabaseLock
+     */
+    public function getLock(): DatabaseLock
+    {
+        return new DatabaseLock($this);
+    }
+
+    /**
+     * @return DatabaseTemp
+     */
+    public function getTemp(): DatabaseTemp
+    {
+        return new DatabaseTemp($this);
+    }
 }
