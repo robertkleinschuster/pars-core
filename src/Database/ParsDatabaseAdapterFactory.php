@@ -5,6 +5,7 @@ namespace Pars\Core\Database;
 
 
 use Doctrine\DBAL\DriverManager;
+use Doctrine\DBAL\Logging\DebugStack;
 use Pars\Pattern\Exception\CoreException;
 use Psr\Container\ContainerInterface;
 use Psr\Log\LoggerInterface;
@@ -24,7 +25,13 @@ class ParsDatabaseAdapterFactory
             'host' => $config['db']['hostname'],
             'driver' => strtolower($config['db']['driver']),
         );
-        return new ParsDatabaseAdapter(DriverManager::getConnection($connectionParams), $container->get(LoggerInterface::class));
+
+        $connection = DriverManager::getConnection($connectionParams);
+        if (isset($config['db']['debug']) && $config['db']['debug']) {
+            $connection->getConfiguration()->setSQLLogger(new DebugStack());
+        }
+
+        return new ParsDatabaseAdapter($connection, $container->get(LoggerInterface::class));
     }
 
 }
