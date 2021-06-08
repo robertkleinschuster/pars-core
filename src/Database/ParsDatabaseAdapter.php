@@ -73,6 +73,14 @@ class ParsDatabaseAdapter
         return $result;
     }
 
+    public function clearDebug()
+    {
+        $logger = $this->getConnection()->getConfiguration()->getSQLLogger();
+        if ($logger) {
+            $logger->queries = [];
+        }
+    }
+
     /**
      * @param string $message
      * @param array $data
