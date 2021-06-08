@@ -1,4 +1,5 @@
 <?php
+$GLOBALS['execTimeStart'] = microtime(true);
 require 'initialize.php';
 $run = require 'static.php';
 if ($run) {

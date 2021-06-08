@@ -11,6 +11,7 @@ use Psr\Log\LoggerInterface;
 class ParsDatabaseAdapter
 {
     use LoggerAwareTrait;
+
     protected Connection $connection;
 
 
@@ -59,7 +60,16 @@ class ParsDatabaseAdapter
     public function getDebug()
     {
         $result = [];
-
+        $logger = $this->getConnection()->getConfiguration()->getSQLLogger();
+        if ($logger) {
+            $queries = $logger->queries;
+            if (is_array($queries)) {
+                foreach ($queries as $key => $query) {
+                    $result[$key]['sql'] = $query['sql'];
+                    $result[$key]['elapse'] = $query['executionMS'];
+                }
+            }
+        }
         return $result;
     }
 
