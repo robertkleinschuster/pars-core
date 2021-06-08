@@ -21,6 +21,20 @@ jobs:
           coverage: xdebug
           tools: php-cs-fixer, phpunit
 
+      - name: Shutdown Ubuntu MySQL (SUDO)
+        run: sudo service mysql stop
+
+      - name: Set up MySQL
+        uses: mirromutth/mysql-action@v1.1
+        with:
+          character set server: 'utf8'
+          collation server: 'utf8_general_ci'
+          mysql version: '8.0'
+          mysql database: 'pars'
+          mysql root password: 'pars'
+          mysql user: 'pars'
+          mysql password: 'pars'
+
       - name: Validate composer.json and composer.lock
         run: composer validate
 

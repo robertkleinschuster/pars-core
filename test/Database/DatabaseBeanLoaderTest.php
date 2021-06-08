@@ -22,9 +22,9 @@ class DatabaseBeanLoaderTest extends DefaultTestCase
     {
         parent::setUp();
         $connectionParams = array(
-            'dbname' => 'mydb',
-            'user' => 'user',
-            'password' => 'secret',
+            'dbname' => 'pars',
+            'user' => 'pars',
+            'password' => 'pars',
             'host' => 'localhost',
             'driver' => 'pdo_mysql',
         );
@@ -54,7 +54,7 @@ class DatabaseBeanLoaderTest extends DefaultTestCase
         $this->loader->search('test');
         $this->loader->order(['Test_Code', 'TestJoin_Code' => BeanFinderInterface::ORDER_MODE_DESC]);
         $this->loader->initByIdMap(['TestJoin2_Code' => 'code']);
-        $expected = "SELECT Test.Test_ID, Test.Test_Code, TestJoin.TestJoin_ID, TestJoin.TestJoin_Code, TestJoin2.TestJoin2_Code, TestJoin2.TestJoin2_Lang FROM Test INNER JOIN TestJoin TestJoin ON Test.TestJoin_ID = TestJoin.TestJoin_ID LEFT JOIN TestJoin2 TestJoin2 ON (TestJoin.TestJoin2_Code = TestJoin2.TestJoin2_Code) AND (TestJoin2.TestJoin2_Lang = :join_testjoin2_lang_1_de) WHERE ((Test.Test_ID <> :exclude_test.test_id_2_111) AND (Test.Test_ID = :filter_test.test_id_3_123) AND (TestJoin2.TestJoin2_Code = :filter_testjoin2.testjoin2_code_4_code)) OR (Test.Test_ID LIKE :search_test.test_id_5_) OR (Test.Test_Code LIKE :search_test.test_code_6_) OR (TestJoin.TestJoin_ID LIKE :search_testjoin.testjoin_id_7_) OR (TestJoin.TestJoin_Code LIKE :search_testjoin.testjoin_code_8_) OR (TestJoin2.TestJoin2_Code LIKE :search_testjoin2.testjoin2_code_9_) OR (TestJoin2.TestJoin2_Lang LIKE :search_testjoin2.testjoin2_lang_10_) ORDER BY Test.Test_Code ASC, TestJoin.TestJoin_Code DESC";
+        $expected = "SELECT `Test`.`Test_ID` AS 'Test.Test_ID', `Test`.`Test_Code` AS 'Test.Test_Code', `TestJoin`.`TestJoin_ID` AS 'TestJoin.TestJoin_ID', `TestJoin`.`TestJoin_Code` AS 'TestJoin.TestJoin_Code', `TestJoin2`.`TestJoin2_Code` AS 'TestJoin2.TestJoin2_Code', `TestJoin2`.`TestJoin2_Lang` AS 'TestJoin2.TestJoin2_Lang' FROM Test INNER JOIN TestJoin TestJoin ON Test.TestJoin_ID = TestJoin.TestJoin_ID LEFT JOIN TestJoin2 TestJoin2 ON (TestJoin.TestJoin2_Code = TestJoin2.TestJoin2_Code) AND (TestJoin2.TestJoin2_Code = :join_testjoin2_lang_1) WHERE ((Test.Test_ID <> :exclude_test_id_2) AND (Test.Test_ID = :filter_test_id_3) AND (TestJoin2.TestJoin2_Code = :filter_testjoin2_code_4)) OR (Test.Test_ID LIKE :search_test_id_5) OR (Test.Test_Code LIKE :search_test_code_6) OR (TestJoin.TestJoin_ID LIKE :search_testjoin_id_7) OR (TestJoin.TestJoin_Code LIKE :search_testjoin_code_8) OR (TestJoin2.TestJoin2_Code LIKE :search_testjoin2_code_9) OR (TestJoin2.TestJoin2_Lang LIKE :search_testjoin2_lang_10) ORDER BY Test.Test_Code ASC, TestJoin.TestJoin_Code DESC";
         $this->assertEquals($expected, $this->loader->buildQuery(false, true)->getSQL());
     }
 }
