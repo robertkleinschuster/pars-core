@@ -387,6 +387,7 @@ class DatabaseBeanLoader extends AbstractBeanLoader implements ParsDatabaseAdapt
                     $right = $right->getIdentifier();
                 } elseif ($right instanceof \DateTime) {
                     $right = $right->format(DatabaseBeanConverter::DATE_FORMAT);
+                    $right = $builder->createNamedParameter($right, $this->getValueParameterType($right));
                 } else {
                     $right = $builder->createNamedParameter($right, $this->getValueParameterType($right));
                 }
@@ -578,10 +579,7 @@ class DatabaseBeanLoader extends AbstractBeanLoader implements ParsDatabaseAdapt
     public function preloadValueList(string $field): array
     {
         $builder = $this->buildQuery(true, false);
-        $column = $this->getColumn($field);
-        $table = $this->getTable($field);
-        $tableColumn = "$table.$column";
-        $builder->select($tableColumn);
+        $builder->select($this->buildColumn($field));
         return $builder->fetchFirstColumn();
     }
 
