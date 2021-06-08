@@ -25,7 +25,7 @@ class DatabaseBeanLoaderTest extends DefaultTestCase
             'dbname' => 'pars',
             'user' => 'pars',
             'password' => 'pars',
-            'host' => 'localhost',
+            'host' => '127.0.0.1',
             'driver' => 'pdo_mysql',
         );
         $conn = \Doctrine\DBAL\DriverManager::getConnection($connectionParams);
