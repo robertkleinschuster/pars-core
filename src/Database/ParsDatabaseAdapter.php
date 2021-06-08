@@ -128,4 +128,9 @@ class ParsDatabaseAdapter
     {
         return new DatabaseTemp($this);
     }
+
+    public function isValid()
+    {
+        return $this->getSchemaManager()->tablesExist(['Person', 'User']);
+    }
 }

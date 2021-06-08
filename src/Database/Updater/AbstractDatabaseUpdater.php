@@ -174,6 +174,7 @@ abstract class AbstractDatabaseUpdater implements ValidationHelperAwareInterface
             return $this->{$method}();
         } catch (\Throwable $ex) {
             $this->getValidationHelper()->addError($method, $ex->getMessage());
+            $this->getParsContainer()->getLogger()->error($ex->getMessage());
             return $ex->getMessage();
         }
     }
@@ -408,12 +409,12 @@ abstract class AbstractDatabaseUpdater implements ValidationHelperAwareInterface
         return $this->getParsContainer()->getConfig()->get('locale.default');
     }
 
-    protected const TYPE_VARCHAR = 'string';
+    protected const TYPE_STRING = 'string';
     protected const TYPE_BOOLEAN = 'boolean';
     protected const TYPE_INTEGER = 'integer';
     protected const TYPE_TEXT = 'text';
     protected const TYPE_JSON = 'json';
-    protected const TYPE_TIMESTAMP = 'datetime';
+    protected const TYPE_DATETIME = 'datetime';
 
     public function getSchemaManager()
     {
@@ -493,20 +494,20 @@ abstract class AbstractDatabaseUpdater implements ValidationHelperAwareInterface
                 $default = 0;
             }
             if (StringHelper::endsWith($name, '_Name')) {
-                $type = self::TYPE_VARCHAR;
+                $type = self::TYPE_STRING;
             }
             if (StringHelper::endsWith($name, '_Reference')) {
-                $type = self::TYPE_VARCHAR;
+                $type = self::TYPE_STRING;
             }
             if (StringHelper::endsWith($name, '_Template')) {
-                $type = self::TYPE_VARCHAR;
+                $type = self::TYPE_STRING;
             }
             if (StringHelper::endsWith($name, '_Active')) {
                 $type = self::TYPE_BOOLEAN;
                 $default = 1;
             }
             if (StringHelper::endsWith($name, '_Code')) {
-                $type = self::TYPE_VARCHAR;
+                $type = self::TYPE_STRING;
             }
             if (StringHelper::endsWith($name, '_Data')) {
                 $type = self::TYPE_JSON;
@@ -539,7 +540,7 @@ abstract class AbstractDatabaseUpdater implements ValidationHelperAwareInterface
         if (in_array($type, ['boolean'])) {
             $column->setDefault($default);
         }
-        if (in_array($type, [self::TYPE_TIMESTAMP])) {
+        if (in_array($type, [self::TYPE_DATETIME])) {
             $column->setDefault('CURRENT_TIMESTAMP');
         }
         if (StringHelper::endsWith($name, '_Order')) {
@@ -603,17 +604,17 @@ abstract class AbstractDatabaseUpdater implements ValidationHelperAwareInterface
         try {
             $table->addIndex($key);
         } catch (SchemaException $schemaException) {
-
+            $this->getParsContainer()->getLogger()->error($schemaException->getMessage());
         }
     }
 
     protected function addDefaultColumnsToTable(Table $table)
     {
-        $this->addColumnToTable($table, 'Timestamp_Create', self::TYPE_TIMESTAMP)
+        $this->addColumnToTable($table, 'Timestamp_Create', self::TYPE_DATETIME)
             ->setNotnull(false)->setDefault('CURRENT_TIMESTAMP');
         $this->addColumnToTable($table, 'Person_ID_Create', self::TYPE_INTEGER)
             ->setNotnull(false);
-        $this->addColumnToTable($table, 'Timestamp_Edit', self::TYPE_TIMESTAMP)
+        $this->addColumnToTable($table, 'Timestamp_Edit', self::TYPE_DATETIME)
             ->setNotnull(false)->setDefault('CURRENT_TIMESTAMP');
         $this->addColumnToTable($table, 'Person_ID_Edit', self::TYPE_INTEGER)
             ->setNotnull(false);
@@ -640,9 +641,9 @@ abstract class AbstractDatabaseUpdater implements ValidationHelperAwareInterface
         $table = $this->getTableStatement('Person', $schema);
         $this->addColumnToTable($table, 'Person_ID', 'integer')
             ->setAutoincrement(true);
-        $this->addColumnToTable($table, 'Person_Firstname', 'varchar')
+        $this->addColumnToTable($table, 'Person_Firstname', self::TYPE_STRING)
             ->setLength(255)->setNotnull(false);
-        $this->addColumnToTable($table, 'Person_Lastname', 'varchar')
+        $this->addColumnToTable($table, 'Person_Lastname', self::TYPE_STRING)
             ->setLength(255)->setNotnull(false);
         $this->addPrimaryKeyToTable($table, 'Person_ID');
         $this->addDefaultColumnsToTable($table);

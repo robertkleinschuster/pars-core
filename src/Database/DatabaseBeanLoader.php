@@ -439,7 +439,7 @@ class DatabaseBeanLoader extends AbstractBeanLoader implements ParsDatabaseAdapt
             }
             foreach ($fields as $field) {
                 $column = $this->buildColumn($field);
-                $where = $builder->expr()->like($column, $builder->createNamedParameter($str, $this->getValueParameterType($str), $this->buildPlaceholder($column, 'search')));
+                $where = $builder->expr()->like($column, $builder->createNamedParameter($str, $this->getValueParameterType($str), $this->buildPlaceholder($field, 'search')));
                 if ($mode == BeanFinderInterface::FILTER_MODE_OR) {
                     $builder->orWhere($where);
                 } else {
@@ -447,6 +447,7 @@ class DatabaseBeanLoader extends AbstractBeanLoader implements ParsDatabaseAdapt
                 }
             }
         }
+
         return $this;
     }
 

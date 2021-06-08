@@ -2,8 +2,6 @@
 
 namespace Pars\Core\Translation;
 
-use Laminas\I18n\Translator\Loader\RemoteLoaderInterface;
-use Laminas\I18n\Translator\Translator;
 use Laminas\I18n\Translator\TranslatorInterface;
 use Pars\Core\Config\ParsConfig;
 use Pars\Core\Localization\LocaleFinderInterface;
