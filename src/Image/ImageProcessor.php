@@ -108,6 +108,7 @@ class ImageProcessor
      * @param $path
      * @param $params
      * @param ...$p
+     * @return string
      */
     public function buildHtml($path, $params, ...$p)
     {
