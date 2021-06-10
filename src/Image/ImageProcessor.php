@@ -219,7 +219,7 @@ class ImageProcessor
         if ($loading == 'lazy') {
             $result .= "<noscript class='loading-lazy'>";
         }
-        $result .= "<picture class='$class'>";
+        $result .= "<picture class='$class' data-original='{$this->buildUrl($path)}'>";
         $result .= "<source media='(min-width: {$widthLarge}px)' srcset='$largeWebP 1x, $largeX2WebP 2x' type='image/webp'>";
         $result .= "<source media='(min-width: {$widthLarge}px)' srcset='$large 1x, $largeX2 2x'>";
 
