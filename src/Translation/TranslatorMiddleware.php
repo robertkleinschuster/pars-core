@@ -46,6 +46,7 @@ class TranslatorMiddleware implements MiddlewareInterface
         $locale = $request->getAttribute(LocaleInterface::class);
         if ($locale instanceof LocaleInterface) {
             $this->translator->setLocale($locale);
+            $this->getParsContainer()->setLocale($locale);
         }
         return $handler->handle($request);
     }
