@@ -7,6 +7,10 @@ namespace Pars\Core\Application;
 use Laminas\ServiceManager\ServiceManager;
 use Pars\Core\Deployment\CacheClearer;
 
+/**
+ * Class AbstractApplicationContainer
+ * @package Pars\Core\Application
+ */
 abstract class AbstractApplicationContainer extends ServiceManager
 {
 
