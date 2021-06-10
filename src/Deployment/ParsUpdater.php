@@ -56,38 +56,120 @@ class ParsUpdater implements UpdaterInterface
         }
     }
 
+    /**
+     * @param string $module
+     * @return bool
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     */
+    public function isNewAvailable(string $module): bool
+    {
+        $version = $this->getLatestVersionString($module);
+        return $this->compareVersionString(PARS_VERSION, $version) > 0;
+    }
+
+    /**
+     * @param string $module
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     */
     protected function updateVersion(string $module)
     {
-        $client = new Client();
-        $response = $client->get("https://api.github.com/repos/PARS-Framework/$module/releases/latest",
-            [
-                RequestOptions::CONNECT_TIMEOUT => 20
-            ]
-        );
+        $download = $this->getLatestVersionDownload($module);
 
-        $data = json_decode($response->getBody()->getContents(), true);
-        $assets = array_filter($data['assets'], function ($asset) use ($module) {
-            return StringHelper::startsWith($asset['name'], $module);
-        });
-        $asset = reset($assets);
-        $download = $asset['browser_download_url'];
-        $response = $client->get($download);
-        if (PARS_VERSION != 'DEV' && PARS_VERSION != 'CORE') {
-            $file = 'update.zip';
-            file_put_contents($file, $response->getBody());
-            $path = dirname(realpath($file));
-            $zip = new \ZipArchive();
-            $res = $zip->open($file);
-            if ($res === TRUE) {
-                $zip->extractTo($path);
-                $zip->close();
+        if ($this->isNewAvailable($module) && $download) {
+            $client = new Client();
+            $response = $client->get($download);
+            if (PARS_VERSION != 'DEV' && PARS_VERSION != 'CORE') {
+                $file = 'update.zip';
+                file_put_contents($file, $response->getBody());
+                $path = dirname(realpath($file));
+                $zip = new \ZipArchive();
+                $res = $zip->open($file);
+                if ($res === TRUE) {
+                    $zip->extractTo($path);
+                    $zip->close();
+                }
+                unlink($file);
             }
-            unlink($file);
         }
     }
 
     /**
-     * @param UriInterface $self
+     * @param string $module
+     * @return mixed|string
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     */
+    public function getLatestVersionString(string $module)
+    {
+        $release = $this->findLatestRelease($module);
+        return $release['version'] ?? '-';
+    }
+
+    /**
+     * @param string $module
+     * @return mixed|string
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     */
+    public function getLatestVersionDownload(string $module)
+    {
+        $release = $this->findLatestRelease($module);
+        return $release['download'] ?? null;
+    }
+
+    /**
+     * @param string $current
+     * @param string $latest
+     * @return int
+     */
+    public function compareVersionString(string $current, string $latest): int
+    {
+        $current = (int)filter_var($current, FILTER_SANITIZE_NUMBER_INT);
+        $latest = (int)filter_var($latest, FILTER_SANITIZE_NUMBER_INT);
+        if ($current == 0 || $latest == 0) {
+            return 0;
+        }
+        return $latest - $current;
+    }
+
+
+    /**
+     * @param string $module
+     * @return array|null
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     */
+    public function findLatestRelease(string $module): ?array
+    {
+        static $result = [];
+        if (!isset($result[$module]) || $result[$module] === null) {
+            $client = new Client();
+            $response = $client->get("https://api.github.com/repos/PARS-Framework/$module/releases",
+                [
+                    RequestOptions::CONNECT_TIMEOUT => 20
+                ]
+            );
+
+            $release_List = json_decode($response->getBody()->getContents(), true);
+            foreach ($release_List as $release) {
+                if (StringHelper::contains($release['tag_name'], PARS_BRANCH)) {
+                    $assets = array_filter($release['assets'], function ($asset) use ($module) {
+                        return StringHelper::startsWith($asset['name'], $module);
+                    });
+                    $asset = reset($assets);
+                    $download = $asset['browser_download_url'];
+                    $result[$module] = [
+                        'download' => $download,
+                        'version' => $release['tag_name']
+                    ];
+                    break;
+                }
+            }
+            if ($result[$module] === null) {
+                $result[$module] = false;
+            }
+        }
+        return $result[$module] === false ? null : $result[$module];
+    }
+
+    /**
      */
     public function updateRemote()
     {
