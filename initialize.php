@@ -5,6 +5,7 @@ if (!@include PARS_DIR . '/version.php') {
     define('PARS_VERSION', 'CORE');
     define('PARS_BRANCH', 'master');
 }
+
 const PARS_CONTAINER = PARS_DIR . '/container.php';
 const PARS_CACHE_DIR = PARS_DIR . '/data/cache';
 const PARS_SESSION_DIR = PARS_DIR . '/data/session';
