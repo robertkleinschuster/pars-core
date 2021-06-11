@@ -110,6 +110,10 @@ class CacheClearer implements OptionAwareInterface
                 && $this->hasOption(self::OPTION_RESET_OPCACHE)
             ) {
                 opcache_reset();
+                FilesystemHelper::deleteDirectory(PARS_OPCACHE_DIR);
+                if (!is_dir(PARS_OPCACHE_DIR)) {
+                    mkdir(PARS_OPCACHE_DIR);
+                }
             }
             if ($this->hasOption(self::OPTION_CLEAR_CONFIG)) {
                 $this->clearConfig();

@@ -15,6 +15,8 @@ const PARS_CONFIG_PATTERN = PARS_DIR . '/config/autoload/{{,*.}global,{,*.}local
 const PARS_DEV_CONFIG = PARS_DIR . '/config/development.config.php';
 const PARS_PUBLIC = PARS_DIR . '/public';
 const PARS_TEMPLATE_DIR = PARS_DIR . '/templates';
+const PARS_OPCACHE_DIR = PARS_CACHE_DIR . '/opcache';
+ini_set('opcache.file_cache', PARS_OPCACHE_DIR);
 
 if (!@include PARS_CONTAINER) {
     trigger_error('Container file not found. CWD: ' . PARS_DIR);
