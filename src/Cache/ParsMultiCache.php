@@ -11,7 +11,7 @@ use Pars\Helper\String\StringHelper;
  * Class ParsMultiCache
  * @package Pars\Core\Cache
  */
-class ParsMultiCache extends AbstractCachePool
+class ParsMultiCache extends AbstractCachePool implements ParsCacheInterface
 {
     use ParsCacheTrait;
 

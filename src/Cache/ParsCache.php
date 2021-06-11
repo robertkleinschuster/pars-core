@@ -16,7 +16,7 @@ use Pars\Helper\String\StringHelper;
  * Class ParsCache
  * @package Pars\Core\Cache
  */
-class ParsCache extends AbstractCachePool
+class ParsCache extends AbstractCachePool implements ParsCacheInterface
 {
 
     use ParsCacheTrait;
