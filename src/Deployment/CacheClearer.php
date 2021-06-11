@@ -104,6 +104,7 @@ class CacheClearer implements OptionAwareInterface
     {
         try {
             $this->getParsContainer()->getLogger()->info('CLEAR SELF');
+            clearstatcache(true);
             if (
                 function_exists('opcache_reset')
                 && $this->hasOption(self::OPTION_RESET_OPCACHE)
