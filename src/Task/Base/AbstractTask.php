@@ -245,4 +245,9 @@ abstract class AbstractTask implements ParsDatabaseAdapterAwareInterface, ParsTr
     }
 
     abstract public function execute(): void;
+
+    /**
+     *
+     */
+    public abstract function initAll();
 }
