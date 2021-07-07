@@ -28,7 +28,7 @@ jobs:
           mysql password: 'pars'
       - name: Bump version and push tag
         id: tag_version
-        uses: mathieudutour/github-tag-action@v5.5
+        uses: hennejg/github-tag-action@v4.1.jh1
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
       - name: write version
