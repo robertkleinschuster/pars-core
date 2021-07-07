@@ -149,7 +149,7 @@ class ParsUpdater implements UpdaterInterface
 
             $release_List = json_decode($response->getBody()->getContents(), true);
             foreach ($release_List as $release) {
-                if (StringHelper::contains($release['tag_name'], PARS_BRANCH)) {
+                if ($this->acceptTag($release['tag_name'])) {
                     $assets = array_filter($release['assets'], function ($asset) use ($module) {
                         return StringHelper::startsWith($asset['name'], $module);
                     });
@@ -167,6 +167,11 @@ class ParsUpdater implements UpdaterInterface
             }
         }
         return $result[$module] === false ? null : $result[$module];
+    }
+
+    protected function acceptTag(string $tag) {
+        return StringHelper::contains($tag, PARS_BRANCH)
+            || !StringHelper::endsWith($tag, '.0');
     }
 
     /**
